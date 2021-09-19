@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<TabPane prefHeight="298.0" prefWidth="686.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="extension.WiredPresets">
+  <tabs>
+    <Tab text="Presets">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="269.0" prefWidth="569.0" style="-fx-background-color: white;">
+               <children>
+                  <BorderPane fx:id="logsBorderPane" layoutX="232.0" layoutY="13.0" prefHeight="244.0" prefWidth="283.0" style="-fx-background-color: white; -fx-border-color: lightgrey;">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </BorderPane>
+                  <AnchorPane layoutX="14.0" layoutY="12.0" prefHeight="246.0" prefWidth="207.0" style="-fx-border-width: 1px; -fx-border-style: solid; -fx-border-color: #999; -fx-border-radius: 5px;">
+                     <children>
+                        <GridPane gridLinesVisible="true" layoutX="14.0" layoutY="15.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="142.0" prefWidth="175.0">
+                           <columnConstraints>
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                           <children>
+                              <Label fx:id="cndConnectedLbl" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #f28d8d;" text="Connected to Habbo" />
+                              <Label fx:id="cndRoomLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="11.0" layoutY="11.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #f28d8d;" text="Room detected" GridPane.rowIndex="1" />
+                              <Label fx:id="cndInventoryLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #f28d8d;" text="Inventory parsed" GridPane.rowIndex="4" />
+                              <Label fx:id="cndStackTileLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="86.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #f28d8d;" text="Stack tile found" GridPane.rowIndex="5" />
+                              <Label fx:id="cndFurnidataLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="86.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #f28d8d;" text="Furnidata parsed" GridPane.rowIndex="2" />
+                              <Label fx:id="cndBCShopLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="58.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #f28d8d;" text="BC Catalog parsed" GridPane.rowIndex="3" />
+                           </children>
+                        </GridPane>
+                        <Button layoutX="22.0" layoutY="168.0" mnemonicParsing="false" onAction="#loadInventoryClick" prefHeight="25.0" prefWidth="160.0" text="Load Inventory" />
+                        <Button layoutX="22.0" layoutY="203.0" mnemonicParsing="false" onAction="#loadBCClick" prefHeight="25.0" prefWidth="160.0" text="Load BC Catalog" />
+                     </children>
+                  </AnchorPane>
+                  <ListView fx:id="presetListView" layoutX="527.0" layoutY="12.0" prefHeight="204.0" prefWidth="146.0" />
+                  <Button fx:id="availabilityBtn" layoutX="527.0" layoutY="225.0" mnemonicParsing="false" onAction="#availabilityBtnClick" prefHeight="25.0" prefWidth="147.0" text="Check Availability" />
+               </children>
+            </AnchorPane>
+      </content>
+    </Tab>
+    <Tab text="Settings">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <RadioButton layoutX="138.0" layoutY="14.0" mnemonicParsing="false" selected="true" text="2x2">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="stacktile_tgl" />
+                     </toggleGroup></RadioButton>
+                  <Label layoutX="14.0" layoutY="14.0" text="Stacktile dimensions:" />
+                  <RadioButton layoutX="190.0" layoutY="14.0" mnemonicParsing="false" text="4x4" toggleGroup="$stacktile_tgl" />
+                  <RadioButton layoutX="246.0" layoutY="14.0" mnemonicParsing="false" text="6x6" toggleGroup="$stacktile_tgl" />
+                  <RadioButton layoutX="301.0" layoutY="14.0" mnemonicParsing="false" text="8x8" toggleGroup="$stacktile_tgl" />
+                  <Label layoutX="14.0" layoutY="45.0" text="Item source:" />
+                  <RadioButton fx:id="onlyInvCbx" layoutX="93.0" layoutY="45.0" mnemonicParsing="false" selected="true" text="Only Inventory">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="item_src_tgl" />
+                     </toggleGroup>
+                  </RadioButton>
+                  <RadioButton fx:id="preferInvCbx" layoutX="203.0" layoutY="45.0" mnemonicParsing="false" text="Prefer Inventory" toggleGroup="$item_src_tgl" />
+                  <RadioButton fx:id="preferBcCbx" layoutX="320.0" layoutY="45.0" mnemonicParsing="false" text="Prefer BC" toggleGroup="$item_src_tgl" />
+                  <RadioButton fx:id="onlyBcCbx" layoutX="405.0" layoutY="45.0" mnemonicParsing="false" text="Only BC" toggleGroup="$item_src_tgl" />
+                  <Button layoutX="13.0" layoutY="223.0" mnemonicParsing="false" onAction="#openPresetsFolderClick" prefHeight="25.0" prefWidth="157.0" text="Open Presets Folder" />
+                  <Button fx:id="currentPresetBtn" layoutX="187.0" layoutY="223.0" mnemonicParsing="false" onAction="#openCurrentPresetClick" prefHeight="25.0" prefWidth="222.0" text="Open Selected Preset In Editor" />
+                  <Button layoutX="543.0" layoutY="223.0" mnemonicParsing="false" onAction="#reloadPresetsClick" prefHeight="25.0" prefWidth="131.0" text="Reload Presets" />
+                  <CheckBox fx:id="allowIncompleteBuildsCbx" layoutX="14.0" layoutY="187.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="205.0" text="Allow building without all furni" />
+               </children></AnchorPane>
+      </content>
+    </Tab>
+      <Tab text="Preset configuration">
+          <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <AnchorPane layoutX="426.0" layoutY="14.0" prefHeight="244.0" prefWidth="254.0" style="-fx-border-color: #999; -fx-border-image-width: 1px; -fx-border-radius: 5px;">
+                     <children>
+                        <Button layoutX="20.0" layoutY="196.0" mnemonicParsing="false" onAction="#updatePostconfigClick" prefHeight="25.0" prefWidth="214.0" text="Update " />
+                        <TextField fx:id="furniNamePC_txt" layoutX="97.0" layoutY="21.0" prefHeight="25.0" prefWidth="137.0" promptText="furniname[x]" />
+                        <TextField fx:id="replacementIdPC_txt" layoutX="97.0" layoutY="55.0" prefHeight="25.0" prefWidth="137.0" promptText="123456789" />
+                        <Label layoutX="90.0" layoutY="130.0" text="(Unfinished)" textFill="#666666" />
+                        <Label layoutX="14.0" layoutY="25.0" text="Furni name:" />
+                        <Label layoutX="14.0" layoutY="59.0" text="Existing furni:" />
+                        <Label fx:id="postconfigErrorLbl" layoutX="20.0" layoutY="171.0" textFill="#e12121" />
+                     </children>
+                  </AnchorPane>
+                  <GridPane fx:id="pcgrid" layoutX="14.0" layoutY="14.0" prefHeight="245.0" prefWidth="401.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                  </GridPane>
+               </children>
+              </AnchorPane>
+          </content>
+      </Tab>
+  </tabs>
+</TabPane>
