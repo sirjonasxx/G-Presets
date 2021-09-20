@@ -9,7 +9,7 @@ _video coming soon_
 
 ## Exporting a preset
 
-To export a preset, type `:exportpreset` or `:ep`. You will be asked to select the area of the preset, and name the preset.
+To export a preset, type `:exportpreset` or `:ep`. You will be asked to select the area of the preset, and to name the preset.
 
 You can also use `:exportpreset all` or `:ep all` to export the entire room
 
@@ -40,7 +40,7 @@ If you start building without having all furniture, the import will fail right a
 ![image](https://user-images.githubusercontent.com/36828922/133943525-0b0c904b-810a-4ca1-85cc-1a7963eae701.png)
 
 Use the settings tab to:
-* Select the **stacktile** you want to use. Make sure it can fit in all spaces of your floorplan (if needed), also make sure it can handle all sizes of the furni in the preset
+* Select the **stacktile** you want to use. Make sure all items fit on this stacktile for the initial placements. If you have more stacktiles in the room, they will also be used if they are needed for movements of the furniture
 * Select the **Item source**, speaks for itself
 * Allow building without having all furniture available if you're sure you want this
 * _Open the presets folder to rename/add/delete presets manually, afterwards, click "Reload Presets" to see the changes_
@@ -49,7 +49,7 @@ Use the settings tab to:
 
 ## Preset configuration
 
-This is/will be a more advanced tab for wired-specific extra configurations. Currently, it only allows you to replace an furniture in the preset with an already existing furniture.
+This is/will be a more advanced tab for wired-specific extra configurations. Currently, it only allows you to replace a furniture in the preset with an already existing furniture.
 
 For example: the `Wired timer` uses a colortile to control if the timer should reset, pause or start.
 In that case, you may want to use a colortile that is already in the room instead of a new one, to allow for easier "plug and play". If you want this, you can specify it in this tab. Every furniture has a unique name assigned, you can use the button to open a text editor in `Settings` to find out what name you should use
