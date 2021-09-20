@@ -37,7 +37,7 @@ If you start building without having all furniture, the import will fail right a
 
 ## Settings
 
-![image](https://user-images.githubusercontent.com/36828922/134005169-86ab791e-5132-4564-a36f-49aa4ccb0c5a.png)
+![image](https://user-images.githubusercontent.com/36828922/134006632-4394a8f9-a6be-4328-bb45-5ed80da36d2c.png)
 
 Use the settings tab to:
 * Select the **stacktile** you want to use. Make sure all items fit on this stacktile for the initial placements. If you have more stacktiles in the room, they will also be used if they are needed for movements of the furniture
