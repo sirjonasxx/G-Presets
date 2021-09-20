@@ -36,6 +36,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import utils.Utils;
 
 import java.awt.*;
 import java.io.File;
@@ -49,7 +50,7 @@ import java.util.stream.Collectors;
 @ExtensionInfo(
         Title =  "Wired Presets",
         Description =  "Never do anything twice",
-        Version =  "0.1",
+        Version =  "0.2",
         Author =  "sirjonasxx"
 )
 public class WiredPresets extends ExtensionForm {
@@ -81,6 +82,8 @@ public class WiredPresets extends ExtensionForm {
     public TableView<FurniPostConfig> postconfigTable;
     public GridPane pcgrid;
     public Label postconfigErrorLbl;
+    public CheckBox noExportWiredCbx;
+    public Slider ratelimiter;
 
     private List<FurniPostConfig> furniPostConfigs = new ArrayList<>();
 
@@ -165,6 +168,13 @@ public class WiredPresets extends ExtensionForm {
         });
 
         pcgrid.add(postconfigTable, 0, 0);
+
+
+
+        ratelimiter.valueProperty().addListener((observable, oldValue, newValue) -> {
+            int val = newValue.intValue();
+            Utils.setExtraSleepTime(val);
+        });
     }
 
     @Override
@@ -441,5 +451,9 @@ public class WiredPresets extends ExtensionForm {
 //            e.printStackTrace();
             Platform.runLater(() -> postconfigErrorLbl.setText("You entered invalid information!"));
         }
+    }
+
+    public boolean shouldExportWired() {
+        return !noExportWiredCbx.isSelected();
     }
 }

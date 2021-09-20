@@ -1,10 +1,7 @@
 package extension.tools;
 
 import extension.WiredPresets;
-import extension.tools.importutils.AvailabilityChecker;
-import extension.tools.importutils.FurniDropInfo;
-import extension.tools.importutils.FurniMoveInfo;
-import extension.tools.importutils.StackTileUtils;
+import extension.tools.importutils.*;
 import extension.tools.postconfig.ItemSource;
 import extension.tools.postconfig.PostConfig;
 import extension.tools.presetconfig.PresetConfig;
@@ -23,10 +20,10 @@ import gearth.protocol.HPacket;
 import utils.StateExtractor;
 import utils.Utils;
 
+import javax.rmi.CORBA.Util;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class WiredPresetImporter {
@@ -71,11 +68,16 @@ public class WiredPresetImporter {
     // expect furni drops on location described by key(string) -> "x|y|typeId"
     private Map<String, LinkedList<Integer>> expectFurniDrops = null;
     private WiredImportState state = WiredImportState.NONE;
-    private volatile int stacktile = -1;
-    private volatile int stackDimension = 0;
+
+
+    private volatile int mainStackTile = -1;
+    private volatile int mainStackDimensions = 0;
     private HPoint reservedSpace = null;
     private HPoint rootLocation = null;
-    private HPoint originalStackTileLocation = new HPoint(0, 0); // move back after movements
+    private HPoint stackTileLocation = null;
+
+    private List<StackTileInfo> allAvailableStackTiles = null;
+//    private HPoint originalStackTileLocation = new HPoint(0, 0); // move back after movements
 
     private int heightOffset = 0;
 
@@ -222,9 +224,29 @@ public class WiredPresetImporter {
                         return;
                     }
                 }
-                stacktile = extension.stackTile().getId();
-                originalStackTileLocation = extension.stackTile().getTile();
-                stackDimension = extension.getStackTileSetting().getDimension();
+                mainStackTile = extension.stackTile().getId();
+
+                allAvailableStackTiles = new ArrayList<>();
+                Set<String> allStacktileClasses = Arrays.stream(StackTileSetting.values()).map(StackTileSetting::getClassName).collect(Collectors.toSet());
+                allStacktileClasses.forEach(c -> {
+                    List<HFloorItem> stackTiles = extension.getFloorState().getItemsFromType(furniData, c);
+                    if (stackTiles.size() > 0) {
+                        HFloorItem stackTile = stackTiles.get(0);
+                        allAvailableStackTiles.add(new StackTileInfo(
+                                stackTile.getId(),
+                                stackTile.getTile(),
+                                stackTile.getFacing().ordinal(),
+                                StackTileSetting.fromClassName(c).getDimension()
+                        ));
+                    }
+                });
+
+                if (allAvailableStackTiles.size() > 0) {
+                    extension.getLogger().log(String.format("Detected %d available types of stacktiles", allAvailableStackTiles.size()), "green");
+                }
+
+//                originalStackTileLocation = extension.stackTile().getTile();
+                mainStackDimensions = extension.getStackTileSetting().getDimension();
 
                 state = WiredImportState.AWAITING_UNOCCUPIED_SPACE;
                 extension.sendVisualChatInfo("Select unoccupied space in the room");
@@ -353,17 +375,20 @@ public class WiredPresetImporter {
 
     private void moveFurni(int furniId, int x, int y, int rot, boolean moveStackTile, double height) {
         if (moveStackTile) {
-            HPoint dest = StackTileUtils.findBestDropLocation(x, y, stackDimension, extension.getFloorState());
-            moveFurni(stacktile, dest.getX(), dest.getY(), 0, false, -1);
-            if (height != -1) {
-                extension.sendToServer(new HPacket(
-                        "SetCustomStackingHeight",
-                        HMessage.Direction.TOSERVER,
-                        stacktile,
-                        ((int) (height * 100)) + heightOffset * 100
-                ));
+            StackTileInfo stackInfo = StackTileUtils.findBestDropLocation(x, y, allAvailableStackTiles, extension.getFloorState());
+            if (stackInfo != null) {
+                moveFurni(stackInfo.getFurniId(), stackInfo.getLocation().getX(), stackInfo.getLocation().getY(),
+                        stackInfo.getRotation(), false, -1);
+                if (height != -1) {
+                    extension.sendToServer(new HPacket(
+                            "SetCustomStackingHeight",
+                            HMessage.Direction.TOSERVER,
+                            stackInfo.getFurniId(),
+                            ((int) (height * 100)) + heightOffset * 100
+                    ));
 
-                Utils.sleep(40);
+                    Utils.sleep(40);
+                }
             }
         }
 
@@ -475,20 +500,19 @@ public class WiredPresetImporter {
             });
         }
 
+        Map<Integer, PresetFurni> movesByRealId = new HashMap<>();
+
         int i = 0;
         while (state == WiredImportState.MOVE_FURNITURE && i < moveList.size()) {
             PresetFurni moveFurni = moveList.get(i);
             i++;
             int realFurniId = realFurniIdMap.get(moveFurni.getFurniId());
 
-            if (realFurniId == 27513728) {
-                System.out.println("uh");
-            }
-
             if (moveFurni.getState() != null) {
                 attemptSetState(realFurniId, moveFurni.getState());
             }
 
+            movesByRealId.put(realFurniId, moveFurni);
             moveFurni(
                     realFurniId,
                     moveFurni.getLocation().getX() + rootLocation.getX(),
@@ -499,9 +523,43 @@ public class WiredPresetImporter {
             );
         }
 
+
+        // second pass
+        Utils.sleep(300 + extension.getSafeFeedbackTimeout());
         if (state == WiredImportState.MOVE_FURNITURE) {
-            moveFurni(stacktile, originalStackTileLocation.getX(), originalStackTileLocation.getY(), 0,
-                    false, -1);
+            List<HFloorItem> maybeNotMovedItems = extension.getFloorState().getFurniOnTile(stackTileLocation.getX(), stackTileLocation.getY());
+            maybeNotMovedItems.addAll(extension.getFloorState().getFurniOnTile(stackTileLocation.getX(), stackTileLocation.getY()));
+            maybeNotMovedItems.addAll(extension.getFloorState().getFurniOnTile(reservedSpace.getX(), reservedSpace.getY()));
+            maybeNotMovedItems = maybeNotMovedItems.stream().filter(h -> {
+                PresetFurni p = movesByRealId.get(h.getId());
+                if (p == null) return false;
+                return p.getLocation().getX() + rootLocation.getX() != h.getTile().getX() ||
+                        p.getLocation().getY() + rootLocation.getY() != h.getTile().getY() ||
+                        p.getRotation() != h.getFacing().ordinal();
+            }).collect(Collectors.toList());
+
+            for (HFloorItem o : maybeNotMovedItems) {
+                if (state != WiredImportState.MOVE_FURNITURE) break;
+
+                PresetFurni p = movesByRealId.get(o.getId());
+
+                moveFurni(
+                        o.getId(),
+                        p.getLocation().getX() + rootLocation.getX(),
+                        p.getLocation().getY() + rootLocation.getY(),
+                        p.getRotation(),
+                        true,
+                        p.getLocation().getZ() + rootLocation.getZ()
+                );
+            }
+        }
+
+        if (state == WiredImportState.MOVE_FURNITURE) {
+            for(StackTileInfo stackTileInfo : allAvailableStackTiles) {
+                moveFurni(stackTileInfo.getFurniId(), stackTileInfo.getLocation().getX(), stackTileInfo.getLocation().getY(),
+                        stackTileInfo.getRotation(), false, -1);
+            }
+
         }
 
         synchronized (lock) {
@@ -561,12 +619,11 @@ public class WiredPresetImporter {
             if (bindings != null) {
                 // set stuff to the right rotation/location/state
                 for (PresetWiredFurniBinding binding : bindings) {
-//                    PresetFurni bindFurni = furni.get(binding.getFurniId());
                     int furniId;
                     synchronized (lock) {
                         if (state != WiredImportState.SETUP_WIRED) return;
 
-                        if (/*bindFurni == null ||*/ !realFurniIdMap.containsKey(binding.getFurniId())) continue;
+                        if (!realFurniIdMap.containsKey(binding.getFurniId())) continue;
                         furniId = realFurniIdMap.get(binding.getFurniId());
                     }
                     if (binding.getState() != null) {
@@ -638,11 +695,11 @@ public class WiredPresetImporter {
         }
     }
 
-    private void dropAllOtherFurni(HPoint stackTileLocation) {
+    private void dropAllOtherFurni() {
         FurniDataTools furniData = extension.getFurniDataTools();
         List<FurniDropInfo> furniDropInfos = new ArrayList<>();
 
-        moveFurni(stacktile, stackTileLocation.getX(), stackTileLocation.getY(), 0, false, -1);
+        moveFurni(mainStackTile, stackTileLocation.getX(), stackTileLocation.getY(), 0, false, -1);
 
         synchronized (lock) {
             workingPresetConfig.getFurniture().forEach(f -> {
@@ -721,16 +778,16 @@ public class WiredPresetImporter {
         FloorState floor = extension.getFloorState();
 
 
-        for (int x = 0; x < 64 - stackDimension; x++) {
+        for (int x = 0; x < 64 - mainStackDimensions; x++) {
 
             nextIteration:
-            for (int y = 0; y < 64 - stackDimension; y++) {
+            for (int y = 0; y < 64 - mainStackDimensions; y++) {
 
                 char reference = floor.floorHeight(x, y);
                 if (reference == 'x') continue;
 
-                for (int xOffset = 0; xOffset < stackDimension; xOffset++) {
-                    for (int yOffset = 0; yOffset < stackDimension; yOffset++) {
+                for (int xOffset = 0; xOffset < mainStackDimensions; xOffset++) {
+                    for (int yOffset = 0; yOffset < mainStackDimensions; yOffset++) {
                         if (floor.floorHeight(x + xOffset, y + yOffset) != reference) {
                             continue nextIteration;
                         }
@@ -787,7 +844,8 @@ public class WiredPresetImporter {
 //        }
 
         if (state == WiredImportState.ADD_FURNITURE) {
-            dropAllOtherFurni(findStackTileLocation());
+            stackTileLocation = findStackTileLocation();
+            dropAllOtherFurni();
         }
 
     }

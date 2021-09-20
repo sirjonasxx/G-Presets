@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 
-<TabPane prefHeight="298.0" prefWidth="686.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="extension.WiredPresets">
+<TabPane prefHeight="298.0" prefWidth="686.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="extension.WiredPresets">
   <tabs>
     <Tab text="Presets">
       <content>
@@ -52,14 +65,14 @@
       <content>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
-                  <RadioButton layoutX="138.0" layoutY="14.0" mnemonicParsing="false" selected="true" text="2x2">
+                  <RadioButton layoutX="158.0" layoutY="14.0" mnemonicParsing="false" selected="true" text="2x2">
                      <toggleGroup>
                         <ToggleGroup fx:id="stacktile_tgl" />
                      </toggleGroup></RadioButton>
-                  <Label layoutX="14.0" layoutY="14.0" text="Stacktile dimensions:" />
-                  <RadioButton layoutX="190.0" layoutY="14.0" mnemonicParsing="false" text="4x4" toggleGroup="$stacktile_tgl" />
-                  <RadioButton layoutX="246.0" layoutY="14.0" mnemonicParsing="false" text="6x6" toggleGroup="$stacktile_tgl" />
-                  <RadioButton layoutX="301.0" layoutY="14.0" mnemonicParsing="false" text="8x8" toggleGroup="$stacktile_tgl" />
+                  <Label layoutX="14.0" layoutY="14.0" text="Main stacktile:" />
+                  <RadioButton layoutX="210.0" layoutY="14.0" mnemonicParsing="false" text="4x4" toggleGroup="$stacktile_tgl" />
+                  <RadioButton layoutX="262.0" layoutY="14.0" mnemonicParsing="false" text="6x6" toggleGroup="$stacktile_tgl" />
+                  <RadioButton layoutX="314.0" layoutY="14.0" mnemonicParsing="false" text="8x8" toggleGroup="$stacktile_tgl" />
                   <Label layoutX="14.0" layoutY="45.0" text="Item source:" />
                   <RadioButton fx:id="onlyInvCbx" layoutX="93.0" layoutY="45.0" mnemonicParsing="false" selected="true" text="Only Inventory">
                      <toggleGroup>
@@ -73,6 +86,10 @@
                   <Button fx:id="currentPresetBtn" layoutX="187.0" layoutY="223.0" mnemonicParsing="false" onAction="#openCurrentPresetClick" prefHeight="25.0" prefWidth="222.0" text="Open Selected Preset In Editor" />
                   <Button layoutX="543.0" layoutY="223.0" mnemonicParsing="false" onAction="#reloadPresetsClick" prefHeight="25.0" prefWidth="131.0" text="Reload Presets" />
                   <CheckBox fx:id="allowIncompleteBuildsCbx" layoutX="14.0" layoutY="187.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="205.0" text="Allow building without all furni" />
+                  <RadioButton layoutX="106.0" layoutY="14.0" mnemonicParsing="false" text="1x1" toggleGroup="$stacktile_tgl" />
+                  <CheckBox fx:id="noExportWiredCbx" layoutX="14.0" layoutY="167.0" mnemonicParsing="false" text="Do not export wired" />
+                  <Slider fx:id="ratelimiter" layoutX="82.0" layoutY="80.0" prefHeight="14.0" prefWidth="219.0" />
+                  <Label layoutX="13.0" layoutY="78.0" text="Ratelimit:" />
                </children></AnchorPane>
       </content>
     </Tab>

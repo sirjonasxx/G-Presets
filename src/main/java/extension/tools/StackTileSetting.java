@@ -1,7 +1,11 @@
 package extension.tools;
 
+import java.util.Arrays;
+
 public enum StackTileSetting {
 
+    Small("tile_stackmagic", 1),
+    Medium("tile_stackmagic1", -1),
     Large("tile_stackmagic2", 2),
     XL("tile_stackmagic4x4", 4),
     XXL("tile_stackmagic6x6", 6),
@@ -24,11 +28,25 @@ public enum StackTileSetting {
     }
 
     public static StackTileSetting fromString(String s) {
-        if (s.equals("2x2")) return Large;
-        else if (s.equals("4x4")) return XL;
-        else if (s.equals("6x6")) return XXL;
-        else if (s.equals("8x8")) return XXXL;
+        switch (s) {
+            case "1x1":
+                return Small;
+            case "1x2":
+                return Medium;
+            case "2x2":
+                return Large;
+            case "4x4":
+                return XL;
+            case "6x6":
+                return XXL;
+            case "8x8":
+                return XXXL;
+        }
         return null;
+    }
+
+    public static StackTileSetting fromClassName(String className) {
+        return Arrays.stream(values()).filter(v -> v.getClassName().equals(className)).findFirst().orElse(null);
     }
 
     @Override

@@ -7,9 +7,55 @@ import java.util.*;
 
 public class StackTileUtils {
 
-    public static HPoint findBestDropLocation(int x, int y, int stackDimensions, FloorState floorState) {
-        if (!floorState.inRoom()) return new HPoint(x, y);
+    public static StackTileInfo findBestDropLocation(int x, int y, List<StackTileInfo> potentialStacktiles, FloorState floorState) {
+        if (!floorState.inRoom()) return null;
 
+        potentialStacktiles.sort((o1, o2) -> -Integer.compare(o1.getDimension(), o2.getDimension()));
+
+        for (StackTileInfo info : potentialStacktiles) {
+            int dimension = info.getDimension();
+            if (dimension != -1) {
+                HPoint dropLocation = findBestDropLocation(x, y, dimension, floorState);
+
+                if (dropLocation != null) {
+                    return new StackTileInfo(info.getFurniId(), dropLocation, 0, dimension);
+                }
+            }
+            else {
+                // is 1x2 tile
+                char rootChar = floorState.floorHeight(x, y);
+                if (rootChar == 'x') continue;
+
+                HPoint location = null;
+                int rotation = -1;
+
+                if (floorState.floorHeight(x+1, y) == rootChar) {
+                    location = new HPoint(x, y);
+                    rotation = 0;
+                }
+                else if (floorState.floorHeight(x, y+1) == rootChar) {
+                    location = new HPoint(x, y);
+                    rotation = 2;
+                }
+                else if (floorState.floorHeight(x-1, y) == rootChar) {
+                    location = new HPoint(x-1, y);
+                    rotation = 0;
+                }
+                else if (floorState.floorHeight(x, y-1) == rootChar) {
+                    location = new HPoint(x, y-1);
+                    rotation = 2;
+                }
+
+                if (location != null) {
+                    return new StackTileInfo(info.getFurniId(), location, rotation, -1);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static HPoint findBestDropLocation(int x, int y, int stackDimensions, FloorState floorState) {
         List<HPoint> possibleLocations = new ArrayList<>();
 
         for (int x2 = x; x2 > Math.max(x - stackDimensions, 0); x2--) {
@@ -41,7 +87,7 @@ public class StackTileUtils {
             return new HPoint(x2, y2);
         }
 
-        return new HPoint(x, y);
+        return null;
     }
 
 }

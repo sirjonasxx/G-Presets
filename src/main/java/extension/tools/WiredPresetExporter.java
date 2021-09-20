@@ -240,7 +240,7 @@ public class WiredPresetExporter {
     }
 
     private void export(String name, int x, int y, int dimX, int dimY) {
-        if (isReady() && unRegisteredWiredsInArea(x, y, dimX, dimY).size() == 0) {
+        if (isReady() && (unRegisteredWiredsInArea(x, y, dimX, dimY).size() == 0 || !extension.shouldExportWired())) {
             FloorState floor = extension.getFloorState();
             FurniDataTools furniDataTools = extension.getFurniDataTools();
 
@@ -264,19 +264,21 @@ public class WiredPresetExporter {
                                 f.getFacing().ordinal(), StateExtractor.stateFromItem(f));
                         allFurni.add(presetFurni);
 
-                        if (classname.startsWith("wf_trg_")) {
-                            allTriggers.add(new PresetWiredTrigger(wiredTriggerConfigs.get(f.getId())));
-                        }
-                        else if (classname.startsWith("wf_cnd_")) {
-                            allConditions.add(new PresetWiredCondition(wiredConditionConfigs.get(f.getId())));
-                        }
-                        else if (classname.startsWith("wf_act_")) {
-                            allEffects.add(new PresetWiredEffect(wiredEffectConfigs.get(f.getId())));
-                        }
+                        if (extension.shouldExportWired()) {
+                            if (classname.startsWith("wf_trg_")) {
+                                allTriggers.add(new PresetWiredTrigger(wiredTriggerConfigs.get(f.getId())));
+                            }
+                            else if (classname.startsWith("wf_cnd_")) {
+                                allConditions.add(new PresetWiredCondition(wiredConditionConfigs.get(f.getId())));
+                            }
+                            else if (classname.startsWith("wf_act_")) {
+                                allEffects.add(new PresetWiredEffect(wiredEffectConfigs.get(f.getId())));
+                            }
 
-                        if (wiredFurniBindings.containsKey(f.getId())) {
-                            allBindings.addAll(wiredFurniBindings.get(f.getId()).stream()
-                                    .map(b -> new PresetWiredFurniBinding(b)).collect(Collectors.toList()));
+                            if (wiredFurniBindings.containsKey(f.getId())) {
+                                allBindings.addAll(wiredFurniBindings.get(f.getId()).stream()
+                                        .map(b -> new PresetWiredFurniBinding(b)).collect(Collectors.toList()));
+                            }
                         }
                     }
                 }
@@ -518,7 +520,7 @@ public class WiredPresetExporter {
     private void attemptExport(String name, int x, int y, int dimX, int dimY) {
         if (isReady()) {
             List<Integer> unregisteredWired = unRegisteredWiredsInArea(x, y, dimX, dimY);
-            if (unregisteredWired.size() > 0) {
+            if (unregisteredWired.size() > 0 && extension.shouldExportWired()) {
                 exportName = name;
                 state = PresetExportState.FETCHING_UNKNOWN_CONFIGS;
                 extension.sendVisualChatInfo(String.format(
