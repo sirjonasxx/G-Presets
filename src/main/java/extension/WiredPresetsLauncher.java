@@ -18,9 +18,9 @@ public class WiredPresetsLauncher extends ExtensionFormCreator {
 
         stage.setTitle("Wired Presets 0.2");
         stage.setScene(new Scene(root));
-        stage.getScene().getStylesheets().add(GEarthController.class.getResource("/gearth/ui/bootstrap3.css").toExternalForm());
+        stage.getScene().getStylesheets().add(GEarthController.class.getResource("/gearth/themes/G-Earth/styling.css").toExternalForm());
         stage.getScene().getStylesheets().add(getClass().getResource("ui/logger.css").toExternalForm());
-        stage.getIcons().add(new Image(Main.class.getResourceAsStream("G-EarthLogoSmaller.png")));
+        stage.getIcons().add(new Image(Main.class.getResourceAsStream("/gearth/themes/G-Earth/logoSmall.png")));
 
         stage.setResizable(false);
 
