@@ -16,7 +16,7 @@ public class WiredPresetsLauncher extends ExtensionFormCreator {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("ui/wiredpresets.fxml"));
         Parent root = loader.load();
 
-        stage.setTitle("Wired Presets 0.2");
+        stage.setTitle("Wired Presets 0.2.1");
         stage.setScene(new Scene(root));
         stage.getScene().getStylesheets().add(GEarthController.class.getResource("/gearth/themes/G-Earth/styling.css").toExternalForm());
         stage.getScene().getStylesheets().add(getClass().getResource("ui/logger.css").toExternalForm());
