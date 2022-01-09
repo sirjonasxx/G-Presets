@@ -37,11 +37,13 @@ If you start building without having all furniture, the import will fail right a
 
 ## Settings
 
-![image](https://user-images.githubusercontent.com/36828922/133943525-0b0c904b-810a-4ca1-85cc-1a7963eae701.png)
+![image](https://user-images.githubusercontent.com/36828922/134006632-4394a8f9-a6be-4328-bb45-5ed80da36d2c.png)
 
 Use the settings tab to:
 * Select the **stacktile** you want to use. Make sure all items fit on this stacktile for the initial placements. If you have more stacktiles in the room, they will also be used if they are needed for movements of the furniture
 * Select the **Item source**, speaks for itself
+* Increase the ratelimit if needed, using the extension will become slower
+* Export rooms without exporting wired, for example if you have no rights
 * Allow building without having all furniture available if you're sure you want this
 * _Open the presets folder to rename/add/delete presets manually, afterwards, click "Reload Presets" to see the changes_
 * _Open the selected preset in a text editor to make adjustments or inspect the preset if you feel like it_
