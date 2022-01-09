@@ -239,7 +239,7 @@ public class WiredPresets extends ExtensionForm {
     @Override
     protected void onStartConnection() {
         latestPingTimestamp = System.currentTimeMillis();
-        sendToServer(new HPacket("LatencyPingRequest", HMessage.Direction.TOSERVER, -1));
+//        sendToServer(new HPacket("LatencyPingRequest", HMessage.Direction.TOSERVER, -1));
 
         isConnected = true;
         updateUI();
