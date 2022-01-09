@@ -3,10 +3,9 @@ package extension.tools.presetconfig;
 import extension.WiredPresets;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -53,7 +52,7 @@ public class PresetConfigUtils {
         File presetPath = new File(presetPath());
         presetPath.mkdirs();
 
-        try (FileWriter file = new FileWriter(new File(presetPath(), name + ".txt"))) {
+        try (Writer file = new OutputStreamWriter(new FileOutputStream(new File(presetPath(), name + ".txt")), StandardCharsets.UTF_8)) {
             file.write(config.toJsonObject().toString(4));
             file.flush();
             return true;
@@ -68,7 +67,7 @@ public class PresetConfigUtils {
         File file = new File(presetPath(), name + ".txt");
         if (file.exists() && file.isFile()) {
             try {
-                String contents = String.join("\n", Files.readAllLines(file.toPath()));
+                String contents = String.join("\n", Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
                 return new PresetConfig(new JSONObject(contents));
             } catch (IOException e) {
                 e.printStackTrace();
