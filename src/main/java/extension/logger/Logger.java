@@ -19,7 +19,7 @@ public class Logger {
 
     public void initialize(BorderPane borderPane) {
         area = new StyleClassedTextArea();
-        area.getStyleClass().add("white");
+        area.getStyleClass().add("themed-background");
 //        area.setWrapText(true);
         area.setEditable(false);
 

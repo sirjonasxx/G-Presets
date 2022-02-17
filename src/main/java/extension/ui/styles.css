@@ -1,0 +1,101 @@
+.g-light .lblgreen {
+    -fx-background-color: lightgreen;
+}
+
+.g-dark .lblgreen {
+    -fx-background-color: #5d9c41;
+}
+
+.g-light .lblred {
+    -fx-background-color: #f28d8d;
+}
+
+.g-dark .lblred {
+    -fx-background-color: #942523;
+}
+
+.g-light .lblorange {
+    -fx-background-color: #FFC485;
+}
+
+.g-dark .lblorange {
+    -fx-background-color: #b37c22;
+}
+
+.g-light .lblgrey {
+    -fx-background-color: lightgrey;
+}
+
+.g-dark .lblgrey {
+    -fx-background-color: #6e6e6e;
+}
+
+
+/* logger css */
+
+.g-light .orange {
+    -fx-fill: orange;
+}
+.g-light .purple {
+    -fx-fill: purple;
+}
+
+.g-light .red {
+    -fx-fill: red;
+}
+
+.g-light .black {
+    -fx-fill: black;
+}
+
+.g-light .blue {
+    -fx-fill: blue;
+}
+.g-light .green {
+    -fx-fill: #73b504;
+}
+
+
+.g-dark .orange {
+    -fx-fill: #ffc958;
+}
+.g-dark .purple {
+    -fx-fill: #eb68dd;
+}
+
+.g-dark .red {
+    -fx-fill: #ff8d82;
+}
+
+.g-dark .black {
+    -fx-fill: #efefef;
+}
+
+.g-dark .blue {
+    -fx-fill: #c0b8ff;
+}
+.g-dark .green {
+    -fx-fill: #b9ff52;
+}
+
+
+
+
+
+
+.dark {
+    -fx-background-color: #000000;
+}
+
+.caret {
+    -fx-stroke: #ffffff;
+}
+
+/*.label {*/
+/*    -fx-text-fill: #000000 !important;*/
+/*}*/
+
+.scroll-bar:vertical {
+    -fx-pref-width: 11.5;
+    -fx-padding: 1;
+}

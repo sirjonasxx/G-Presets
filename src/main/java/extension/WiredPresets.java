@@ -279,12 +279,10 @@ public class WiredPresets extends ExtensionForm {
 //    }
 
     private void updateLabel(Label lbl, boolean isFullfilled, boolean isBusy, boolean isOptional) {
-        lbl.setStyle("-fx-background-color: " + (isFullfilled ?
-                "lightgreen;" :
-                (isBusy ?
-                        "orange;" :
-                        (isOptional ? "lightgrey;" : "#f28d8d;")))
-        );
+        lbl.getStyleClass().removeAll(lbl.getStyleClass().stream().filter(p -> p.startsWith("lbl")).collect(Collectors.toList()));
+        lbl.getStyleClass().add(
+                isFullfilled ?
+                        "lblgreen" : (isBusy ? "lblorange" : (isOptional ? "lblgrey" : "lblred")));
     }
 
     private void updateLabel(Label lbl, boolean isFullfilled, boolean isBusy) {

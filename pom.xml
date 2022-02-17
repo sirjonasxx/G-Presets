@@ -85,7 +85,7 @@
         <dependency>
             <groupId>G-Earth</groupId>
             <artifactId>G-Earth</artifactId>
-            <version>1.5.1</version>
+            <version>1.5.2</version>
         </dependency>
     </dependencies>
 
