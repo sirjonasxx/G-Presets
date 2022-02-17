@@ -9,7 +9,7 @@ public class WiredPresetsLauncher extends ThemedExtensionFormCreator {
 
     @Override
     protected String getTitle() {
-        return "Wired Presets 0.2.1";
+        return "Wired Presets 0.2.2";
     }
 
     @Override
