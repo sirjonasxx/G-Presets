@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 @ExtensionInfo(
         Title =  "Wired Presets",
         Description =  "Never do anything twice",
-        Version =  "0.2.2",
+        Version =  "0.2.3",
         Author =  "sirjonasxx"
 )
 public class WiredPresets extends ExtensionForm {
