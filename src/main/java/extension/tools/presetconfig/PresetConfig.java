@@ -2,12 +2,14 @@ package extension.tools.presetconfig;
 
 import extension.tools.postconfig.FurniPostConfig;
 import extension.tools.postconfig.PostConfig;
+import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
 import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
 import extension.tools.presetconfig.furni.PresetFurni;
 import extension.tools.presetconfig.wired.PresetWireds;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,12 +20,13 @@ public class PresetConfig implements PresetJsonConfigurable {
     private List<PresetFurni> furniture;
     private PresetWireds presetWireds;
     private List<PresetWiredFurniBinding> bindings;
+    private List<PresetAdsBackground> adsBackgrounds;
 
-
-    public PresetConfig(List<PresetFurni> furniture, PresetWireds presetWireds, List<PresetWiredFurniBinding> bindings) {
+    public PresetConfig(List<PresetFurni> furniture, PresetWireds presetWireds, List<PresetWiredFurniBinding> bindings, List<PresetAdsBackground> adsBackgrounds) {
         this.furniture = furniture;
         this.presetWireds = presetWireds;
         this.bindings = bindings;
+        this.adsBackgrounds = adsBackgrounds;
     }
 
     public PresetConfig(JSONObject object) {
@@ -35,6 +38,9 @@ public class PresetConfig implements PresetJsonConfigurable {
         bindings = object.getJSONArray("bindings").toList().stream()
                 .map(o -> new PresetWiredFurniBinding(new JSONObject((Map)o))).collect(Collectors.toList());
 
+        adsBackgrounds = !object.has("adsBackgrounds") ? new ArrayList<>() :
+                object.getJSONArray("adsBackgrounds").toList().stream()
+                .map(o -> new PresetAdsBackground(new JSONObject((Map)o))).collect(Collectors.toList());
     }
 
     @Override
@@ -47,6 +53,9 @@ public class PresetConfig implements PresetJsonConfigurable {
         object.put("furni", jsonFurni);
         object.put("wired", presetWireds.toJsonObject());
         object.put("bindings", jsonBindings);
+        if (!adsBackgrounds.isEmpty()) {
+            object.put("adsBackgrounds", adsBackgrounds);
+        }
         return object;
     }
 
@@ -97,5 +106,13 @@ public class PresetConfig implements PresetJsonConfigurable {
 
     public void setBindings(List<PresetWiredFurniBinding> bindings) {
         this.bindings = bindings;
+    }
+
+    public List<PresetAdsBackground> getAdsBackgrounds() {
+        return adsBackgrounds;
+    }
+
+    public void setAdsBackgrounds(List<PresetAdsBackground> adsBackgrounds) {
+        this.adsBackgrounds = adsBackgrounds;
     }
 }

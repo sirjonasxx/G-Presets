@@ -3,6 +3,7 @@ package extension.tools;
 import extension.WiredPresets;
 import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.PresetConfigUtils;
+import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
 import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
 import extension.tools.presetconfig.furni.PresetFurni;
 import extension.tools.presetconfig.wired.*;
@@ -13,6 +14,7 @@ import furnidata.FurniDataTools;
 import game.FloorState;
 import gearth.extensions.parsers.HFloorItem;
 import gearth.extensions.parsers.HPoint;
+import gearth.extensions.parsers.HStuff;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import utils.StateExtractor;
@@ -250,6 +252,7 @@ public class WiredPresetExporter {
             List<PresetWiredTrigger> allTriggers = new ArrayList<>();
             List<List<? extends PresetWiredBase>> wiredLists = Arrays.asList(allConditions, allEffects, allTriggers);
             List<PresetWiredFurniBinding> allBindings = new ArrayList<>();
+            List<PresetAdsBackground> allAdsBackgrounds = new ArrayList<>();
 
 
 
@@ -263,6 +266,24 @@ public class WiredPresetExporter {
                         PresetFurni presetFurni = new PresetFurni(f.getId(), classname, f.getTile(),
                                 f.getFacing().ordinal(), StateExtractor.stateFromItem(f));
                         allFurni.add(presetFurni);
+
+                        if (classname.equals("ads_background") && f.getCategory() == 1) {
+                            Map<String, String> stuffDataMap = new HashMap<>();
+                            Object[] stuff = f.getStuff();
+                            for (int i = 0; i < (int)(stuff[0]); i++) {
+                                String key = (String)(stuff[i*2 + 1]);
+                                String value = (String)(stuff[i*2 + 2]);
+                                stuffDataMap.put(key, value);
+                            }
+
+                            allAdsBackgrounds.add(new PresetAdsBackground(
+                                    f.getId(),
+                                    stuffDataMap.get("imageUrl"),
+                                    stuffDataMap.get("offsetX"),
+                                    stuffDataMap.get("offsetY"),
+                                    stuffDataMap.get("offsetZ")
+                            ));
+                        }
 
                         if (extension.shouldExportWired()) {
                             if (classname.startsWith("wf_trg_")) {
@@ -332,6 +353,9 @@ public class WiredPresetExporter {
                     ));
                 }
             });
+            allAdsBackgrounds.forEach(a -> {
+                a.setFurniId(mappedFurniIds.get(a.getFurniId()));
+            });
 
 
             // fourth pass: assign names to furniture based on class & remove state information from wired class
@@ -355,7 +379,7 @@ public class WiredPresetExporter {
 
 
             PresetWireds presetWireds = new PresetWireds(allConditions, allEffects, allTriggers);
-            PresetConfig presetConfig = new PresetConfig(allFurni, presetWireds, allBindings);
+            PresetConfig presetConfig = new PresetConfig(allFurni, presetWireds, allBindings, allAdsBackgrounds);
 
             PresetConfigUtils.savePreset(name, presetConfig);
             extension.updateInstalledPresets();

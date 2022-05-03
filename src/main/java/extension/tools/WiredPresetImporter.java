@@ -5,6 +5,7 @@ import extension.tools.importutils.*;
 import extension.tools.postconfig.ItemSource;
 import extension.tools.postconfig.PostConfig;
 import extension.tools.presetconfig.PresetConfig;
+import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
 import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
 import extension.tools.presetconfig.furni.PresetFurni;
 import extension.tools.presetconfig.wired.*;
@@ -24,6 +25,7 @@ import javax.rmi.CORBA.Util;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class WiredPresetImporter {
@@ -51,6 +53,7 @@ public class WiredPresetImporter {
 
         // check if all furniture were placed
 
+        SETUP_ADS,
         SETUP_WIRED,
         MOVE_FURNITURE      // move to correct location
     }
@@ -128,6 +131,7 @@ public class WiredPresetImporter {
         synchronized (lock) {
             if (isPlacing()) {
                 HFloorItem item = new HFloorItem(hMessage.getPacket());
+//                String classname = extension.getFurniDataTools().getFloorItemName(item.getTypeId());
                 String dropKey = String.format("%d|%d|%d",
                         item.getTile().getX(), item.getTile().getY(), item.getTypeId());
 
@@ -135,6 +139,13 @@ public class WiredPresetImporter {
                 if (awaitMatchingDropIds != null && awaitMatchingDropIds.size() > 0) {
                     int assignedFurniId = awaitMatchingDropIds.pollFirst();
                     realFurniIdMap.put(assignedFurniId, item.getId());
+
+//                    if (classname != null && classname.equals("ads_background")) {
+//                        PresetAdsBackground ads = workingPresetConfig.getAdsBackgrounds().stream().filter(a -> a.getFurniId() == assignedFurniId).findFirst().orElse(null);
+//                        if (ads != null) {
+//
+//                        }
+//                    }
 
                     if (awaitMatchingDropIds.size() == 0) {
                         expectFurniDrops.remove(dropKey);
@@ -283,8 +294,8 @@ public class WiredPresetImporter {
                 int y = hMessage.getPacket().readInteger();
                 rootLocation = new HPoint(
                         x,
-                        y,
-                        PresetUtils.lowestFloorPoint(extension.getFloorState(), workingPresetConfig, new HPoint(x, y))
+                        y//,
+//                        PresetUtils.lowestFloorPoint(extension.getFloorState(), workingPresetConfig, new HPoint(x, y))
                 );
 
                 startAddingFurni = true;
@@ -519,7 +530,7 @@ public class WiredPresetImporter {
                     moveFurni.getLocation().getY() + rootLocation.getY(),
                     moveFurni.getRotation(),
                     true,
-                    moveFurni.getLocation().getZ() + rootLocation.getZ()
+                    moveFurni.getLocation().getZ()// + rootLocation.getZ()
             );
         }
 
@@ -549,7 +560,7 @@ public class WiredPresetImporter {
                         p.getLocation().getY() + rootLocation.getY(),
                         p.getRotation(),
                         true,
-                        p.getLocation().getZ() + rootLocation.getZ()
+                        p.getLocation().getZ()// + rootLocation.getZ()
                 );
             }
         }
@@ -743,7 +754,7 @@ public class WiredPresetImporter {
             synchronized (lock) {
                 if (state == WiredImportState.ADD_FURNITURE) {
                     if (expectFurniDrops.isEmpty() || extension.allowIncompleteBuilds()) {
-                        state = WiredImportState.SETUP_WIRED;
+                        state = WiredImportState.SETUP_ADS;
                     }
                     else {
                         state = WiredImportState.NONE;
@@ -752,10 +763,49 @@ public class WiredPresetImporter {
                     }
                 }
             }
-            if (state == WiredImportState.SETUP_WIRED) {
-                extension.sendVisualChatInfo("Setting up wired..");
-                setupWired();
+            if (state == WiredImportState.SETUP_ADS) {
+                setupAds();
             }
+        }
+    }
+
+    private void setupAds() {
+        List<PresetAdsBackground> adsBackgrounds = workingPresetConfig.getAdsBackgrounds();
+        if (!adsBackgrounds.isEmpty()) {
+            extension.sendVisualChatInfo("Setting up ads backgrounds..");
+
+            int index = 0;
+            while (index < adsBackgrounds.size() && state == WiredImportState.SETUP_ADS) {
+                PresetAdsBackground adsBackground = adsBackgrounds.get(index);
+
+                synchronized (lock) {
+                    if (state == WiredImportState.SETUP_ADS && realFurniIdMap.containsKey(adsBackground.getFurniId())) {
+                        int realFurni = realFurniIdMap.get(adsBackground.getFurniId());
+                        extension.sendToServer(
+                                new HPacket("SetObjectData", HMessage.Direction.TOSERVER,
+                                        realFurni, 8,
+                                        "imageUrl", adsBackground.getImageUrl(),
+                                        "offsetX", adsBackground.getOffsetX(),
+                                        "offsetY", adsBackground.getOffsetY(),
+                                        "offsetZ", adsBackground.getOffsetZ()
+                                )
+                        );
+                    }
+                }
+
+                Utils.sleep(100);
+                index++;
+            }
+        }
+
+        synchronized (lock) {
+            if (state == WiredImportState.SETUP_ADS) {
+                state = WiredImportState.SETUP_WIRED;
+            }
+        }
+        if (state == WiredImportState.SETUP_WIRED) {
+            extension.sendVisualChatInfo("Setting up wired..");
+            setupWired();
         }
     }
 
