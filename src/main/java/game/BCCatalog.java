@@ -1,6 +1,6 @@
 package game;
 
-import extension.WiredPresets;
+import extension.BuildingPresets;
 import extension.logger.Logger;
 import furnidata.FurniDataTools;
 import gearth.extensions.parsers.HProductType;
@@ -58,12 +58,12 @@ public class BCCatalog {
     private Logger logger;
     private Callback stateChangeCallback;
 
-    private final WiredPresets extension;
+    private final BuildingPresets extension;
     private CatalogState state = CatalogState.NONE;
 
     private final Map<Integer, SingleFurniProduct> typeIdToProduct = new HashMap<>();
 
-    public BCCatalog(WiredPresets extension, Logger logger, Callback stateChangeCallback) {
+    public BCCatalog(BuildingPresets extension, Logger logger, Callback stateChangeCallback) {
         this.extension = extension;
         this.logger = logger;
         this.stateChangeCallback = stateChangeCallback;
@@ -176,7 +176,7 @@ public class BCCatalog {
 
 
     private String fileNameForHash(String hash) throws URISyntaxException {
-        String path = (new File(WiredPresets.class.getProtectionDomain().getCodeSource().getLocation().toURI()))
+        String path = (new File(BuildingPresets.class.getProtectionDomain().getCodeSource().getLocation().toURI()))
                 .getParentFile().toString();
         String filename = "BC_FLOORITEMS_" + hash + ".txt";
 

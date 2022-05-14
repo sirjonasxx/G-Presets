@@ -1,6 +1,6 @@
 package extension.tools;
 
-import extension.WiredPresets;
+import extension.BuildingPresets;
 import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.PresetConfigUtils;
 import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
@@ -14,7 +14,6 @@ import furnidata.FurniDataTools;
 import game.FloorState;
 import gearth.extensions.parsers.HFloorItem;
 import gearth.extensions.parsers.HPoint;
-import gearth.extensions.parsers.HStuff;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import utils.StateExtractor;
@@ -24,7 +23,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class WiredPresetExporter {
+public class BuildingPresetExporter {
 
     private final Object lock = new Object();
 
@@ -51,9 +50,9 @@ public class WiredPresetExporter {
     private final Map<Integer, List<PresetWiredFurniBinding>> wiredFurniBindings = Collections.synchronizedMap(new HashMap<>());
 
 
-    private final WiredPresets extension;
+    private final BuildingPresets extension;
 
-    public WiredPresetExporter(WiredPresets extension) {
+    public BuildingPresetExporter(BuildingPresets extension) {
         this.extension = extension;
 
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateCondition", this::saveCondition);

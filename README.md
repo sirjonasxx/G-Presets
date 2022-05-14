@@ -1,6 +1,6 @@
-# Wired Presets
+# Building Presets
 
-Wired Presets is a G-Earth extension that can export and import creations inside Habbo, with emphasis on Wired, but it works for anything. Download it from the [G-ExtensionStore](https://github.com/sirjonasxx/G-ExtensionStore)!
+Building Presets is a G-Earth extension that can export and import creations inside Habbo, with emphasis on Wired, but it works for anything. Download it from the [G-ExtensionStore](https://github.com/sirjonasxx/G-ExtensionStore)!
 
 _video coming soon_
 

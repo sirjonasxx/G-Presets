@@ -5,16 +5,16 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 
-public class WiredPresetsLauncher extends ThemedExtensionFormCreator {
+public class BuildingPresetsLauncher extends ThemedExtensionFormCreator {
 
     @Override
     protected String getTitle() {
-        return "Wired Presets 0.2.3";
+        return "Building Presets 0.2.3";
     }
 
     @Override
     protected URL getFormResource() {
-        return getClass().getResource("ui/wiredpresets.fxml");
+        return getClass().getResource("ui/buildingpresets.fxml");
     }
 
     @Override
@@ -23,7 +23,7 @@ public class WiredPresetsLauncher extends ThemedExtensionFormCreator {
     }
 
     public static void main(String[] args) {
-        runExtensionForm(args, WiredPresetsLauncher.class);
+        runExtensionForm(args, BuildingPresetsLauncher.class);
     }
 
 }

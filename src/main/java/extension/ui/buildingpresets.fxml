@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<TabPane prefHeight="303.0" prefWidth="686.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="extension.WiredPresets">
+<TabPane prefHeight="303.0" prefWidth="686.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="extension.BuildingPresets">
   <tabs>
     <Tab text="Presets">
       <content>
@@ -75,7 +75,7 @@
                   <CheckBox fx:id="allowIncompleteBuildsCbx" layoutX="14.0" layoutY="187.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="205.0" text="Allow building without all furni" />
                   <RadioButton layoutX="106.0" layoutY="14.0" mnemonicParsing="false" text="1x1" toggleGroup="$stacktile_tgl" />
                   <CheckBox fx:id="noExportWiredCbx" layoutX="14.0" layoutY="167.0" mnemonicParsing="false" text="Do not export wired" />
-                  <Slider fx:id="ratelimiter" layoutX="82.0" layoutY="80.0" prefHeight="14.0" prefWidth="219.0" value="25.0" />
+                  <Slider fx:id="ratelimiter" layoutX="82.0" layoutY="80.0" prefHeight="14.0" prefWidth="219.0" value="22.0" />
                   <Label layoutX="13.0" layoutY="78.0" text="Ratelimit:" />
                </children></AnchorPane>
       </content>

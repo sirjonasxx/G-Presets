@@ -1,6 +1,6 @@
 package extension.tools;
 
-import extension.WiredPresets;
+import extension.BuildingPresets;
 import extension.tools.importutils.*;
 import extension.tools.postconfig.ItemSource;
 import extension.tools.postconfig.PostConfig;
@@ -21,21 +21,19 @@ import gearth.protocol.HPacket;
 import utils.StateExtractor;
 import utils.Utils;
 
-import javax.rmi.CORBA.Util;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class WiredPresetImporter {
+public class BuildingPresetImporter {
 
     private final Object lock = new Object();
 
-    private WiredPresets extension = null;
+    private BuildingPresets extension = null;
 
 
-    public enum WiredImportState {
+    public enum BuildingImportState {
         NONE,
 
         // select a location ingame that will be used to move furniture to that need state adjustments
@@ -70,7 +68,7 @@ public class WiredPresetImporter {
 
     // expect furni drops on location described by key(string) -> "x|y|typeId"
     private Map<String, LinkedList<Integer>> expectFurniDrops = null;
-    private WiredImportState state = WiredImportState.NONE;
+    private BuildingImportState state = BuildingImportState.NONE;
 
 
     private volatile int mainStackTile = -1;
@@ -84,7 +82,7 @@ public class WiredPresetImporter {
 
     private int heightOffset = 0;
 
-    public WiredPresetImporter(WiredPresets extension) {
+    public BuildingPresetImporter(BuildingPresets extension) {
         this.extension = extension;
 
         extension.intercept(HMessage.Direction.TOSERVER, "Chat", this::onChat);
@@ -107,7 +105,7 @@ public class WiredPresetImporter {
 
     private void blockFurniAdjustments(HMessage message) {
         synchronized (lock) {
-            if (state == WiredImportState.SETUP_WIRED || state == WiredImportState.MOVE_FURNITURE) {
+            if (state == BuildingImportState.SETUP_WIRED || state == BuildingImportState.MOVE_FURNITURE) {
                 message.setBlocked(true);
                 extension.sendVisualChatInfo("Don't adjust furniture while the importer is active!");
             }
@@ -116,7 +114,7 @@ public class WiredPresetImporter {
 
     private void maybeBlockPlacements(HMessage hMessage) {
         synchronized (lock) {
-            if (state != WiredImportState.NONE) {
+            if (state != BuildingImportState.NONE) {
                 hMessage.setBlocked(true);
                 extension.sendVisualChatInfo("Can't drop furniture while the importer is active, please await the procedure or abort");
             }
@@ -124,7 +122,7 @@ public class WiredPresetImporter {
     }
 
     private boolean isPlacing() {
-        return state == WiredImportState.ADD_UNSTACKABLES || state == WiredImportState.ADD_FURNITURE;
+        return state == BuildingImportState.ADD_UNSTACKABLES || state == BuildingImportState.ADD_FURNITURE;
     }
 
     private void onObjectAdd(HMessage hMessage) {
@@ -168,7 +166,7 @@ public class WiredPresetImporter {
             if (text.startsWith(":ip") || text.startsWith(":importpreset")) {
                 hMessage.setBlocked(true);
 
-                if (state != WiredImportState.NONE) {
+                if (state != BuildingImportState.NONE) {
                     extension.sendVisualChatInfo("Already importing preset.. finish up or abort first");
                 }
                 else if (!isReady()) {
@@ -196,8 +194,8 @@ public class WiredPresetImporter {
             if (text.equals(":abort") || text.equals(":a")) {
                 hMessage.setBlocked(true);
 
-                if (state != WiredImportState.NONE) {
-                    state = WiredImportState.NONE;
+                if (state != BuildingImportState.NONE) {
+                    state = BuildingImportState.NONE;
                     extension.sendVisualChatInfo("Successfully aborted importing");
                 }
             }
@@ -259,7 +257,7 @@ public class WiredPresetImporter {
 //                originalStackTileLocation = extension.stackTile().getTile();
                 mainStackDimensions = extension.getStackTileSetting().getDimension();
 
-                state = WiredImportState.AWAITING_UNOCCUPIED_SPACE;
+                state = BuildingImportState.AWAITING_UNOCCUPIED_SPACE;
                 extension.sendVisualChatInfo("Select unoccupied space in the room");
             }
 
@@ -273,7 +271,7 @@ public class WiredPresetImporter {
         synchronized (lock) {
             boolean startAddingFurni = false;
 
-            if (state == WiredImportState.AWAITING_UNOCCUPIED_SPACE) {
+            if (state == BuildingImportState.AWAITING_UNOCCUPIED_SPACE) {
                 hMessage.setBlocked(true);
                 reservedSpace = new HPoint(
                         hMessage.getPacket().readInteger(),
@@ -281,14 +279,14 @@ public class WiredPresetImporter {
                 );
 
                 if (rootLocation == null) {
-                    state = WiredImportState.AWAITING_ROOT_LOCATION;
+                    state = BuildingImportState.AWAITING_ROOT_LOCATION;
                     extension.sendVisualChatInfo("Select where the preset should be imported");
                 }
                 else {
                     startAddingFurni = true;
                 }
             }
-            else if (state == WiredImportState.AWAITING_ROOT_LOCATION) {
+            else if (state == BuildingImportState.AWAITING_ROOT_LOCATION) {
                 hMessage.setBlocked(true);
                 int x = hMessage.getPacket().readInteger();
                 int y = hMessage.getPacket().readInteger();
@@ -304,7 +302,7 @@ public class WiredPresetImporter {
             if (startAddingFurni) {
                 heightOffset = PresetUtils.lowestFloorPoint(extension.getFloorState(), workingPresetConfig, rootLocation);
 
-                state = WiredImportState.ADD_UNSTACKABLES;
+                state = BuildingImportState.ADD_UNSTACKABLES;
                 new Thread(this::addUnstackables).start();
                 extension.sendVisualChatInfo("Adding furniture...");
             }
@@ -336,7 +334,7 @@ public class WiredPresetImporter {
         if (useBC) {
             if (catalogProduct == null) {
                 if (!extension.allowIncompleteBuilds()) {
-                    state = WiredImportState.NONE;
+                    state = BuildingImportState.NONE;
                     extension.sendVisualChatInfo(String.format("ERROR: Couldn't find the item '%s' in BC warehouse.. aborting", className));
                 }
                 else {
@@ -360,7 +358,7 @@ public class WiredPresetImporter {
         else {
             if (inventoryItems.size() == 0) {
                 if (!extension.allowIncompleteBuilds()) {
-                    state = WiredImportState.NONE;
+                    state = BuildingImportState.NONE;
                     extension.sendVisualChatInfo(String.format("ERROR: Couldn't find '%s' in inventory.. aborting", className));
                 }
                 else {
@@ -429,7 +427,7 @@ public class WiredPresetImporter {
         }
 
         synchronized (lock) {
-            if (state != WiredImportState.NONE) {
+            if (state != BuildingImportState.NONE) {
                 moveFurni(furniId, reservedSpace.getX(), reservedSpace.getY(), 0, false, -1);
             }
         }
@@ -437,7 +435,7 @@ public class WiredPresetImporter {
         String newState = "-1";
 
         int i = 0;
-        while (state != WiredImportState.NONE && newState != null && !currentState.equals(newState) && !newState.equals(targetState) && i < 20) {
+        while (state != BuildingImportState.NONE && newState != null && !currentState.equals(newState) && !newState.equals(targetState) && i < 20) {
             currentState = newState;
 
             extension.sendToServer(new HPacket("UseFurniture", HMessage.Direction.TOSERVER, furniId, 0));
@@ -460,7 +458,7 @@ public class WiredPresetImporter {
     private Semaphore wiredSaveConfirmation = new Semaphore(0);
 
     private void wiredSaved(HMessage hMessage) {
-        if (state == WiredImportState.SETUP_WIRED) {
+        if (state == BuildingImportState.SETUP_WIRED) {
             wiredSaveConfirmation.release();
         }
     }
@@ -514,7 +512,7 @@ public class WiredPresetImporter {
         Map<Integer, PresetFurni> movesByRealId = new HashMap<>();
 
         int i = 0;
-        while (state == WiredImportState.MOVE_FURNITURE && i < moveList.size()) {
+        while (state == BuildingImportState.MOVE_FURNITURE && i < moveList.size()) {
             PresetFurni moveFurni = moveList.get(i);
             i++;
             int realFurniId = realFurniIdMap.get(moveFurni.getFurniId());
@@ -537,7 +535,7 @@ public class WiredPresetImporter {
 
         // second pass
         Utils.sleep(300 + extension.getSafeFeedbackTimeout());
-        if (state == WiredImportState.MOVE_FURNITURE) {
+        if (state == BuildingImportState.MOVE_FURNITURE) {
             List<HFloorItem> maybeNotMovedItems = extension.getFloorState().getFurniOnTile(stackTileLocation.getX(), stackTileLocation.getY());
             maybeNotMovedItems.addAll(extension.getFloorState().getFurniOnTile(stackTileLocation.getX(), stackTileLocation.getY()));
             maybeNotMovedItems.addAll(extension.getFloorState().getFurniOnTile(reservedSpace.getX(), reservedSpace.getY()));
@@ -550,7 +548,7 @@ public class WiredPresetImporter {
             }).collect(Collectors.toList());
 
             for (HFloorItem o : maybeNotMovedItems) {
-                if (state != WiredImportState.MOVE_FURNITURE) break;
+                if (state != BuildingImportState.MOVE_FURNITURE) break;
 
                 PresetFurni p = movesByRealId.get(o.getId());
 
@@ -565,7 +563,7 @@ public class WiredPresetImporter {
             }
         }
 
-        if (state == WiredImportState.MOVE_FURNITURE) {
+        if (state == BuildingImportState.MOVE_FURNITURE) {
             for(StackTileInfo stackTileInfo : allAvailableStackTiles) {
                 moveFurni(stackTileInfo.getFurniId(), stackTileInfo.getLocation().getX(), stackTileInfo.getLocation().getY(),
                         stackTileInfo.getRotation(), false, -1);
@@ -574,8 +572,8 @@ public class WiredPresetImporter {
         }
 
         synchronized (lock) {
-            if (state == WiredImportState.MOVE_FURNITURE) {
-                state = WiredImportState.NONE;
+            if (state == BuildingImportState.MOVE_FURNITURE) {
+                state = BuildingImportState.NONE;
                 extension.sendVisualChatInfo("Imported the preset successfully");
                 extension.getLogger().log("Finished importing the preset!", "green");
             }
@@ -615,7 +613,7 @@ public class WiredPresetImporter {
         }
 
         int i = 0;
-        while (state == WiredImportState.SETUP_WIRED && i < allWireds.size()) {
+        while (state == BuildingImportState.SETUP_WIRED && i < allWireds.size()) {
             PresetWiredBase wiredBase = allWireds.get(i);
             i++;
 
@@ -632,7 +630,7 @@ public class WiredPresetImporter {
                 for (PresetWiredFurniBinding binding : bindings) {
                     int furniId;
                     synchronized (lock) {
-                        if (state != WiredImportState.SETUP_WIRED) return;
+                        if (state != BuildingImportState.SETUP_WIRED) return;
 
                         if (!realFurniIdMap.containsKey(binding.getFurniId())) continue;
                         furniId = realFurniIdMap.get(binding.getFurniId());
@@ -642,7 +640,7 @@ public class WiredPresetImporter {
                         attemptSetState(furniId, targetState);
                     }
                     synchronized (lock) {
-                        if (state != WiredImportState.SETUP_WIRED) return;
+                        if (state != BuildingImportState.SETUP_WIRED) return;
 
                         boolean needMovement = binding.getLocation() != null || binding.getRotation() != null;
                         if (needMovement) {
@@ -696,11 +694,11 @@ public class WiredPresetImporter {
 
 
         synchronized (lock) {
-            if (state == WiredImportState.SETUP_WIRED) {
-                state = WiredImportState.MOVE_FURNITURE;
+            if (state == BuildingImportState.SETUP_WIRED) {
+                state = BuildingImportState.MOVE_FURNITURE;
             }
         }
-        if (state == WiredImportState.MOVE_FURNITURE) {
+        if (state == BuildingImportState.MOVE_FURNITURE) {
             extension.sendVisualChatInfo("Setting furni in their correct position..");
             moveFurniture();
         }
@@ -734,36 +732,36 @@ public class WiredPresetImporter {
         }
 
         int i = 0;
-        while (i < furniDropInfos.size() && state == WiredImportState.ADD_FURNITURE) {
+        while (i < furniDropInfos.size() && state == BuildingImportState.ADD_FURNITURE) {
             FurniDropInfo dropInfo = furniDropInfos.get(i);
             dropFurni(dropInfo);
 
             i++;
         }
 
-        if (state == WiredImportState.ADD_FURNITURE) {
+        if (state == BuildingImportState.ADD_FURNITURE) {
             int j = 0;
             boolean done;
             do {
                 Utils.sleep(500);
                 synchronized (lock) {
-                    done = state != WiredImportState.ADD_FURNITURE || expectFurniDrops.isEmpty() || j++ > 7;
+                    done = state != BuildingImportState.ADD_FURNITURE || expectFurniDrops.isEmpty() || j++ > 7;
                 }
             } while (!done);
 
             synchronized (lock) {
-                if (state == WiredImportState.ADD_FURNITURE) {
+                if (state == BuildingImportState.ADD_FURNITURE) {
                     if (expectFurniDrops.isEmpty() || extension.allowIncompleteBuilds()) {
-                        state = WiredImportState.SETUP_ADS;
+                        state = BuildingImportState.SETUP_ADS;
                     }
                     else {
-                        state = WiredImportState.NONE;
+                        state = BuildingImportState.NONE;
                         extension.sendVisualChatInfo("ERROR: not all furniture were placed");
                         extension.getLogger().log("ERROR: not all furniture were placed", "red");
                     }
                 }
             }
-            if (state == WiredImportState.SETUP_ADS) {
+            if (state == BuildingImportState.SETUP_ADS) {
                 setupAds();
             }
         }
@@ -775,11 +773,11 @@ public class WiredPresetImporter {
             extension.sendVisualChatInfo("Setting up ads backgrounds..");
 
             int index = 0;
-            while (index < adsBackgrounds.size() && state == WiredImportState.SETUP_ADS) {
+            while (index < adsBackgrounds.size() && state == BuildingImportState.SETUP_ADS) {
                 PresetAdsBackground adsBackground = adsBackgrounds.get(index);
 
                 synchronized (lock) {
-                    if (state == WiredImportState.SETUP_ADS && realFurniIdMap.containsKey(adsBackground.getFurniId())) {
+                    if (state == BuildingImportState.SETUP_ADS && realFurniIdMap.containsKey(adsBackground.getFurniId())) {
                         int realFurni = realFurniIdMap.get(adsBackground.getFurniId());
                         extension.sendToServer(
                                 new HPacket("SetObjectData", HMessage.Direction.TOSERVER,
@@ -799,11 +797,11 @@ public class WiredPresetImporter {
         }
 
         synchronized (lock) {
-            if (state == WiredImportState.SETUP_ADS) {
-                state = WiredImportState.SETUP_WIRED;
+            if (state == BuildingImportState.SETUP_ADS) {
+                state = BuildingImportState.SETUP_WIRED;
             }
         }
-        if (state == WiredImportState.SETUP_WIRED) {
+        if (state == BuildingImportState.SETUP_WIRED) {
             extension.sendVisualChatInfo("Setting up wired..");
             setupWired();
         }
@@ -877,7 +875,7 @@ public class WiredPresetImporter {
         }
 
         int i = 0;
-        while (i < furniDropInfos.size() && state == WiredImportState.ADD_UNSTACKABLES) {
+        while (i < furniDropInfos.size() && state == BuildingImportState.ADD_UNSTACKABLES) {
             FurniDropInfo dropInfo = furniDropInfos.get(i);
             dropFurni(dropInfo);
 
@@ -887,13 +885,13 @@ public class WiredPresetImporter {
 //        if (state == WiredImportState.ADD_UNSTACKABLES) {
 //            if (furniDropInfos.size() > 0) Utils.sleep(2500);
             synchronized (lock) {
-                if (state == WiredImportState.ADD_UNSTACKABLES) {
-                    state = WiredImportState.ADD_FURNITURE;
+                if (state == BuildingImportState.ADD_UNSTACKABLES) {
+                    state = BuildingImportState.ADD_FURNITURE;
                 }
             }
 //        }
 
-        if (state == WiredImportState.ADD_FURNITURE) {
+        if (state == BuildingImportState.ADD_FURNITURE) {
             stackTileLocation = findStackTileLocation();
             dropAllOtherFurni();
         }
@@ -901,7 +899,7 @@ public class WiredPresetImporter {
     }
 
     public void reset() {
-        state = WiredImportState.NONE;
+        state = BuildingImportState.NONE;
     }
 
     public void setPresetConfig(PresetConfig presetConfig) {
@@ -920,7 +918,7 @@ public class WiredPresetImporter {
 //        return postConfig;
 //    }
 
-    public WiredImportState getState() {
+    public BuildingImportState getState() {
         return state;
     }
 }

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>gearthextensions</groupId>
-    <artifactId>WiredPresets</artifactId>
+    <artifactId>BuildingPresets</artifactId>
     <packaging>jar</packaging>
     <version>0.2.3</version>
 
@@ -33,7 +33,7 @@
                         <manifest>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addClasspath>true</addClasspath>
-                            <mainClass>extension.WiredPresetsLauncher</mainClass>
+                            <mainClass>extension.BuildingPresetsLauncher</mainClass>
                             <useUniqueVersions>false</useUniqueVersions>
                             <classpathPrefix>lib/</classpathPrefix>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
@@ -58,7 +58,7 @@
                     <outputDirectory>${project.build.directory}/bin</outputDirectory>
                     <archive>
                         <manifest>
-                            <mainClass>extension.WiredPresetsLauncher</mainClass>
+                            <mainClass>extension.BuildingPresetsLauncher</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
