@@ -1,12 +1,11 @@
 package game;
 
-import extension.BuildingPresets;
+import extension.GPresets;
 import extension.logger.Logger;
 import furnidata.FurniDataTools;
 import gearth.extensions.parsers.HProductType;
 import gearth.extensions.parsers.catalog.HCatalogIndex;
 import gearth.extensions.parsers.catalog.HCatalogPage;
-import gearth.extensions.IExtension;
 import gearth.extensions.parsers.catalog.HCatalogPageIndex;
 import gearth.extensions.parsers.catalog.HProduct;
 import gearth.protocol.HMessage;
@@ -18,7 +17,6 @@ import utils.Utils;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,12 +56,12 @@ public class BCCatalog {
     private Logger logger;
     private Callback stateChangeCallback;
 
-    private final BuildingPresets extension;
+    private final GPresets extension;
     private CatalogState state = CatalogState.NONE;
 
     private final Map<Integer, SingleFurniProduct> typeIdToProduct = new HashMap<>();
 
-    public BCCatalog(BuildingPresets extension, Logger logger, Callback stateChangeCallback) {
+    public BCCatalog(GPresets extension, Logger logger, Callback stateChangeCallback) {
         this.extension = extension;
         this.logger = logger;
         this.stateChangeCallback = stateChangeCallback;
@@ -176,7 +174,7 @@ public class BCCatalog {
 
 
     private String fileNameForHash(String hash) throws URISyntaxException {
-        String path = (new File(BuildingPresets.class.getProtectionDomain().getCodeSource().getLocation().toURI()))
+        String path = (new File(GPresets.class.getProtectionDomain().getCodeSource().getLocation().toURI()))
                 .getParentFile().toString();
         String filename = "BC_FLOORITEMS_" + hash + ".txt";
 

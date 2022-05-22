@@ -1,6 +1,6 @@
 package extension.tools.presetconfig;
 
-import extension.BuildingPresets;
+import extension.GPresets;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -15,7 +15,7 @@ public class PresetConfigUtils {
 
     public static String presetPath() {
         try {
-            String path = (new File(BuildingPresets.class.getProtectionDomain().getCodeSource().getLocation().toURI()))
+            String path = (new File(GPresets.class.getProtectionDomain().getCodeSource().getLocation().toURI()))
                     .getParentFile().toString();
             return Paths.get(path, "presets").toString();
         } catch (URISyntaxException e) {

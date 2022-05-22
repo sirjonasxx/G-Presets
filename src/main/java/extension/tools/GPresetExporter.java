@@ -1,6 +1,6 @@
 package extension.tools;
 
-import extension.BuildingPresets;
+import extension.GPresets;
 import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.PresetConfigUtils;
 import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class BuildingPresetExporter {
+public class GPresetExporter {
 
     private final Object lock = new Object();
 
@@ -50,9 +50,9 @@ public class BuildingPresetExporter {
     private final Map<Integer, List<PresetWiredFurniBinding>> wiredFurniBindings = Collections.synchronizedMap(new HashMap<>());
 
 
-    private final BuildingPresets extension;
+    private final GPresets extension;
 
-    public BuildingPresetExporter(BuildingPresets extension) {
+    public GPresetExporter(GPresets extension) {
         this.extension = extension;
 
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateCondition", this::saveCondition);

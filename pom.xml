@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>gearthextensions</groupId>
-    <artifactId>BuildingPresets</artifactId>
+    <artifactId>GPresets</artifactId>
     <packaging>jar</packaging>
     <version>0.2.3</version>
 
@@ -33,7 +33,7 @@
                         <manifest>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addClasspath>true</addClasspath>
-                            <mainClass>extension.BuildingPresetsLauncher</mainClass>
+                            <mainClass>extension.GPresetsLauncher</mainClass>
                             <useUniqueVersions>false</useUniqueVersions>
                             <classpathPrefix>lib/</classpathPrefix>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
@@ -58,7 +58,7 @@
                     <outputDirectory>${project.build.directory}/bin</outputDirectory>
                     <archive>
                         <manifest>
-                            <mainClass>extension.BuildingPresetsLauncher</mainClass>
+                            <mainClass>extension.GPresetsLauncher</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

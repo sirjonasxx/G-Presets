@@ -3,8 +3,8 @@ package extension;
 import extension.logger.Logger;
 import extension.tools.PresetUtils;
 import extension.tools.StackTileSetting;
-import extension.tools.BuildingPresetExporter;
-import extension.tools.BuildingPresetImporter;
+import extension.tools.GPresetExporter;
+import extension.tools.GPresetImporter;
 import extension.tools.importutils.AvailabilityChecker;
 import extension.tools.importutils.FurniDropInfo;
 import extension.tools.postconfig.FurniPostConfig;
@@ -48,12 +48,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ExtensionInfo(
-        Title =  "Building Presets",
+        Title =  "G-Presets",
         Description =  "Never do anything twice",
         Version =  "0.2.3",
         Author =  "sirjonasxx"
 )
-public class BuildingPresets extends ExtensionForm {
+public class GPresets extends ExtensionForm {
 
     public BorderPane logsBorderPane;
 
@@ -95,8 +95,8 @@ public class BuildingPresets extends ExtensionForm {
     private BCCatalog catalog = null;
     private volatile boolean isConnected = false;
 
-    private BuildingPresetExporter exporter = null;
-    private BuildingPresetImporter importer = null;
+    private GPresetExporter exporter = null;
+    private GPresetImporter importer = null;
 
     private volatile long latestPingTimestamp = -1;
     private volatile int ping = 45;
@@ -109,7 +109,7 @@ public class BuildingPresets extends ExtensionForm {
         logsBorderPane.setPadding(new Insets(5, 5, 5, 5));
         logger.initialize(logsBorderPane);
 
-        logger.log("Welcome to Building Presets!", "purple");
+        logger.log("Welcome to G-Presets!", "purple");
         logger.log("Use the following commands:", "purple");
         logger.log("* :exportpreset [all] / :ep [all]", "purple");
         logger.log("* :importpreset [x,y] / :ip [x,y]", "purple");
@@ -187,8 +187,8 @@ public class BuildingPresets extends ExtensionForm {
         this.inventory = new Inventory(this, logger, this::updateUI);
         this.catalog = new BCCatalog(this, logger, this::updateUI);
 
-        this.exporter = new BuildingPresetExporter(this);
-        this.importer = new BuildingPresetImporter(this);
+        this.exporter = new GPresetExporter(this);
+        this.importer = new GPresetImporter(this);
 
         onConnect((host, i, s1, s2, hClient) -> furniDataTools = new FurniDataTools(host, this::updateUI));
 

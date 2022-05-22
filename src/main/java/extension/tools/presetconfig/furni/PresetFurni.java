@@ -12,7 +12,7 @@ public class PresetFurni implements PresetJsonConfigurable {
     private int rotation;
     private String state;    // only if category = legacystuffdata (0), only apply if UseFurniture packet works
 
-    private String furniName = null; // uniquely given name by BuildingPresets, based on furniId and className
+    private String furniName = null; // uniquely given name by GPresets, based on furniId and className
 
     public PresetFurni(int furniId, String className, HPoint location, int rotation, String state) {
         this.furniId = furniId;

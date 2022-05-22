@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class FurniPostConfig {
 
-    // identifier created by BuildingPreset
+    // identifier created by GPreset
     private final String furniIdentifier;
 
     // use existing furni in room instead of placing new one

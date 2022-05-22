@@ -1,6 +1,6 @@
 package extension.tools;
 
-import extension.BuildingPresets;
+import extension.GPresets;
 import extension.tools.importutils.*;
 import extension.tools.postconfig.ItemSource;
 import extension.tools.postconfig.PostConfig;
@@ -26,11 +26,11 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class BuildingPresetImporter {
+public class GPresetImporter {
 
     private final Object lock = new Object();
 
-    private BuildingPresets extension = null;
+    private GPresets extension = null;
 
 
     public enum BuildingImportState {
@@ -82,7 +82,7 @@ public class BuildingPresetImporter {
 
     private int heightOffset = 0;
 
-    public BuildingPresetImporter(BuildingPresets extension) {
+    public GPresetImporter(GPresets extension) {
         this.extension = extension;
 
         extension.intercept(HMessage.Direction.TOSERVER, "Chat", this::onChat);

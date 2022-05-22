@@ -5,16 +5,16 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 
-public class BuildingPresetsLauncher extends ThemedExtensionFormCreator {
+public class GPresetsLauncher extends ThemedExtensionFormCreator {
 
     @Override
     protected String getTitle() {
-        return "Building Presets 0.2.3";
+        return "G-Presets - Building & Wired Presets";
     }
 
     @Override
     protected URL getFormResource() {
-        return getClass().getResource("ui/buildingpresets.fxml");
+        return getClass().getResource("ui/gpresets.fxml");
     }
 
     @Override
@@ -23,7 +23,7 @@ public class BuildingPresetsLauncher extends ThemedExtensionFormCreator {
     }
 
     public static void main(String[] args) {
-        runExtensionForm(args, BuildingPresetsLauncher.class);
+        runExtensionForm(args, GPresetsLauncher.class);
     }
 
 }
