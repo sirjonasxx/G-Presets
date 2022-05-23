@@ -567,7 +567,22 @@ public class GPresetExporter {
         return state;
     }
 
+
+    // called from wired importer
     public void cacheWiredConfig(PresetWiredBase presetWiredBase) {
+
+        FurniDataTools furniData = extension.getFurniDataTools();
+        FloorState floorState = extension.getFloorState();
+        if (furniData == null || floorState == null) return;
+        HFloorItem floorItem = floorState.furniFromId(presetWiredBase.getWiredId());
+        if (floorItem == null) return;
+        int typeId = floorItem.getTypeId();
+
+        String className = furniData.getFloorItemName(typeId);
+        if (requireBindings.contains(className)) {
+            return;
+        }
+
         if (presetWiredBase instanceof PresetWiredCondition) {
             PresetWiredCondition condition = (PresetWiredCondition) presetWiredBase;
             wiredConditionConfigs.put(condition.getWiredId(), condition);
