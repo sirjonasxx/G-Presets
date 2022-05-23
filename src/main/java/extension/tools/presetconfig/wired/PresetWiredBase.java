@@ -1,6 +1,7 @@
 package extension.tools.presetconfig.wired;
 
 import extension.tools.presetconfig.PresetJsonConfigurable;
+import extension.tools.presetconfig.wired.incoming.RetrievedWired;
 import gearth.extensions.IExtension;
 import gearth.protocol.HPacket;
 import org.json.JSONObject;
@@ -72,7 +73,8 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable {
     protected abstract void appendJsonFields(JSONObject object);
 
     public abstract void applyWiredConfig(IExtension extension);
-    public abstract void applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap);
+
+    public abstract PresetWiredBase applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap);
 
     public int getWiredId() {
         return wiredId;

@@ -476,8 +476,9 @@ public class GPresetImporter {
         if (delay > 0) Utils.sleep(delay);
 
         wiredSaveConfirmation.drainPermits();
+        PresetWiredBase presetWiredBase;
         synchronized (lock) {
-            presetWired.applyWiredConfig(extension, realFurniIdMap);
+            presetWiredBase = presetWired.applyWiredConfig(extension, realFurniIdMap);
         }
 
         if (presetWired instanceof PresetWiredCondition) latestConditionSave = System.currentTimeMillis();
@@ -488,7 +489,14 @@ public class GPresetImporter {
         try { gotConfirmation = wiredSaveConfirmation.tryAcquire(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {}
 
-        if (!gotConfirmation) saveWired(presetWired, attempt + 1);
+        if (gotConfirmation) {
+            if (presetWiredBase != null) {
+                extension.getExporter().cacheWiredConfig(presetWiredBase);
+            }
+        }
+        else {
+            saveWired(presetWired, attempt + 1);
+        }
     }
 
     private void moveFurniture() {

@@ -566,4 +566,19 @@ public class GPresetExporter {
     public PresetExportState getState() {
         return state;
     }
+
+    public void cacheWiredConfig(PresetWiredBase presetWiredBase) {
+        if (presetWiredBase instanceof PresetWiredCondition) {
+            PresetWiredCondition condition = (PresetWiredCondition) presetWiredBase;
+            wiredConditionConfigs.put(condition.getWiredId(), condition);
+        }
+        if (presetWiredBase instanceof PresetWiredEffect) {
+            PresetWiredEffect effect = (PresetWiredEffect) presetWiredBase;
+            wiredEffectConfigs.put(effect.getWiredId(), effect);
+        }
+        if (presetWiredBase instanceof PresetWiredTrigger) {
+            PresetWiredTrigger trigger = (PresetWiredTrigger) presetWiredBase;
+            wiredTriggerConfigs.put(trigger.getWiredId(), trigger);
+        }
+    }
 }

@@ -65,9 +65,9 @@ public class PresetWiredEffect extends PresetWiredBase {
     }
 
     @Override
-    public void applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap) {
+    public PresetWiredEffect applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap) {
         if (realFurniIdMap.containsKey(wiredId)) {
-            new PresetWiredEffect(
+            PresetWiredEffect presetWiredEffect = new PresetWiredEffect(
                     realFurniIdMap.get(wiredId),
                     options,
                     stringConfig,
@@ -75,8 +75,11 @@ public class PresetWiredEffect extends PresetWiredBase {
                             .map(realFurniIdMap::get).collect(Collectors.toList()),
                     delay,
                     stuff
-            ).applyWiredConfig(extension);
+            );
+            presetWiredEffect.applyWiredConfig(extension);
+            return presetWiredEffect;
         }
+        return null;
     }
 
     public int getDelay() {

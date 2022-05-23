@@ -454,4 +454,8 @@ public class GPresets extends ExtensionForm {
     public boolean shouldExportWired() {
         return !noExportWiredCbx.isSelected();
     }
+
+    public GPresetExporter getExporter() {
+        return exporter;
+    }
 }

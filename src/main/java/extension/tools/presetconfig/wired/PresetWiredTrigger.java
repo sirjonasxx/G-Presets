@@ -58,17 +58,21 @@ public class PresetWiredTrigger extends PresetWiredBase {
     }
 
     @Override
-    public void applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap) {
+    public PresetWiredTrigger applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap) {
         if (realFurniIdMap.containsKey(wiredId)) {
-            new PresetWiredTrigger(
+            PresetWiredTrigger presetWiredTrigger = new PresetWiredTrigger(
                     realFurniIdMap.get(wiredId),
                     options,
                     stringConfig,
                     items.stream().filter(realFurniIdMap::containsKey)
                             .map(realFurniIdMap::get).collect(Collectors.toList()),
                     stuff
-            ).applyWiredConfig(extension);
+            );
+
+            presetWiredTrigger.applyWiredConfig(extension);
+            return presetWiredTrigger;
         }
+        return null;
     }
 
     public int getStuff() {

@@ -59,17 +59,21 @@ public class PresetWiredCondition extends PresetWiredBase {
     }
 
     @Override
-    public void applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap) {
+    public PresetWiredCondition applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap) {
         if (realFurniIdMap.containsKey(wiredId)) {
-            new PresetWiredCondition(
+            PresetWiredCondition presetWiredCondition = new PresetWiredCondition(
                     realFurniIdMap.get(wiredId),
                     options,
                     stringConfig,
                     items.stream().filter(realFurniIdMap::containsKey)
                             .map(realFurniIdMap::get).collect(Collectors.toList()),
                     stuff
-            ).applyWiredConfig(extension);
+            );
+
+            presetWiredCondition.applyWiredConfig(extension);
+            return presetWiredCondition;
         }
+        return null;
     }
 
     public int getStuff() {
