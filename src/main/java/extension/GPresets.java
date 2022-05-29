@@ -84,6 +84,7 @@ public class GPresets extends ExtensionForm {
     public Label postconfigErrorLbl;
     public CheckBox noExportWiredCbx;
     public Slider ratelimiter;
+    public CheckBox onTopCbx;
 
     private List<FurniPostConfig> furniPostConfigs = new ArrayList<>();
 
@@ -457,5 +458,9 @@ public class GPresets extends ExtensionForm {
 
     public GPresetExporter getExporter() {
         return exporter;
+    }
+
+    public void alwaysOnTopClick(ActionEvent actionEvent) {
+        primaryStage.setAlwaysOnTop(onTopCbx.isSelected());
     }
 }
