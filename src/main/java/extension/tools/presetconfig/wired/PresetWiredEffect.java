@@ -18,32 +18,27 @@ public class PresetWiredEffect extends PresetWiredBase {
     public PresetWiredEffect(HPacket packet) {
         super(packet);
         delay = packet.readInteger();
-        stuff = packet.readInteger();
     }
 
-    public PresetWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay, int stuff) {
+    public PresetWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay) {
         super(wiredId, options, stringConfig, items);
         this.delay = delay;
-        this.stuff = stuff;
     }
 
     // deep copy constructor
     public PresetWiredEffect(PresetWiredEffect effect) {
         super(effect);
         this.delay = effect.delay;
-        this.stuff = effect.stuff;
     }
 
     public PresetWiredEffect(JSONObject object) {
         super(object);
         this.delay = object.getInt("delay");
-        this.stuff = object.getInt("stuff");
     }
 
     @Override
     protected void appendJsonFields(JSONObject object) {
         object.put("delay", delay);
-        object.put("stuff", stuff);
     }
 
     @Override
@@ -59,7 +54,9 @@ public class PresetWiredEffect extends PresetWiredBase {
         packet.appendInt(items.size());
         items.forEach(packet::appendInt);
         packet.appendInt(delay);
-        packet.appendInt(stuff);
+
+        packet.appendInt(0); // todo
+        packet.appendInt(0);
 
         extension.sendToServer(packet);
     }
@@ -73,8 +70,7 @@ public class PresetWiredEffect extends PresetWiredBase {
                     stringConfig,
                     items.stream().filter(realFurniIdMap::containsKey)
                             .map(realFurniIdMap::get).collect(Collectors.toList()),
-                    delay,
-                    stuff
+                    delay
             );
             presetWiredEffect.applyWiredConfig(extension);
             return presetWiredEffect;
@@ -86,16 +82,8 @@ public class PresetWiredEffect extends PresetWiredBase {
         return delay;
     }
 
-    public int getStuff() {
-        return stuff;
-    }
-
     public void setDelay(int delay) {
         this.delay = delay;
-    }
-
-    public void setStuff(int stuff) {
-        this.stuff = stuff;
     }
 
 }

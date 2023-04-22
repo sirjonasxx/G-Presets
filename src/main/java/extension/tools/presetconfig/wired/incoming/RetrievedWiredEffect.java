@@ -10,8 +10,8 @@ public class RetrievedWiredEffect extends PresetWiredEffect implements Retrieved
 
     private final int typeId;
 
-    public RetrievedWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay, int stuff, int typeId) {
-        super(wiredId, options, stringConfig, items, delay, stuff);
+    public RetrievedWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay, int typeId) {
+        super(wiredId, options, stringConfig, items, delay);
         this.typeId = typeId;
     }
 
@@ -21,7 +21,6 @@ public class RetrievedWiredEffect extends PresetWiredEffect implements Retrieved
     }
 
     public static RetrievedWiredEffect fromPacket(HPacket packet) {
-        packet.readBoolean(); // ?
         packet.readInteger(); // selection limit
 
         int itemCount = packet.readInteger(); // only includes items that are in room
@@ -40,12 +39,17 @@ public class RetrievedWiredEffect extends PresetWiredEffect implements Retrieved
             options.add(packet.readInteger());
         }
 
-        packet.readInteger();
+        int list1length = packet.readInteger();
+        for (int i = 0; i < list1length; i++) {packet.readInteger();}
+
+        int list2length = packet.readInteger();
+        for (int i = 0; i < list2length; i++) {packet.readInteger();}
+
         packet.readInteger(); // wired code
-
         int delay = packet.readInteger(); // delay
-        int stuff = packet.readInteger(); // stuff
 
-        return new RetrievedWiredEffect(wiredId, options, configString, items, delay, stuff, typeId);
+        // more irrelevant stuff here
+        // todo
+        return new RetrievedWiredEffect(wiredId, options, configString, items, delay, typeId);
     }
 }

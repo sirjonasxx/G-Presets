@@ -5,10 +5,8 @@ import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class PresetWiredCondition extends PresetWiredBase {
@@ -17,28 +15,23 @@ public class PresetWiredCondition extends PresetWiredBase {
 
     public PresetWiredCondition(HPacket packet) {
         super(packet);
-        stuff = packet.readInteger();
     }
 
-    public PresetWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int stuff) {
+    public PresetWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items) {
         super(wiredId, options, stringConfig, items);
-        this.stuff = stuff;
     }
 
     // deep copy constructor
     public PresetWiredCondition(PresetWiredCondition condition) {
         super(condition);
-        this.stuff = condition.stuff;
     }
 
     public PresetWiredCondition(JSONObject object) {
         super(object);
-        this.stuff = object.getInt("stuff");
     }
 
     @Override
     protected void appendJsonFields(JSONObject object) {
-        object.put("stuff", stuff);
     }
 
     @Override
@@ -53,7 +46,10 @@ public class PresetWiredCondition extends PresetWiredBase {
         packet.appendString(stringConfig);
         packet.appendInt(items.size());
         items.forEach(packet::appendInt);
-        packet.appendInt(stuff);
+
+        packet.appendInt(0); // todo
+        packet.appendInt(0);
+        packet.appendInt(0);
 
         extension.sendToServer(packet);
     }
@@ -66,22 +62,13 @@ public class PresetWiredCondition extends PresetWiredBase {
                     options,
                     stringConfig,
                     items.stream().filter(realFurniIdMap::containsKey)
-                            .map(realFurniIdMap::get).collect(Collectors.toList()),
-                    stuff
+                            .map(realFurniIdMap::get).collect(Collectors.toList())
             );
 
             presetWiredCondition.applyWiredConfig(extension);
             return presetWiredCondition;
         }
         return null;
-    }
-
-    public int getStuff() {
-        return stuff;
-    }
-
-    public void setStuff(int stuff) {
-        this.stuff = stuff;
     }
 
 }

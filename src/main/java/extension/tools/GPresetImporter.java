@@ -99,6 +99,7 @@ public class GPresetImporter {
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateCondition", this::blockFurniAdjustments);
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateTrigger", this::blockFurniAdjustments);
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateAction", this::blockFurniAdjustments);
+        extension.intercept(HMessage.Direction.TOSERVER, "UpdateAddon", this::blockFurniAdjustments);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredSaveSuccess", this::wiredSaved);
     }
@@ -378,7 +379,8 @@ public class GPresetImporter {
                     )
             ));
 
-            Utils.sleep(600);
+//            Utils.sleep(600);
+            Utils.sleep(230);
         }
     }
 
@@ -454,6 +456,7 @@ public class GPresetImporter {
     private long latestConditionSave = -1;
     private long latestTriggerSave = -1;
     private long latestEffectSave = -1;
+    private long latestAddonSave = -1;
 
     private Semaphore wiredSaveConfirmation = new Semaphore(0);
 
@@ -471,8 +474,9 @@ public class GPresetImporter {
         if (presetWired instanceof PresetWiredCondition) latestSave = latestConditionSave;
         else if (presetWired instanceof PresetWiredEffect) latestSave = latestEffectSave;
         else if (presetWired instanceof PresetWiredTrigger) latestSave = latestTriggerSave;
+        else if (presetWired instanceof PresetWiredAddon) latestSave = latestAddonSave;
 
-        int delay = 600 - ((int)(Math.min(600, System.currentTimeMillis() - latestSave)));
+        int delay = 300 - ((int)(Math.min(300, System.currentTimeMillis() - latestSave)));
         if (delay > 0) Utils.sleep(delay);
 
         wiredSaveConfirmation.drainPermits();
@@ -484,6 +488,7 @@ public class GPresetImporter {
         if (presetWired instanceof PresetWiredCondition) latestConditionSave = System.currentTimeMillis();
         else if (presetWired instanceof PresetWiredEffect) latestEffectSave = System.currentTimeMillis();
         else if (presetWired instanceof PresetWiredTrigger) latestTriggerSave = System.currentTimeMillis();
+        else if (presetWired instanceof PresetWiredAddon) latestAddonSave = System.currentTimeMillis();
 
         boolean gotConfirmation = false;
         try { gotConfirmation = wiredSaveConfirmation.tryAcquire(5, TimeUnit.SECONDS);
@@ -597,7 +602,9 @@ public class GPresetImporter {
             PresetWireds presetWireds = workingPresetConfig.getPresetWireds();
 
             int maxSize = Math.max(presetWireds.getConditions().size(),
-                    Math.max(presetWireds.getEffects().size(), presetWireds.getTriggers().size()));
+                    Math.max(presetWireds.getEffects().size(),
+                            Math.max(presetWireds.getTriggers().size(),
+                                    presetWireds.getAddons().size())));
 
             // ordered like this for better efficiency in wired save ratelimits
             for (int i = 0; i < maxSize; i++) {
@@ -607,6 +614,8 @@ public class GPresetImporter {
                     allWireds.add(presetWireds.getEffects().get(i));
                 if (i < presetWireds.getTriggers().size())
                     allWireds.add(presetWireds.getTriggers().get(i));
+                if (i < presetWireds.getAddons().size())
+                    allWireds.add(presetWireds.getAddons().get(i));
             }
 
             allWireds = allWireds.stream()

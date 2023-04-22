@@ -1,16 +1,16 @@
 package extension.tools.presetconfig.wired.incoming;
 
-import extension.tools.presetconfig.wired.PresetWiredCondition;
+import extension.tools.presetconfig.wired.PresetWiredAddon;
 import gearth.protocol.HPacket;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RetrievedWiredCondition extends PresetWiredCondition implements RetrievedWired {
+public class RetrievedWiredAddon extends PresetWiredAddon implements RetrievedWired {
 
     private final int typeId;
 
-    public RetrievedWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId) {
+    public RetrievedWiredAddon(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId) {
         super(wiredId, options, stringConfig, items);
         this.typeId = typeId;
     }
@@ -20,7 +20,7 @@ public class RetrievedWiredCondition extends PresetWiredCondition implements Ret
         return typeId;
     }
 
-    public static RetrievedWiredCondition fromPacket(HPacket packet) {
+    public static RetrievedWiredAddon fromPacket(HPacket packet) {
         packet.readInteger(); // selection limit
 
         int itemCount = packet.readInteger(); // only includes items that are in room
@@ -43,6 +43,6 @@ public class RetrievedWiredCondition extends PresetWiredCondition implements Ret
 
         // more irrelevant stuff here
         // todo
-        return new RetrievedWiredCondition(wiredId, options, configString, items, typeId);
+        return new RetrievedWiredAddon(wiredId, options, configString, items, typeId);
     }
 }
