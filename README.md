@@ -2,7 +2,7 @@
 
 G-Presets is a G-Earth extension that can export and import creations inside Habbo, with emphasis on Wired, but it works for anything. Download it from the [G-ExtensionStore](https://github.com/sirjonasxx/G-ExtensionStore)!
 
-_video coming soon_
+Watch the youtube playlist for G-Presets: https://www.youtube.com/playlist?list=PL-dmL-QOkwvz03PNFQH7pFFDPu93F6XOE
 
 ![image](https://user-images.githubusercontent.com/36828922/133943406-725fb841-ee6c-4342-9f2d-b0ecf261e49e.png)
 
