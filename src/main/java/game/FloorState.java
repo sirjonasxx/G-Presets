@@ -9,7 +9,6 @@ import gearth.extensions.parsers.HPoint;
 import gearth.extensions.parsers.HStuff;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
-import javafx.beans.InvalidationListener;
 import utils.Callback;
 
 import java.util.*;
@@ -44,7 +43,8 @@ public class FloorState {
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectAdd", this::onObjectAdd);
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectRemove", this::onObjectRemove);
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectUpdate", this::onObjectUpdate);
-        extension.intercept(HMessage.Direction.TOCLIENT, "SlideObjectBundle", this::onObjectMove);
+        extension.intercept(HMessage.Direction.TOCLIENT, "SlideObjectBundle", this::onSlide);
+        extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniMove", this::onFurniMove);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectDataUpdate", this::onDataUpdate);
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectsDataUpdate", this::onDataUpdates);
@@ -229,7 +229,7 @@ public class FloorState {
             addObject(hMessage.getPacket(), owner);
         }
     }
-    private void onObjectMove(HMessage hMessage) {
+    private void onSlide(HMessage hMessage) {
         if (inRoom()) {
             HPacket packet = hMessage.getPacket();
             int oldx = packet.readInteger();
@@ -257,6 +257,31 @@ public class FloorState {
 //            int roller = packet.readInteger();
         }
     }
+
+    private void onFurniMove(HMessage hMessage) {
+        if (inRoom()) {
+            HPacket packet = hMessage.getPacket();
+            synchronized (lock) {
+                int oldX = packet.readInteger();
+                int oldY = packet.readInteger();
+                int newX = packet.readInteger();
+                int newY = packet.readInteger();
+
+                String oldZ = packet.readString();
+                String newZ = packet.readString();
+
+                int furniId = packet.readInteger();
+
+                HFloorItem item = furniIdToItem.get(furniId);
+                if (item != null) {
+                    furnimap.get(item.getTile().getX()).get(item.getTile().getY()).remove(item.getId());
+                    item.setTile(new HPoint(newX, newY, Double.parseDouble(newZ)));
+                    furnimap.get(newX).get(newY).put(item.getId(), item);
+                }
+            }
+        }
+    }
+
 
     private void onDataUpdate(HPacket hPacket, int id) {
 //        int id = Integer.parseInt(hPacket.readString());

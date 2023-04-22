@@ -5,6 +5,7 @@ import extension.tools.presetconfig.furni.PresetFurni;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,8 +34,13 @@ public class PresetWireds implements PresetJsonConfigurable {
         triggers = object.getJSONArray("triggers").toList().stream()
                 .map(o -> new PresetWiredTrigger(new JSONObject((Map)o))).collect(Collectors.toList());
 
-        addons = object.getJSONArray("addons").toList().stream()
-                .map(o -> new PresetWiredAddon(new JSONObject((Map)o))).collect(Collectors.toList());
+        if (object.has("addons")) {
+            addons = object.getJSONArray("addons").toList().stream()
+                    .map(o -> new PresetWiredAddon(new JSONObject((Map)o))).collect(Collectors.toList());
+        }
+        else {
+            addons = new ArrayList<>();
+        }
     }
 
 
