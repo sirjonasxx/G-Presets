@@ -48,7 +48,7 @@ public class GPresetExporter {
     private final Map<Integer, PresetWiredAddon> wiredAddonConfigs = Collections.synchronizedMap(new HashMap<>());
 
     private static final Set<String> requireBindings = new HashSet<>(Arrays.asList(
-            "wf_act_match_to_sshot", "wf_cnd_match_snapshot", "wf_cnd_not_match_snap"));
+            "wf_act_match_to_sshot", "wf_cnd_match_snapshot", "wf_cnd_not_match_snap", "wf_trg_stuff_state"));
     private final Map<Integer, List<PresetWiredFurniBinding>> wiredFurniBindings = Collections.synchronizedMap(new HashMap<>());
 
 
