@@ -100,6 +100,7 @@ public class GPresetImporter {
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateTrigger", this::blockFurniAdjustments);
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateAction", this::blockFurniAdjustments);
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateAddon", this::blockFurniAdjustments);
+        extension.intercept(HMessage.Direction.TOSERVER, "UpdateSelector", this::blockFurniAdjustments);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredSaveSuccess", this::wiredSaved);
     }
@@ -457,6 +458,7 @@ public class GPresetImporter {
     private long latestTriggerSave = -1;
     private long latestEffectSave = -1;
     private long latestAddonSave = -1;
+    private long latestSelectorSave = -1;
 
     private Semaphore wiredSaveConfirmation = new Semaphore(0);
 
@@ -475,6 +477,7 @@ public class GPresetImporter {
         else if (presetWired instanceof PresetWiredEffect) latestSave = latestEffectSave;
         else if (presetWired instanceof PresetWiredTrigger) latestSave = latestTriggerSave;
         else if (presetWired instanceof PresetWiredAddon) latestSave = latestAddonSave;
+        else if (presetWired instanceof PresetWiredSelector) latestSave = latestSelectorSave;
 
         int delay = 300 - ((int)(Math.min(300, System.currentTimeMillis() - latestSave)));
         if (delay > 0) Utils.sleep(delay);
@@ -489,6 +492,7 @@ public class GPresetImporter {
         else if (presetWired instanceof PresetWiredEffect) latestEffectSave = System.currentTimeMillis();
         else if (presetWired instanceof PresetWiredTrigger) latestTriggerSave = System.currentTimeMillis();
         else if (presetWired instanceof PresetWiredAddon) latestAddonSave = System.currentTimeMillis();
+        else if (presetWired instanceof PresetWiredSelector) latestSelectorSave = System.currentTimeMillis();
 
         boolean gotConfirmation = false;
         try { gotConfirmation = wiredSaveConfirmation.tryAcquire(5, TimeUnit.SECONDS);
@@ -604,7 +608,8 @@ public class GPresetImporter {
             int maxSize = Math.max(presetWireds.getConditions().size(),
                     Math.max(presetWireds.getEffects().size(),
                             Math.max(presetWireds.getTriggers().size(),
-                                    presetWireds.getAddons().size())));
+                                    Math.max(presetWireds.getAddons().size(),
+                                            presetWireds.getSelectors().size()))));
 
             // ordered like this for better efficiency in wired save ratelimits
             for (int i = 0; i < maxSize; i++) {
@@ -616,6 +621,8 @@ public class GPresetImporter {
                     allWireds.add(presetWireds.getTriggers().get(i));
                 if (i < presetWireds.getAddons().size())
                     allWireds.add(presetWireds.getAddons().get(i));
+                if (i < presetWireds.getSelectors().size())
+                    allWireds.add(presetWireds.getSelectors().get(i));
             }
 
             allWireds = allWireds.stream()
