@@ -5,7 +5,6 @@ import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,8 +17,8 @@ public class PresetWiredTrigger extends PresetWiredBase {
         super(packet);
     }
 
-    public PresetWiredTrigger(int wiredId, List<Integer> options, String stringConfig, List<Integer> items) {
-        super(wiredId, options, stringConfig, items);
+    public PresetWiredTrigger(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
+        super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources);
     }
 
     // deep copy constructor
@@ -49,8 +48,10 @@ public class PresetWiredTrigger extends PresetWiredBase {
         packet.appendInt(items.size());
         items.forEach(packet::appendInt);
 
-        packet.appendInt(0); // todo
-        packet.appendInt(0);
+        packet.appendInt(pickedFurniSources.size());
+        pickedFurniSources.forEach(packet::appendInt);
+        packet.appendInt(pickedUserSources.size());
+        pickedUserSources.forEach(packet::appendInt);
 
         extension.sendToServer(packet);
     }
@@ -63,7 +64,9 @@ public class PresetWiredTrigger extends PresetWiredBase {
                     options,
                     stringConfig,
                     items.stream().filter(realFurniIdMap::containsKey)
-                            .map(realFurniIdMap::get).collect(Collectors.toList())
+                            .map(realFurniIdMap::get).collect(Collectors.toList()),
+                    pickedFurniSources,
+                    pickedUserSources
             );
 
             presetWiredTrigger.applyWiredConfig(extension);

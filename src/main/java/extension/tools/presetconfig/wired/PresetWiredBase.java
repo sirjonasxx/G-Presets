@@ -1,12 +1,12 @@
 package extension.tools.presetconfig.wired;
 
 import extension.tools.presetconfig.PresetJsonConfigurable;
-import extension.tools.presetconfig.wired.incoming.RetrievedWired;
 import gearth.extensions.IExtension;
 import gearth.protocol.HPacket;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,6 +17,9 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable {
     protected List<Integer> options;
     protected String stringConfig;
     protected List<Integer> items;
+
+    protected List<Integer> pickedFurniSources;
+    protected List<Integer> pickedUserSources;
 
     public PresetWiredBase(HPacket packet) {
         wiredId = packet.readInteger();
@@ -42,13 +45,17 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable {
         this.options = new ArrayList<>(base.options);
         this.stringConfig = base.stringConfig;
         this.items = new ArrayList<>(base.items);
+        this.pickedFurniSources = new ArrayList<>(base.pickedFurniSources);
+        this.pickedUserSources = new ArrayList<>(base.pickedUserSources);
     }
 
-    public PresetWiredBase(int wiredId, List<Integer> options, String stringConfig, List<Integer> items) {
+    public PresetWiredBase(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
         this.wiredId = wiredId;
         this.options = options;
         this.stringConfig = stringConfig;
         this.items = items;
+        this.pickedFurniSources = pickedFurniSources;
+        this.pickedUserSources = pickedUserSources;
     }
 
     public PresetWiredBase(JSONObject object) {
@@ -56,6 +63,12 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable {
         options = object.getJSONArray("options").toList().stream().map(o -> (int)o).collect(Collectors.toList());
         stringConfig = object.getString("config");
         items = object.getJSONArray("items").toList().stream().map(o -> (int)o).collect(Collectors.toList());
+        pickedFurniSources = object.has("furniSources") ?
+                object.getJSONArray("furniSources").toList().stream().map(o -> (int)o).collect(Collectors.toList()) :
+                Collections.emptyList();
+        pickedUserSources = object.has("userSources") ?
+                object.getJSONArray("userSources").toList().stream().map(o -> (int)o).collect(Collectors.toList()) :
+                Collections.emptyList();
     }
 
     @Override
@@ -65,6 +78,8 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable {
         object.put("options", options);
         object.put("config", stringConfig);
         object.put("items", items);
+        object.put("furniSources", pickedFurniSources);
+        object.put("userSources", pickedUserSources);
 
         appendJsonFields(object);
         return object;
@@ -106,5 +121,21 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable {
 
     public void setItems(List<Integer> items) {
         this.items = items;
+    }
+
+    public List<Integer> getPickedFurniSources() {
+        return pickedFurniSources;
+    }
+
+    public void setPickedFurniSources(List<Integer> pickedFurniSources) {
+        this.pickedFurniSources = pickedFurniSources;
+    }
+
+    public List<Integer> getPickedUserSources() {
+        return pickedUserSources;
+    }
+
+    public void setPickedUserSources(List<Integer> pickedUserSources) {
+        this.pickedUserSources = pickedUserSources;
     }
 }

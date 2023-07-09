@@ -2,6 +2,7 @@ package extension.tools.presetconfig.wired.incoming;
 
 import extension.tools.presetconfig.wired.PresetWiredTrigger;
 import gearth.protocol.HPacket;
+import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +11,8 @@ public class RetrievedWiredTrigger extends PresetWiredTrigger implements Retriev
 
     private final int typeId;
 
-    public RetrievedWiredTrigger(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId) {
-        super(wiredId, options, stringConfig, items);
+    public RetrievedWiredTrigger(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
+        super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources);
         this.typeId = typeId;
     }
 
@@ -23,11 +24,7 @@ public class RetrievedWiredTrigger extends PresetWiredTrigger implements Retriev
     public static RetrievedWiredTrigger fromPacket(HPacket packet) {
         packet.readInteger(); // selection limit
 
-        int itemCount = packet.readInteger(); // only includes items that are in room
-        List<Integer> items = new ArrayList<>();
-        for (int i = 0; i < itemCount; i++) {
-            items.add(packet.readInteger());
-        }
+        List<Integer> items = Utils.readIntList(packet);
 
         int typeId = packet.readInteger(); // typeid
 
@@ -35,14 +32,12 @@ public class RetrievedWiredTrigger extends PresetWiredTrigger implements Retriev
         int wiredId = packet.readInteger(); // furni id
         String configString = packet.readString();
 
-        int optionsCount = packet.readInteger();
-        List<Integer> options = new ArrayList<>();
-        for (int i = 0; i < optionsCount; i++) {
-            options.add(packet.readInteger());
-        }
+        List<Integer> options = Utils.readIntList(packet);
+
+        List<Integer> furniSources = Utils.readIntList(packet);
+        List<Integer> userSources = Utils.readIntList(packet);
 
         // more irrelevant stuff here
-        // todo
-        return new RetrievedWiredTrigger(wiredId, options, configString, items, typeId);
+        return new RetrievedWiredTrigger(wiredId, options, configString, items, typeId, furniSources, userSources);
     }
 }

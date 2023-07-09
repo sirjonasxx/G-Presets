@@ -11,23 +11,26 @@ import java.util.stream.Collectors;
 
 public class PresetWiredCondition extends PresetWiredBase {
 
-    private int stuff;
+    private int quantifier;
 
     public PresetWiredCondition(HPacket packet) {
         super(packet);
     }
 
-    public PresetWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items) {
-        super(wiredId, options, stringConfig, items);
+    public PresetWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int quantifier, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
+        super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources);
+        this.quantifier = quantifier;
     }
 
     // deep copy constructor
     public PresetWiredCondition(PresetWiredCondition condition) {
         super(condition);
+        this.quantifier = condition.quantifier;
     }
 
     public PresetWiredCondition(JSONObject object) {
         super(object);
+        this.quantifier = object.has("quantifier") ? object.getInt("quantifier") : 0;
     }
 
     @Override
@@ -47,9 +50,11 @@ public class PresetWiredCondition extends PresetWiredBase {
         packet.appendInt(items.size());
         items.forEach(packet::appendInt);
 
-        packet.appendInt(0); // todo
-        packet.appendInt(0);
-        packet.appendInt(0);
+        packet.appendInt(quantifier);
+        packet.appendInt(pickedFurniSources.size());
+        pickedFurniSources.forEach(packet::appendInt);
+        packet.appendInt(pickedUserSources.size());
+        pickedUserSources.forEach(packet::appendInt);
 
         extension.sendToServer(packet);
     }
@@ -62,7 +67,10 @@ public class PresetWiredCondition extends PresetWiredBase {
                     options,
                     stringConfig,
                     items.stream().filter(realFurniIdMap::containsKey)
-                            .map(realFurniIdMap::get).collect(Collectors.toList())
+                            .map(realFurniIdMap::get).collect(Collectors.toList()),
+                    quantifier,
+                    pickedFurniSources,
+                    pickedUserSources
             );
 
             presetWiredCondition.applyWiredConfig(extension);

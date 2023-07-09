@@ -5,7 +5,6 @@ import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,15 +12,14 @@ import java.util.stream.Collectors;
 public class PresetWiredEffect extends PresetWiredBase {
 
     private int delay;
-    private int stuff;
 
     public PresetWiredEffect(HPacket packet) {
         super(packet);
         delay = packet.readInteger();
     }
 
-    public PresetWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay) {
-        super(wiredId, options, stringConfig, items);
+    public PresetWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
+        super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources);
         this.delay = delay;
     }
 
@@ -55,8 +53,10 @@ public class PresetWiredEffect extends PresetWiredBase {
         items.forEach(packet::appendInt);
         packet.appendInt(delay);
 
-        packet.appendInt(0); // todo
-        packet.appendInt(0);
+        packet.appendInt(pickedFurniSources.size());
+        pickedFurniSources.forEach(packet::appendInt);
+        packet.appendInt(pickedUserSources.size());
+        pickedUserSources.forEach(packet::appendInt);
 
         extension.sendToServer(packet);
     }
@@ -70,7 +70,9 @@ public class PresetWiredEffect extends PresetWiredBase {
                     stringConfig,
                     items.stream().filter(realFurniIdMap::containsKey)
                             .map(realFurniIdMap::get).collect(Collectors.toList()),
-                    delay
+                    delay,
+                    pickedFurniSources,
+                    pickedUserSources
             );
             presetWiredEffect.applyWiredConfig(extension);
             return presetWiredEffect;
