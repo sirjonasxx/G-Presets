@@ -45,6 +45,7 @@ public class FloorState {
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectUpdate", this::onObjectUpdate);
         extension.intercept(HMessage.Direction.TOCLIENT, "SlideObjectBundle", this::onSlide);
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniMove", this::onFurniMove);
+        extension.intercept(HMessage.Direction.TOCLIENT, "WiredMovements", this::onWiredMovements);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectDataUpdate", this::onDataUpdate);
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectsDataUpdate", this::onDataUpdates);
@@ -277,6 +278,63 @@ public class FloorState {
                     furnimap.get(item.getTile().getX()).get(item.getTile().getY()).remove(item.getId());
                     item.setTile(new HPoint(newX, newY, Double.parseDouble(newZ)));
                     furnimap.get(newX).get(newY).put(item.getId(), item);
+                }
+            }
+        }
+    }
+
+    private void onWiredMovements(HMessage hMessage) {
+        if (inRoom()) {
+            HPacket packet = hMessage.getPacket();
+            synchronized (lock) {
+                int type = packet.readInteger();
+                if (type == 0) { // user
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readString();
+                    packet.readString();
+
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
+                }
+                else if (type == 1) { // furni
+                    int oldX = packet.readInteger();
+                    int oldY = packet.readInteger();
+                    int newX = packet.readInteger();
+                    int newY = packet.readInteger();
+
+                    String oldZ = packet.readString();
+                    String newZ = packet.readString();
+
+                    int furniId = packet.readInteger();
+                    int animationTime = packet.readInteger();
+                    int direction = packet.readInteger();
+
+                    HFloorItem item = furniIdToItem.get(furniId);
+                    if (item != null) {
+                        furnimap.get(item.getTile().getX()).get(item.getTile().getY()).remove(item.getId());
+                        item.setTile(new HPoint(newX, newY, Double.parseDouble(newZ)));
+                        furnimap.get(newX).get(newY).put(item.getId(), item);
+                    }
+                }
+                else { // wall item
+                    packet.readInteger();
+                    packet.readBoolean();
+
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
+                    packet.readInteger();
                 }
             }
         }
