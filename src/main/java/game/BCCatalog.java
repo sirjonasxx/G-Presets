@@ -29,10 +29,12 @@ public class BCCatalog {
     public static class SingleFurniProduct {
         private final int pageId;
         private final int offerId;
+        private final String extraParam;
 
-        SingleFurniProduct(int pageId, int offerId) {
+        SingleFurniProduct(int pageId, int offerId, String extraParam) {
             this.pageId = pageId;
             this.offerId = offerId;
+            this.extraParam = extraParam;
         }
 
         public int getPageId() {
@@ -41,6 +43,10 @@ public class BCCatalog {
 
         public int getOfferId() {
             return offerId;
+        }
+
+        public String getExtraParam() {
+            return extraParam;
         }
     }
 
@@ -85,7 +91,8 @@ public class BCCatalog {
                         synchronized (typeIdToProduct) {
                             typeIdToProduct.put(product.getFurniClassId(), new SingleFurniProduct(
                                     page.getPageId(),
-                                    catalogOffer.getOfferId()
+                                    catalogOffer.getOfferId(),
+                                    product.getExtraParam()
                             ));
                         }
                     }
@@ -196,7 +203,10 @@ public class BCCatalog {
             for(Integer typeId : typeIdToProduct.keySet()) {
                 SingleFurniProduct product = typeIdToProduct.get(typeId);
                 String furniName = furniDataTools.getFloorItemName(typeId);
-                String entry = String.format("%s\t%d\t%d", furniName, product.pageId, product.offerId);
+                String entry = product.extraParam.isEmpty() ?
+                        String.format("%s\t%d\t%d", furniName, product.pageId, product.offerId) :
+                        String.format("%s\t%d\t%d\t%s", furniName, product.pageId, product.offerId, product.extraParam);
+
                 builder.append(entry);
                 builder.append("\n");
             }
@@ -228,8 +238,12 @@ public class BCCatalog {
                             int typeId = furniDataTools.getFloorTypeId(fields[0]);
                             int pageId = Integer.parseInt(fields[1]);
                             int offerId = Integer.parseInt(fields[2]);
+                            String extraParam = "";
+                            if (fields.length == 4) {
+                                extraParam = fields[3];
+                            }
 
-                            typeIdToProduct.put(typeId, new SingleFurniProduct(pageId, offerId));
+                            typeIdToProduct.put(typeId, new SingleFurniProduct(pageId, offerId, extraParam));
                         }
                     }
 

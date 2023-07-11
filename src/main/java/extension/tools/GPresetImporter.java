@@ -349,7 +349,7 @@ public class GPresetImporter {
                     HMessage.Direction.TOSERVER,
                     catalogProduct.getPageId(),
                     catalogProduct.getOfferId(),
-                    "",
+                    catalogProduct.getExtraParam(),
                     dropInfo.getX(),
                     dropInfo.getY(),
                     dropInfo.getRotation()
@@ -666,19 +666,24 @@ public class GPresetImporter {
                     synchronized (lock) {
                         if (state != BuildingImportState.SETUP_WIRED) return;
 
-                        boolean needMovement = binding.getLocation() != null || binding.getRotation() != null;
+                        boolean needMovement = binding.getLocation() != null || binding.getRotation() != null || binding.getAltitude() != null;
                         if (needMovement) {
                             HFloorItem floorItem = floor.furniFromId(furniId);
                             if (floorItem != null) {
-                                boolean needStacktile = furniData.isStackable(furniData.getFloorItemName(extension.getFloorState().furniFromId(furniId).getTypeId()));
+                                boolean needStacktile =
+                                        furniData.isStackable(furniData.getFloorItemName(extension.getFloorState().furniFromId(furniId).getTypeId()))
+                                        || binding.getAltitude() != null;
+
                                 FurniMoveInfo undoMovement = new FurniMoveInfo(
                                         furniId, floorItem.getTile().getX(), floorItem.getTile().getY(),
-                                        floorItem.getFacing().ordinal(), needStacktile);
+                                        floorItem.getFacing().ordinal(), null, needStacktile);
                                 undoBindMoves.add(undoMovement);
 
                                 int targetX = floorItem.getTile().getX() + rootLocation.getX();
                                 int targetY = floorItem.getTile().getY() + rootLocation.getY();
                                 int targetRotation = floorItem.getFacing().ordinal();
+                                Integer targetAltitude = null;
+
                                 if (binding.getLocation() != null) {
                                     targetX = binding.getLocation().getX() + rootLocation.getX();
                                     targetY = binding.getLocation().getY() + rootLocation.getY();
@@ -686,9 +691,12 @@ public class GPresetImporter {
                                 if (binding.getRotation() != null) {
                                     targetRotation = binding.getRotation();
                                 }
+                                if (binding.getAltitude() != null) {
+                                    targetAltitude = binding.getAltitude();
+                                }
 
                                 FurniMoveInfo movement = new FurniMoveInfo(
-                                        furniId, targetX, targetY, targetRotation, needStacktile);
+                                        furniId, targetX, targetY, targetRotation, targetAltitude, needStacktile);
                                 bindMoves.add(movement);
                             }
                         }
@@ -699,18 +707,20 @@ public class GPresetImporter {
             }
 
             for (FurniMoveInfo furniMoveInfo : bindMoves) {
+                double altitude = furniMoveInfo.getAltitude() == null ? -1 : ((double) furniMoveInfo.getAltitude()) / 100;
                 moveFurni(
                         furniMoveInfo.getFurniId(), furniMoveInfo.getX(), furniMoveInfo.getY(),
-                        furniMoveInfo.getRotation(), furniMoveInfo.useStackTile(), -1
+                        furniMoveInfo.getRotation(), furniMoveInfo.useStackTile(), altitude
                 );
             }
 
             saveWired(wiredBase, 0);
 
             for (FurniMoveInfo furniMoveInfo : undoBindMoves) {
+                double altitude = furniMoveInfo.getAltitude() == null ? -1 : ((double) furniMoveInfo.getAltitude()) / 100;
                 moveFurni(
                         furniMoveInfo.getFurniId(), furniMoveInfo.getX(), furniMoveInfo.getY(),
-                        furniMoveInfo.getRotation(), furniMoveInfo.useStackTile(), -1
+                        furniMoveInfo.getRotation(), furniMoveInfo.useStackTile(), altitude
                 );
                 // todo maybe set to original height? perhaps needed when furni is overridden with existing furni
             }

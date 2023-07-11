@@ -162,10 +162,11 @@ public class GPresetExporter {
         HFloorItem wiredItem = floorState.furniFromId(wiredBase.getWiredId());
         String className = furniDataTools.getFloorItemName(wiredItem.getTypeId());
 
-        if(requireBindings.contains(className) && wiredBase.getOptions().size() == 3) {
+        if(requireBindings.contains(className) && wiredBase.getOptions().size() >= 4) {
             boolean bindState = wiredBase.getOptions().get(0) == 1;
             boolean bindDirection = wiredBase.getOptions().get(1) == 1;
             boolean bindPosition = wiredBase.getOptions().get(2) == 1;
+            boolean bindAltitude = wiredBase.getOptions().get(3) == 1;
 
             List<PresetWiredFurniBinding> bindings = new ArrayList<>();
             wiredBase.getItems().forEach(bindItemId -> {
@@ -177,7 +178,8 @@ public class GPresetExporter {
                             wiredBase.getWiredId(),
                             !bindPosition ? null : new HPoint(bindItem.getTile().getX(), bindItem.getTile().getY()),
                             !bindDirection ? null : bindItem.getFacing().ordinal(),
-                            !bindState ? null : StateExtractor.stateFromItem(bindItem)
+                            !bindState ? null : StateExtractor.stateFromItem(bindItem),
+                            !bindAltitude ? null : (int) (Math.round(bindItem.getTile().getZ() * 100))
                     );
                     bindings.add(binding);
                 }
@@ -522,8 +524,9 @@ public class GPresetExporter {
                     Integer rotation = fields[2].equals("N") ? null : Integer.parseInt(fields[2]);
                     HPoint location = fields[3].equals("N") || fields[4].equals("N") ? null :
                             new HPoint(Integer.parseInt(fields[3]), Integer.parseInt(fields[4]));
+                    Integer altitude = fields[5].equals("N") ? null : Integer.parseInt(fields[5]);
 
-                    PresetWiredFurniBinding binding = new PresetWiredFurniBinding(bindFurniId, wired.getWiredId(), location, rotation, state);
+                    PresetWiredFurniBinding binding = new PresetWiredFurniBinding(bindFurniId, wired.getWiredId(), location, rotation, state, altitude);
                     bindings.add(binding);
                 }
 

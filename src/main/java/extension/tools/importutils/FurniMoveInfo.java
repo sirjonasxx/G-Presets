@@ -7,12 +7,14 @@ public class FurniMoveInfo {
     private int y;
     private int rotation;
     private boolean useStackTile;
+    private Integer altitude;
 
-    public FurniMoveInfo(int furniId, int x, int y, int rotation, boolean useStackTile) {
+    public FurniMoveInfo(int furniId, int x, int y, int rotation, Integer altitude, boolean useStackTile) {
         this.furniId = furniId;
         this.x = x;
         this.y = y;
         this.rotation = rotation;
+        this.altitude = altitude;
         this.useStackTile = useStackTile;
     }
 
@@ -30,6 +32,10 @@ public class FurniMoveInfo {
 
     public int getRotation() {
         return rotation;
+    }
+
+    public Integer getAltitude() {
+        return altitude;
     }
 
     public boolean useStackTile() {

@@ -20,12 +20,16 @@ public class PresetWiredFurniBinding implements PresetJsonConfigurable {
     // or if furni category = MapStuffData (1) and contains "state" & is a number? / check if this can ever be toggled with UseFurniture
     private String state;
 
-    public PresetWiredFurniBinding(int furniId, int wiredId, HPoint location, Integer rotation, String state) {
+    private Integer altitude;
+
+
+    public PresetWiredFurniBinding(int furniId, int wiredId, HPoint location, Integer rotation, String state, Integer altitude) {
         this.furniId = furniId;
         this.wiredId = wiredId;
         this.location = location;
         this.rotation = rotation;
         this.state = state;
+        this.altitude = altitude;
     }
 
     // deep copy constructor
@@ -35,6 +39,7 @@ public class PresetWiredFurniBinding implements PresetJsonConfigurable {
         this.location = binding.location == null ? null : new HPoint(binding.location.getX(), binding.location.getY());
         this.rotation = binding.rotation;
         this.state = binding.state;
+        this.altitude = binding.altitude;
     }
 
     public PresetWiredFurniBinding(JSONObject object) {
@@ -47,6 +52,7 @@ public class PresetWiredFurniBinding implements PresetJsonConfigurable {
         ) : null;
         this.rotation = object.has("rotation") ? object.getInt("rotation") : null;
         this.state = object.has("state") ? object.getString("state") : null;
+        this.altitude = object.has("altitude") ? object.getInt("altitude") : null;
     }
 
     @Override
@@ -66,6 +72,9 @@ public class PresetWiredFurniBinding implements PresetJsonConfigurable {
         }
         if (state != null) {
             object.put("state", state);
+        }
+        if (altitude != null) {
+            object.put("altitude", altitude);
         }
 
         return object;
@@ -111,4 +120,11 @@ public class PresetWiredFurniBinding implements PresetJsonConfigurable {
         this.state = state;
     }
 
+    public Integer getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(Integer altitude) {
+        this.altitude = altitude;
+    }
 }
