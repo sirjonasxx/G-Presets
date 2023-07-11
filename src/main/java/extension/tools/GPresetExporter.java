@@ -382,6 +382,7 @@ public class GPresetExporter {
                             oldLocation.getX() - x,
                             oldLocation.getY() - y
                     ));
+                    b.setAltitude(b.getAltitude() - lowestFloorPoint * 100);
                 }
             });
             allAdsBackgrounds.forEach(a -> {
