@@ -4,6 +4,7 @@ import gearth.extensions.IExtension;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import org.json.JSONObject;
+import utils.Utils;
 
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,9 @@ public class PresetWiredCondition extends PresetWiredBase {
 
     public PresetWiredCondition(HPacket packet) {
         super(packet);
+        quantifier = packet.readInteger();
+        pickedFurniSources = Utils.readIntList(packet);
+        pickedUserSources = Utils.readIntList(packet);
     }
 
     public PresetWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int quantifier, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {

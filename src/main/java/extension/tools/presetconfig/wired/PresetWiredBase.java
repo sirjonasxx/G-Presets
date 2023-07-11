@@ -18,7 +18,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable {
     protected String stringConfig;
     protected List<Integer> items;
 
-    protected List<Integer> pickedFurniSources;
+    protected List<Integer> pickedFurniSources; // set in subclass
     protected List<Integer> pickedUserSources;
 
     public PresetWiredBase(HPacket packet) {

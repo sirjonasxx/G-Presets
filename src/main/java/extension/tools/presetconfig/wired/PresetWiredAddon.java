@@ -4,6 +4,7 @@ import gearth.extensions.IExtension;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import org.json.JSONObject;
+import utils.Utils;
 
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ public class PresetWiredAddon extends PresetWiredBase {
 
     public PresetWiredAddon(HPacket packet) {
         super(packet);
+        pickedFurniSources = Utils.readIntList(packet);
+        pickedUserSources = Utils.readIntList(packet);
     }
 
     public PresetWiredAddon(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {

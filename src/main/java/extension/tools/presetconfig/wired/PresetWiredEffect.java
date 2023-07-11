@@ -4,6 +4,7 @@ import gearth.extensions.IExtension;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import org.json.JSONObject;
+import utils.Utils;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,8 @@ public class PresetWiredEffect extends PresetWiredBase {
     public PresetWiredEffect(HPacket packet) {
         super(packet);
         delay = packet.readInteger();
+        pickedFurniSources = Utils.readIntList(packet);
+        pickedUserSources = Utils.readIntList(packet);
     }
 
     public PresetWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
