@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 @ExtensionInfo(
         Title =  "G-Presets",
         Description =  "Never do anything twice",
-        Version =  "1.0.2",
+        Version =  "1.0.3",
         Author =  "sirjonasxx"
 )
 public class GPresets extends ExtensionForm {
