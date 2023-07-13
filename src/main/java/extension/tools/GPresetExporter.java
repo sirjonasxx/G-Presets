@@ -377,12 +377,15 @@ public class GPresetExporter {
                 b.setFurniId(mappedFurniIds.get(b.getFurniId()));
                 b.setWiredId(mappedFurniIds.get(b.getWiredId()));
                 HPoint oldLocation = b.getLocation();
+                Integer oldAltitude = b.getAltitude();
                 if (oldLocation != null) {
                     b.setLocation(new HPoint(
                             oldLocation.getX() - x,
                             oldLocation.getY() - y
                     ));
-                    b.setAltitude(b.getAltitude() - lowestFloorPoint * 100);
+                }
+                if (oldAltitude != null) {
+                    b.setAltitude(oldAltitude - lowestFloorPoint * 100);
                 }
             });
             allAdsBackgrounds.forEach(a -> {
