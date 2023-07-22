@@ -528,7 +528,7 @@ public class GPresetExporter {
                     Integer rotation = fields[2].equals("N") ? null : Integer.parseInt(fields[2]);
                     HPoint location = fields[3].equals("N") || fields[4].equals("N") ? null :
                             new HPoint(Integer.parseInt(fields[3]), Integer.parseInt(fields[4]));
-                    Integer altitude = fields[5].equals("N") ? null : Integer.parseInt(fields[5]);
+                    Integer altitude = fields.length < 6 || fields[5].equals("N") ? null : Integer.parseInt(fields[5]);
 
                     PresetWiredFurniBinding binding = new PresetWiredFurniBinding(bindFurniId, wired.getWiredId(), location, rotation, state, altitude);
                     bindings.add(binding);
