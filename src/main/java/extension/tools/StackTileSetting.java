@@ -42,7 +42,7 @@ public enum StackTileSetting {
             case "8x8":
                 return XXXL;
         }
-        return null;
+        return Large;
     }
 
     public static StackTileSetting fromClassName(String className) {

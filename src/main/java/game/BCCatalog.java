@@ -256,4 +256,16 @@ public class BCCatalog {
         }
         return false;
     }
+
+    public void clearCache() throws URISyntaxException {
+        String path = (new File(GPresets.class.getProtectionDomain().getCodeSource().getLocation().toURI()))
+                .getParentFile().toString();
+        File root = new File(Paths.get(path, "catalog").toString());
+        if (root.exists() && root.listFiles() != null) {
+            for (File file : root.listFiles()) {
+                System.out.println(file);
+                file.delete();
+            }
+        }
+    }
 }
