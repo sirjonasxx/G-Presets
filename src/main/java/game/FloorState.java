@@ -409,7 +409,7 @@ public class FloorState {
 
     public double getTileHeight(int x, int y) {
         synchronized (lock) {
-            return ((double)heightmap[x][y]) / 256;
+            return ((double)(heightmap[x][y] & 16383)) / 256;
         }
     }
 
