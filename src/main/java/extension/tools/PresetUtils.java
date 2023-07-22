@@ -59,8 +59,8 @@ public class PresetUtils {
     public static int lowestFloorPoint(FloorState floor, HPoint start, HPoint end) {
         int lowestPoint = 256;
 
-        for (int x = start.getX(); x < end.getX(); x++) {
-            for (int y = start.getY(); y < end.getY(); y++) {
+        for (int x = start.getX(); x <= end.getX(); x++) {
+            for (int y = start.getY(); y <= end.getY(); y++) {
                 int height = heightFromChar(floor.floorHeight(x, y));
                 if (height < lowestPoint) {
                     lowestPoint = height;
