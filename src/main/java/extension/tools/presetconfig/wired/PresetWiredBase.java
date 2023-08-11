@@ -2,8 +2,10 @@ package extension.tools.presetconfig.wired;
 
 import extension.tools.presetconfig.PresetJsonConfigurable;
 import gearth.extensions.IExtension;
+import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import org.json.JSONObject;
+import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class PresetWiredBase implements PresetJsonConfigurable {
+public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneable {
 
     protected int wiredId;
     protected List<Integer> options;
@@ -23,20 +25,12 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable {
 
     public PresetWiredBase(HPacket packet) {
         wiredId = packet.readInteger();
-
-        int optionsCount = packet.readInteger();
-        options = new ArrayList<>();
-        for (int i = 0; i < optionsCount; i++) {
-            options.add(packet.readInteger());
-        }
-
+        options = Utils.readIntList(packet);
         stringConfig = packet.readString();
-
-        int itemsCount = packet.readInteger();
-        items = new ArrayList<>();
-        for (int i = 0; i < itemsCount; i++) {
-            items.add(packet.readInteger());
-        }
+        items = Utils.readIntList(packet);
+        readTypeSpecific(packet);
+        pickedFurniSources = Utils.readIntList(packet);
+        pickedUserSources = Utils.readIntList(packet);
     }
 
     // deep copy constructor
@@ -85,11 +79,60 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable {
         return object;
     }
 
+    protected abstract void readTypeSpecific(HPacket packet);
+
     protected abstract void appendJsonFields(JSONObject object);
 
-    public abstract void applyWiredConfig(IExtension extension);
+    protected abstract String getPacketName();
 
-    public abstract PresetWiredBase applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap);
+    public void applyWiredConfig(IExtension extension) {
+        HPacket packet = new HPacket(
+                getPacketName(),
+                HMessage.Direction.TOSERVER,
+                wiredId
+        );
+        packet.appendInt(options.size());
+        options.forEach(packet::appendInt);
+        packet.appendString(stringConfig);
+        packet.appendInt(items.size());
+        items.forEach(packet::appendInt);
+
+        applyTypeSpecificWiredConfig(packet);
+
+        packet.appendInt(pickedFurniSources.size());
+        pickedFurniSources.forEach(packet::appendInt);
+        packet.appendInt(pickedUserSources.size());
+        pickedUserSources.forEach(packet::appendInt);
+
+        if (this instanceof PresetWiredTrigger) {
+            new PresetWiredTrigger(packet);
+        } else if (this instanceof PresetWiredSelector) {
+            new PresetWiredSelector(packet);
+        } else if (this instanceof PresetWiredEffect) {
+            new PresetWiredEffect(packet);
+        } else if (this instanceof PresetWiredAddon) {
+            new PresetWiredAddon(packet);
+        } else if (this instanceof PresetWiredCondition) {
+            new PresetWiredCondition(packet);
+        }
+
+        extension.sendToServer(packet);
+    }
+
+    protected abstract void applyTypeSpecificWiredConfig(HPacket packet);
+
+    public <T extends PresetWiredBase> T applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap) {
+        if (realFurniIdMap.containsKey(wiredId)) {
+            PresetWiredBase presetWiredBase = this.clone();
+            presetWiredBase.wiredId = realFurniIdMap.get(wiredId);
+            presetWiredBase.items = items.stream().filter(realFurniIdMap::containsKey)
+                    .map(realFurniIdMap::get).collect(Collectors.toList());
+
+            presetWiredBase.applyWiredConfig(extension);
+            return (T) presetWiredBase;
+        }
+        return null;
+    }
 
     public int getWiredId() {
         return wiredId;
@@ -105,6 +148,14 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable {
 
     public List<Integer> getItems() {
         return items;
+    }
+
+    public List<Integer> getPickedFurniSources() {
+        return pickedFurniSources;
+    }
+
+    public List<Integer> getPickedUserSources() {
+        return pickedUserSources;
     }
 
     public void setWiredId(int wiredId) {
@@ -123,19 +174,14 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable {
         this.items = items;
     }
 
-    public List<Integer> getPickedFurniSources() {
-        return pickedFurniSources;
-    }
-
     public void setPickedFurniSources(List<Integer> pickedFurniSources) {
         this.pickedFurniSources = pickedFurniSources;
-    }
-
-    public List<Integer> getPickedUserSources() {
-        return pickedUserSources;
     }
 
     public void setPickedUserSources(List<Integer> pickedUserSources) {
         this.pickedUserSources = pickedUserSources;
     }
+
+    @Override
+    protected abstract PresetWiredBase clone();
 }

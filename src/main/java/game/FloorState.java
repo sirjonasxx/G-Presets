@@ -161,14 +161,7 @@ public class FloorState {
                 }
             }
 
-            for (HFloorItem item : floorItems) {
-                furnimap.get(item.getTile().getX()).get(item.getTile().getY()).put(item.getId(), item);
-                furniIdToItem.put(item.getId(), item);
-                if (!typeIdToItems.containsKey(item.getTypeId())) {
-                    typeIdToItems.put(item.getTypeId(), new HashSet<>());
-                }
-                typeIdToItems.get(item.getTypeId()).add(item);
-            }
+            Arrays.stream(floorItems).forEach(this::addObject);
         }
 
         onFurnisChange.call();
@@ -207,14 +200,20 @@ public class FloorState {
             }
             item.setOwnerName(ownerName);
 
-            furnimap.get(item.getTile().getX()).get(item.getTile().getY()).put(item.getId(), item);
-            furniIdToItem.put(item.getId(), item);
-            if (!typeIdToItems.containsKey(item.getTypeId())) {
-                typeIdToItems.put(item.getTypeId(), new HashSet<>());
-            }
-            typeIdToItems.get(item.getTypeId()).add(item);
+            addObject(item);
         }
     }
+
+    private void addObject(HFloorItem item) {
+        furnimap.get(item.getTile().getX()).get(item.getTile().getY()).put(item.getId(), item);
+        furniIdToItem.put(item.getId(), item);
+        if (!typeIdToItems.containsKey(item.getTypeId())) {
+            typeIdToItems.put(item.getTypeId(), new HashSet<>());
+        }
+        typeIdToItems.get(item.getTypeId()).add(item);
+
+    }
+
     private void onObjectUpdate(HMessage hMessage) {
         if (inRoom()) {
             HFloorItem newItem = new HFloorItem(hMessage.getPacket());
@@ -230,28 +229,24 @@ public class FloorState {
             addObject(hMessage.getPacket(), owner);
         }
     }
+
     private void onSlide(HMessage hMessage) {
         if (inRoom()) {
             HPacket packet = hMessage.getPacket();
-            int oldx = packet.readInteger();
-            int oldy = packet.readInteger();
-            int newx = packet.readInteger();
-            int newy = packet.readInteger();
+            int oldX = packet.readInteger();
+            int oldY = packet.readInteger();
+            int newX = packet.readInteger();
+            int newY = packet.readInteger();
 
             int amount = packet.readInteger();
 
             synchronized (lock) {
                 for (int i = 0; i < amount; i++) {
                     int furniId = packet.readInteger();
-                    String oldz = packet.readString();
-                    String newz = packet.readString();
+                    String oldZ = packet.readString();
+                    String newZ = packet.readString();
 
-                    HFloorItem item = furniIdToItem.get(furniId);
-                    if (item != null) {
-                        furnimap.get(item.getTile().getX()).get(item.getTile().getY()).remove(item.getId());
-                        item.setTile(new HPoint(newx, newy, Double.parseDouble(newz)));
-                        furnimap.get(newx).get(newy).put(item.getId(), item);
-                    }
+                    updateFurniPosition(furniId, newX, newY, newZ);
                 }
             }
 
@@ -273,13 +268,17 @@ public class FloorState {
 
                 int furniId = packet.readInteger();
 
-                HFloorItem item = furniIdToItem.get(furniId);
-                if (item != null) {
-                    furnimap.get(item.getTile().getX()).get(item.getTile().getY()).remove(item.getId());
-                    item.setTile(new HPoint(newX, newY, Double.parseDouble(newZ)));
-                    furnimap.get(newX).get(newY).put(item.getId(), item);
-                }
+                updateFurniPosition(furniId, newX, newY, newZ);
             }
+        }
+    }
+
+    private void updateFurniPosition(int furniId, int newX, int newY, String newZ) {
+        HFloorItem item = furniIdToItem.get(furniId);
+        if (item != null) {
+            furnimap.get(item.getTile().getX()).get(item.getTile().getY()).remove(item.getId());
+            item.setTile(new HPoint(newX, newY, Double.parseDouble(newZ)));
+            furnimap.get(newX).get(newY).put(item.getId(), item);
         }
     }
 
@@ -317,12 +316,7 @@ public class FloorState {
                         int animationTime = packet.readInteger();
                         int direction = packet.readInteger();
 
-                        HFloorItem item = furniIdToItem.get(furniId);
-                        if (item != null) {
-                            furnimap.get(item.getTile().getX()).get(item.getTile().getY()).remove(item.getId());
-                            item.setTile(new HPoint(newX, newY, Double.parseDouble(newZ)));
-                            furnimap.get(newX).get(newY).put(item.getId(), item);
-                        }
+                        updateFurniPosition(furniId, newX, newY, newZ);
                     }
                     else { // wall item
                         packet.readInteger();
@@ -409,7 +403,7 @@ public class FloorState {
 
     public double getTileHeight(int x, int y) {
         synchronized (lock) {
-            return ((double)heightmap[x][y]) / 256;
+            return ((double)(heightmap[x][y] & 16383)) / 256;
         }
     }
 

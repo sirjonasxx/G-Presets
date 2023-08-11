@@ -1,23 +1,14 @@
 package extension.tools.presetconfig.wired;
 
-import gearth.extensions.IExtension;
-import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import org.json.JSONObject;
-import utils.Utils;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class PresetWiredTrigger extends PresetWiredBase {
 
-    private int stuff;
-
     public PresetWiredTrigger(HPacket packet) {
         super(packet);
-        pickedFurniSources = Utils.readIntList(packet);
-        pickedUserSources = Utils.readIntList(packet);
     }
 
     public PresetWiredTrigger(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
@@ -34,48 +25,25 @@ public class PresetWiredTrigger extends PresetWiredBase {
     }
 
     @Override
+    protected void readTypeSpecific(HPacket packet) {
+    }
+
+    @Override
     protected void appendJsonFields(JSONObject object) {
-        object.put("stuff", stuff);
     }
 
     @Override
-    public void applyWiredConfig(IExtension extension) {
-        HPacket packet = new HPacket(
-                "UpdateTrigger",
-                HMessage.Direction.TOSERVER,
-                wiredId
-        );
-        packet.appendInt(options.size());
-        options.forEach(packet::appendInt);
-        packet.appendString(stringConfig);
-        packet.appendInt(items.size());
-        items.forEach(packet::appendInt);
-
-        packet.appendInt(pickedFurniSources.size());
-        pickedFurniSources.forEach(packet::appendInt);
-        packet.appendInt(pickedUserSources.size());
-        pickedUserSources.forEach(packet::appendInt);
-
-        extension.sendToServer(packet);
+    protected String getPacketName() {
+        return "UpdateTrigger";
     }
 
     @Override
-    public PresetWiredTrigger applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap) {
-        if (realFurniIdMap.containsKey(wiredId)) {
-            PresetWiredTrigger presetWiredTrigger = new PresetWiredTrigger(
-                    realFurniIdMap.get(wiredId),
-                    options,
-                    stringConfig,
-                    items.stream().filter(realFurniIdMap::containsKey)
-                            .map(realFurniIdMap::get).collect(Collectors.toList()),
-                    pickedFurniSources,
-                    pickedUserSources
-            );
+    protected void applyTypeSpecificWiredConfig(HPacket packet) {
+    }
 
-            presetWiredTrigger.applyWiredConfig(extension);
-            return presetWiredTrigger;
-        }
-        return null;
+    @Override
+    public PresetWiredTrigger clone() {
+        return new PresetWiredTrigger(this);
     }
 
 }

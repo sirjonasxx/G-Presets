@@ -21,6 +21,7 @@ import gearth.extensions.ExtensionForm;
 import gearth.extensions.ExtensionInfo;
 import gearth.extensions.parsers.HFloorItem;
 import gearth.extensions.parsers.HPoint;
+import gearth.misc.Cacher;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import javafx.application.Platform;
@@ -36,11 +37,13 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import org.json.JSONObject;
 import utils.Utils;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -107,6 +110,8 @@ public class GPresets extends ExtensionForm {
 
 
     public void initialize() {
+        setupCache();
+
         logsBorderPane.setPadding(new Insets(5, 5, 5, 5));
         logger.initialize(logsBorderPane);
 
@@ -117,11 +122,18 @@ public class GPresets extends ExtensionForm {
 
         stacktile_tgl.selectedToggleProperty().addListener(observable -> {
             String option = ((RadioButton)(stacktile_tgl.getSelectedToggle())).getText();
+            Cacher.put("stacktile", option);
             stackTileSetting = StackTileSetting.fromString(option);
             updateUI();
         });
 
+        noExportWiredCbx.selectedProperty().addListener(observable ->
+                Cacher.put("noExportWired", noExportWiredCbx.isSelected())
+        );
 
+        allowIncompleteBuildsCbx.selectedProperty().addListener(observable ->
+                Cacher.put("allowIncompleteBuilds", allowIncompleteBuildsCbx.isSelected())
+        );
 
 
 
@@ -175,6 +187,7 @@ public class GPresets extends ExtensionForm {
         ratelimiter.valueProperty().addListener((observable, oldValue, newValue) -> {
             int val = newValue.intValue();
             Utils.setExtraSleepTime(val);
+            Cacher.put("ratelimit", val);
         });
     }
 
@@ -227,6 +240,46 @@ public class GPresets extends ExtensionForm {
         });
 
         updatePostConfig();
+    }
+
+    private void setupCache() {
+        File extDir = null;
+        try {
+            extDir = (new File(GPresets.class.getProtectionDomain().getCodeSource().getLocation().toURI())).getParentFile();
+            if (extDir.getName().equals("Extensions")) {
+                extDir = extDir.getParentFile();
+            }
+        } catch (URISyntaxException ignored) {}
+
+        Cacher.setCacheDir(extDir + File.separator + "Cache");
+        loadCache();
+    }
+
+    private void loadCache() {
+        JSONObject cache = Cacher.getCacheContents();
+
+        String stackTileKey = cache.optString("stacktile", "2x2");
+        stackTileSetting = StackTileSetting.fromString(stackTileKey);
+        stacktile_tgl.getToggles()
+                .stream()
+                .filter(s -> ((RadioButton) s).getText().equals(stackTileKey))
+                .findFirst()
+                .orElseGet(() -> stacktile_tgl.getToggles().get(2))
+                .setSelected(true);
+
+        String itemSourceKey = cache.optString("itemSource", "ONLY_INVENTORY");
+        item_src_tgl.getToggles()
+                .stream()
+                .filter(s -> itemSourceKey.equals(s.getUserData()))
+                .findFirst()
+                .orElseGet(() -> item_src_tgl.getToggles().get(0))
+                .setSelected(true);
+
+        ratelimiter.setValue(cache.optInt("ratelimit", 22));
+        Utils.setExtraSleepTime(cache.optInt("ratelimit", 22));
+
+        noExportWiredCbx.setSelected(cache.optBoolean("noExportWired"));
+        allowIncompleteBuildsCbx.setSelected(cache.optBoolean("allowIncompleteBuilds"));
     }
 
     private void selectPreset(PresetConfig preset, String name) {
@@ -330,6 +383,10 @@ public class GPresets extends ExtensionForm {
         catalog.requestIndex();
     }
 
+    public void clearBCClick(ActionEvent actionEvent) throws URISyntaxException {
+        catalog.clearCache();
+    }
+
     public FurniDataTools getFurniDataTools() {
         return furniDataTools;
     }
@@ -366,9 +423,10 @@ public class GPresets extends ExtensionForm {
     private PostConfig createPostConfig() {
         PostConfig postConfig = new PostConfig();
 
-        postConfig.setItemSource(onlyBcCbx.isSelected() ? ItemSource.ONLY_BC : (preferBcCbx.isSelected() ?
-                ItemSource.PREFER_BC : (preferInvCbx.isSelected() ? ItemSource.PREFER_INVENTORY : ItemSource.ONLY_INVENTORY
-        )));
+        ItemSource itemSource = ItemSource.valueOf((String) item_src_tgl.getSelectedToggle().getUserData());
+        Cacher.put("itemSource", itemSource);
+
+        postConfig.setItemSource(itemSource);
 
         furniPostConfigs.forEach(postConfig::addFurniPostConfig);
         return postConfig;
