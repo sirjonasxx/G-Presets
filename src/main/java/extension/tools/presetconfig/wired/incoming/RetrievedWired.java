@@ -23,6 +23,8 @@ public interface RetrievedWired {
         List<Integer> furniSources = Utils.readIntList(packet);
         List<Integer> userSources = Utils.readIntList(packet);
 
+        packet.readInteger(); // code
+
         if (cls == RetrievedWiredAddon.class) {
             return cls.cast(new RetrievedWiredAddon(wiredId, options, configString, items, typeId, furniSources, userSources));
         } else if (cls == RetrievedWiredTrigger.class) {
