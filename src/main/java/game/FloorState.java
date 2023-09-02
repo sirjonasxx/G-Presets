@@ -19,11 +19,12 @@ public class FloorState {
     private final Object lock = new Object();
 
     private Callback onFurnisChange;
-    private Callback onRoomLeave;
+    private Callback onRoomChangeOrLeave;
     private Logger logger;
 
     private long latestRequestTimestamp = -1;
 
+    private volatile int roomId;
     private volatile int[][] heightmap = null; // 256 * 256
     private volatile Map<Integer, HFloorItem> furniIdToItem = null;
     private volatile Map<Integer, Set<HFloorItem>> typeIdToItems = null;
@@ -34,10 +35,10 @@ public class FloorState {
     private volatile Map<Integer, Set<Consumer<HFloorItem>>> stateUpdateListeners = new HashMap<>();
 
 
-    public FloorState(IExtension extension, Logger logger, Callback onFloorItemsChange, Callback onRoomLeave) {
+    public FloorState(IExtension extension, Logger logger, Callback onFloorItemsChange, Callback onRoomChangeOrLeave) {
         this.logger = logger;
         this.onFurnisChange = onFloorItemsChange;
-        this.onRoomLeave = onRoomLeave;
+        this.onRoomChangeOrLeave = onRoomChangeOrLeave;
         extension.intercept(HMessage.Direction.TOCLIENT, "Objects", this::parseFloorItems);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectAdd", this::onObjectAdd);
@@ -83,14 +84,20 @@ public class FloorState {
     }
 
     private void roomEntryInfo(HMessage hMessage) {
+        synchronized (lock) {
+            roomId = hMessage.getPacket().readInteger();
+        }
+
         if (latestRequestTimestamp > System.currentTimeMillis() - 400) {
             hMessage.setBlocked(true); // request wasnt made by user
             latestRequestTimestamp = -1;
         }
+
+        onRoomChangeOrLeave.call();
     }
 
     public boolean inRoom() {
-        return furnimap != null && floorplan != null && heightmap != null;
+        return furnimap != null && floorplan != null && heightmap != null && roomId != 0;
     }
     public void reset() {
         if (heightmap != null || furnimap != null || floorplan != null) {
@@ -100,8 +107,9 @@ public class FloorState {
                 furnimap = null;
                 floorplan = null;
                 typeIdToItems = null;
+                roomId = 0;
             }
-            onRoomLeave.call();
+            onRoomChangeOrLeave.call();
             onFurnisChange.call();
         }
     }
@@ -434,23 +442,7 @@ public class FloorState {
         return result;
     }
 
-    public void addItemStateListener(int furniId, Consumer<HFloorItem> listener) {
-        synchronized (lock) {
-            if (!stateUpdateListeners.containsKey(furniId)) {
-                stateUpdateListeners.put(furniId, new HashSet<>());
-            }
-            stateUpdateListeners.get(furniId).add(listener);
-        }
-    }
-
-    public void removeItemStateListener(int furniId, Consumer<HFloorItem> listener) {
-        synchronized (lock) {
-            if (stateUpdateListeners.containsKey(furniId)) {
-                stateUpdateListeners.get(furniId).remove(listener);
-                if (stateUpdateListeners.get(furniId).size() == 0) {
-                    stateUpdateListeners.remove(furniId);
-                }
-            }
-        }
+    public int getRoomId() {
+        return roomId;
     }
 }

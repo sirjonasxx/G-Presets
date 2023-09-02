@@ -33,11 +33,9 @@ public interface RetrievedWired {
             int delay = packet.readInteger();
             return cls.cast(new RetrievedWiredEffect(wiredId, options, configString, items, delay, typeId, furniSources, userSources));
         } else if (cls == RetrievedWiredCondition.class) {
-            packet.readInteger();
             int quantifier = packet.readInteger();
             return cls.cast(new RetrievedWiredCondition(wiredId, options, configString, items, typeId, quantifier, furniSources, userSources));
         } else if (cls == RetrievedWiredSelector.class) {
-            packet.readInteger();
             boolean filter = packet.readBoolean();
             boolean invert = packet.readBoolean();
             return cls.cast(new RetrievedWiredSelector(wiredId, options, configString, items, typeId, filter, invert, furniSources, userSources));
