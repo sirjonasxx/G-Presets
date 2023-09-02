@@ -18,8 +18,8 @@ public class FloorState {
 
     private final Object lock = new Object();
 
-    private Callback onFurnisChange;
-    private Callback onRoomChangeOrLeave;
+    private Callback onFloorStateChange;
+    private Callback onRoomLeave;
     private Logger logger;
 
     private long latestRequestTimestamp = -1;
@@ -35,10 +35,10 @@ public class FloorState {
     private volatile Map<Integer, Set<Consumer<HFloorItem>>> stateUpdateListeners = new HashMap<>();
 
 
-    public FloorState(IExtension extension, Logger logger, Callback onFloorItemsChange, Callback onRoomChangeOrLeave) {
+    public FloorState(IExtension extension, Logger logger, Callback onFloorItemsChange, Callback onRoomLeave) {
         this.logger = logger;
-        this.onFurnisChange = onFloorItemsChange;
-        this.onRoomChangeOrLeave = onRoomChangeOrLeave;
+        this.onFloorStateChange = onFloorItemsChange;
+        this.onRoomLeave = onRoomLeave;
         extension.intercept(HMessage.Direction.TOCLIENT, "Objects", this::parseFloorItems);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectAdd", this::onObjectAdd);
@@ -93,7 +93,7 @@ public class FloorState {
             latestRequestTimestamp = -1;
         }
 
-        onRoomChangeOrLeave.call();
+        onFloorStateChange.call();
     }
 
     public boolean inRoom() {
@@ -109,8 +109,8 @@ public class FloorState {
                 typeIdToItems = null;
                 roomId = 0;
             }
-            onRoomChangeOrLeave.call();
-            onFurnisChange.call();
+            onRoomLeave.call();
+            onFloorStateChange.call();
         }
     }
 
@@ -172,7 +172,7 @@ public class FloorState {
             Arrays.stream(floorItems).forEach(this::addObject);
         }
 
-        onFurnisChange.call();
+        onFloorStateChange.call();
         logger.log("Parsed floor items", "blue");
     }
 
@@ -181,7 +181,7 @@ public class FloorState {
             HPacket packet = hMessage.getPacket();
             int furniid = Integer.parseInt(packet.readString());
             removeObject(furniid);
-            onFurnisChange.call();
+            onFloorStateChange.call();
         }
     }
     private void removeObject(int furniId) {
@@ -196,7 +196,7 @@ public class FloorState {
     private void onObjectAdd(HMessage hMessage) {
         if (inRoom()) {
             addObject(hMessage.getPacket(), null);
-            onFurnisChange.call();
+            onFloorStateChange.call();
         }
 
     }

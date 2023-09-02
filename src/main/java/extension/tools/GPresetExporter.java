@@ -157,7 +157,7 @@ public class GPresetExporter {
     }
 
     private void maybeSaveBindings(PresetWiredBase wiredBase) {
-        wiredFurniBindings.remove(wiredBase.getWiredId());
+        wiredFurniBindings.remove(wiredCacheKey(wiredBase.getWiredId()));
         FloorState floorState = extension.getFloorState();
         FurniDataTools furniDataTools = extension.getFurniDataTools();
 
@@ -250,11 +250,11 @@ public class GPresetExporter {
                 for (int yi = y; yi < y + dimY; yi++) {
                     floor.getFurniOnTile(xi, yi).forEach(f -> {
                         String classname = furniDataTools.getFloorItemName(f.getTypeId());
-                        if (    (classname.startsWith("wf_trg_") && !wiredTriggerConfigs.containsKey(f.getId()))
-                                || (classname.startsWith("wf_cnd_") && !wiredConditionConfigs.containsKey(f.getId()))
-                                || (classname.startsWith("wf_act_") && !wiredEffectConfigs.containsKey(f.getId()))
-                                || (classname.startsWith("wf_xtra_") && !wiredAddonConfigs.containsKey(f.getId()))
-                                || (classname.startsWith("wf_slc_") && !wiredSelectorConfigs.containsKey(f.getId()))) {
+                        if (    (classname.startsWith("wf_trg_") && !wiredTriggerConfigs.containsKey(wiredCacheKey(f.getId())))
+                                || (classname.startsWith("wf_cnd_") && !wiredConditionConfigs.containsKey(wiredCacheKey(f.getId())))
+                                || (classname.startsWith("wf_act_") && !wiredEffectConfigs.containsKey(wiredCacheKey(f.getId())))
+                                || (classname.startsWith("wf_xtra_") && !wiredAddonConfigs.containsKey(wiredCacheKey(f.getId())))
+                                || (classname.startsWith("wf_slc_") && !wiredSelectorConfigs.containsKey(wiredCacheKey(f.getId())))) {
                             unregisteredWired.add(f.getId());
                         }
                     });
@@ -313,24 +313,26 @@ public class GPresetExporter {
                         }
 
                         if (extension.shouldExportWired()) {
+                            String key = wiredCacheKey(f.getId());
+
                             if (classname.startsWith("wf_trg_")) {
-                                allTriggers.add(new PresetWiredTrigger(wiredTriggerConfigs.get(f.getId())));
+                                allTriggers.add(new PresetWiredTrigger(wiredTriggerConfigs.get(key)));
                             }
                             else if (classname.startsWith("wf_cnd_")) {
-                                allConditions.add(new PresetWiredCondition(wiredConditionConfigs.get(f.getId())));
+                                allConditions.add(new PresetWiredCondition(wiredConditionConfigs.get(key)));
                             }
                             else if (classname.startsWith("wf_act_")) {
-                                allEffects.add(new PresetWiredEffect(wiredEffectConfigs.get(f.getId())));
+                                allEffects.add(new PresetWiredEffect(wiredEffectConfigs.get(key)));
                             }
                             else if (classname.startsWith("wf_xtra_")) {
-                                allAddons.add(new PresetWiredAddon(wiredAddonConfigs.get(f.getId())));
+                                allAddons.add(new PresetWiredAddon(wiredAddonConfigs.get(key)));
                             }
                             else if (classname.startsWith("wf_slc_")) {
-                                allSelectors.add(new PresetWiredSelector(wiredSelectorConfigs.get(f.getId())));
+                                allSelectors.add(new PresetWiredSelector(wiredSelectorConfigs.get(key)));
                             }
 
-                            if (wiredFurniBindings.containsKey(f.getId())) {
-                                allBindings.addAll(wiredFurniBindings.get(f.getId()).stream()
+                            if (wiredFurniBindings.containsKey(key)) {
+                                allBindings.addAll(wiredFurniBindings.get(key).stream()
                                         .map(b -> new PresetWiredFurniBinding(b)).collect(Collectors.toList()));
                             }
                         }

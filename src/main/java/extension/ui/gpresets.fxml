@@ -71,15 +71,15 @@
                   <RadioButton fx:id="onlyBcCbx" layoutX="405.0" layoutY="45.0" mnemonicParsing="false" text="Only BC" toggleGroup="$item_src_tgl" userData="ONLY_BC" />
                   <Button layoutX="13.0" layoutY="223.0" mnemonicParsing="false" onAction="#openPresetsFolderClick" prefHeight="25.0" prefWidth="157.0" text="Open Presets Folder" />
                   <Button fx:id="currentPresetBtn" layoutX="187.0" layoutY="223.0" mnemonicParsing="false" onAction="#openCurrentPresetClick" prefHeight="25.0" prefWidth="222.0" text="Open Selected Preset In Editor" />
-                  <Button layoutX="541.0" layoutY="124.0" mnemonicParsing="false" onAction="#reloadPresetsClick" prefHeight="25.0" prefWidth="131.0" text="Reload Presets" />
+                  <Button layoutX="522.0" layoutY="124.0" mnemonicParsing="false" onAction="#reloadPresetsClick" prefHeight="25.0" prefWidth="150.0" text="Reload Presets" />
                   <CheckBox fx:id="allowIncompleteBuildsCbx" layoutX="14.0" layoutY="187.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="205.0" text="Allow building without all furni" />
                   <RadioButton layoutX="106.0" layoutY="14.0" mnemonicParsing="false" text="1x1" toggleGroup="$stacktile_tgl" />
                   <CheckBox fx:id="noExportWiredCbx" layoutX="14.0" layoutY="167.0" mnemonicParsing="false" text="Do not export wired" />
                   <Slider fx:id="ratelimiter" layoutX="82.0" layoutY="80.0" prefHeight="14.0" prefWidth="219.0" value="22.0" />
                   <Label layoutX="13.0" layoutY="78.0" text="Ratelimit:" />
                   <CheckBox fx:id="onTopCbx" layoutX="576.0" layoutY="232.0" mnemonicParsing="false" onAction="#alwaysOnTopClick" text="Always on top" />
-                  <Button layoutX="541.0" layoutY="159.0" mnemonicParsing="false" onAction="#clearBCClick" prefHeight="25.0" prefWidth="131.0" text="Clear BC Cache" />
-                  <Button layoutX="541.0" layoutY="195.0" mnemonicParsing="false" onAction="#clearWiredClick" prefHeight="25.0" prefWidth="131.0" text="Clear Wired Cache" />
+                  <Button layoutX="522.0" layoutY="159.0" mnemonicParsing="false" onAction="#clearBCClick" prefHeight="25.0" prefWidth="150.0" text="Clear BC Cache" />
+                  <Button layoutX="522.0" layoutY="195.0" mnemonicParsing="false" onAction="#clearWiredClick" prefHeight="25.0" prefWidth="150.0" text="Clear Wired Cache" />
                </children></AnchorPane>
       </content>
     </Tab>
