@@ -639,6 +639,11 @@ public class GPresetImporter {
         int i = 0;
         while (state == BuildingImportState.SETUP_WIRED && i < allWireds.size()) {
             PresetWiredBase wiredBase = allWireds.get(i);
+
+            if ((i + 1) % 10 == 0) {
+                extension.getLogger().log(String.format("Setting up wired.. (%d/%d)", i+1, allWireds.size()), "orange");
+            }
+
             i++;
 
             FloorState floor = extension.getFloorState();
@@ -768,8 +773,12 @@ public class GPresetImporter {
         int i = 0;
         while (i < furniDropInfos.size() && state == BuildingImportState.ADD_FURNITURE) {
             FurniDropInfo dropInfo = furniDropInfos.get(i);
-            dropFurni(dropInfo);
 
+            if ((i + 1) % 10 == 0) {
+                extension.getLogger().log(String.format("Dropping furni.. (%d/%d)", i+1, furniDropInfos.size()), "orange");
+            }
+
+            dropFurni(dropInfo);
             i++;
         }
 
