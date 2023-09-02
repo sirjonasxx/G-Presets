@@ -683,4 +683,16 @@ public class GPresetExporter {
     private String wiredCacheKey(int id) {
         return extension.getFloorState().getRoomId() + "-" + id;
     }
+
+    public void clearCache() {
+        synchronized (lock) {
+            if (state != PresetExportState.FETCHING_UNKNOWN_CONFIGS) {
+                wiredTriggerConfigs.clear();
+                wiredConditionConfigs.clear();
+                wiredEffectConfigs.clear();
+                wiredSelectorConfigs.clear();
+                wiredAddonConfigs.clear();
+            }
+        }
+    }
 }

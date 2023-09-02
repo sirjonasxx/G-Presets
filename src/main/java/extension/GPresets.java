@@ -521,4 +521,8 @@ public class GPresets extends ExtensionForm {
     public void alwaysOnTopClick(ActionEvent actionEvent) {
         primaryStage.setAlwaysOnTop(onTopCbx.isSelected());
     }
+
+    public void clearWiredClick(ActionEvent actionEvent) {
+        exporter.clearCache();
+    }
 }
