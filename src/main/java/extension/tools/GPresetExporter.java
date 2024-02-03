@@ -12,6 +12,7 @@ import furnidata.FurniDataTools;
 import game.FloorState;
 import gearth.extensions.parsers.HFloorItem;
 import gearth.extensions.parsers.HPoint;
+import gearth.extensions.parsers.stuffdata.MapStuffData;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import utils.StateExtractor;
@@ -292,15 +293,8 @@ public class GPresetExporter {
                                 f.getFacing().ordinal(), StateExtractor.stateFromItem(f));
                         allFurni.add(presetFurni);
 
-                        if (classname.equals("ads_background") && f.getCategory() == 1) {
-                            Map<String, String> stuffDataMap = new HashMap<>();
-                            Object[] stuff = f.getStuff();
-                            for (int i = 0; i < (int)(stuff[0]); i++) {
-                                String key = (String)(stuff[i*2 + 1]);
-                                String value = (String)(stuff[i*2 + 2]);
-                                stuffDataMap.put(key, value);
-                            }
-
+                        if (classname.equals("ads_background") && f.getStuff() instanceof MapStuffData) {
+                            Map<String, String> stuffDataMap = (MapStuffData) f.getStuff();
                             allAdsBackgrounds.add(new PresetAdsBackground(
                                     f.getId(),
                                     stuffDataMap.get("imageUrl"),
