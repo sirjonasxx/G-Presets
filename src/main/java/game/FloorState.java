@@ -6,7 +6,7 @@ import gearth.extensions.ExtensionBase;
 import gearth.extensions.IExtension;
 import gearth.extensions.parsers.HFloorItem;
 import gearth.extensions.parsers.HPoint;
-import gearth.extensions.parsers.HStuff;
+import gearth.extensions.parsers.stuffdata.IStuffData;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import utils.Callback;
@@ -347,10 +347,7 @@ public class FloorState {
 
 
     private void onDataUpdate(HPacket hPacket, int id) {
-//        int id = Integer.parseInt(hPacket.readString());
-        int category = hPacket.readInteger();
-        Object[] stuff = HStuff.readData(hPacket, category);
-
+        IStuffData stuff = IStuffData.read(hPacket);
 
         HFloorItem item = null;
         List<Consumer<HFloorItem>> listeners = null;
@@ -358,7 +355,6 @@ public class FloorState {
         synchronized (lock) {
             if (inRoom() && furniIdToItem.containsKey(id)) {
                 item = furniIdToItem.get(id);
-                item.setCategory(category);
                 item.setStuff(stuff);
 
                 if (stateUpdateListeners.containsKey(id)) {
