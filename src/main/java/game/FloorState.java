@@ -27,7 +27,7 @@ public class FloorState {
     private volatile int[][] heightmap = null; // 256 * 256
     private volatile Map<Integer, HFloorItem> furniIdToItem = null;
     private volatile Map<Integer, Set<HFloorItem>> typeIdToItems = null;
-    public volatile List<List<Map<Integer, HFloorItem>>> furnimap = null;
+    private volatile List<List<Map<Integer, HFloorItem>>> furnimap = null;
     private volatile char[][] floorplan = null;
     private volatile Map<Integer, Set<Consumer<HFloorItem>>> stateUpdateListeners = new HashMap<>();
 

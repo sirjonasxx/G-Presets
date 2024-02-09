@@ -2,7 +2,6 @@ package game;
 
 import extension.logger.Logger;
 import gearth.extensions.IExtension;
-import gearth.extensions.parsers.HFloorItem;
 import gearth.extensions.parsers.HInventoryItem;
 import gearth.extensions.parsers.HProductType;
 import gearth.protocol.HMessage;
@@ -88,7 +87,7 @@ public class Inventory {
         }
     }
 
-    public void updateOrAddItem(HInventoryItem item) {
+    private void updateOrAddItem(HInventoryItem item) {
         if (state != InventoryState.UNAVAILABLE) {
             itemPlacements.put(item.getPlacementId(), item);
             Map<Integer, Map<Integer, HInventoryItem>> map = item.getType() == HProductType.FloorItem ? floorItemsByType : wallItemsByType;
