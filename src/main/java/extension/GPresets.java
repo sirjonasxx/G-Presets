@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ExtensionInfo(
-        Title =  "G-Presets modified by Thauan",
+        Title =  "G-Presets",
         Description =  "Never do anything twice",
         Version =  "1.1",
         Author =  "sirjonasxx"
@@ -135,7 +135,9 @@ public class GPresets extends ExtensionForm {
                 Cacher.put("allowIncompleteBuilds", allowIncompleteBuildsCbx.isSelected())
         );
 
-
+        useRoomFurniCbx.selectedProperty().addListener(observable ->
+                Cacher.put("useRoomFurni", useRoomFurniCbx.isSelected())
+        );
 
         postconfigTable = new TableView<>();
 //        postconfigTable.setTableMenuButtonVisible(true);
@@ -280,6 +282,7 @@ public class GPresets extends ExtensionForm {
 
         noExportWiredCbx.setSelected(cache.optBoolean("noExportWired"));
         allowIncompleteBuildsCbx.setSelected(cache.optBoolean("allowIncompleteBuilds"));
+        useRoomFurniCbx.setSelected(cache.optBoolean("useRoomFurni"));
     }
 
     private void selectPreset(PresetConfig preset, String name) {
@@ -445,7 +448,7 @@ public class GPresets extends ExtensionForm {
                 fakeDropInfo.add(new FurniDropInfo(-1, -1, furniDataTools.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1));
             }
 
-            AvailabilityChecker.printAvailability(logger, fakeDropInfo, inventory, catalog, furniDataTools, floorState);
+            AvailabilityChecker.printAvailability(logger, fakeDropInfo, inventory, catalog, furniDataTools, floorState, useRoomFurni());
         }
         else {
             logger.log("No preset chosen or furnidata not ready", "red");
@@ -479,6 +482,10 @@ public class GPresets extends ExtensionForm {
 
     public boolean allowIncompleteBuilds() {
         return allowIncompleteBuildsCbx.isSelected();
+    }
+
+    public boolean useRoomFurni() {
+        return useRoomFurniCbx.isSelected();
     }
 
     private void updateFurniPostConfigsView() {

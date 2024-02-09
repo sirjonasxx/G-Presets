@@ -225,12 +225,12 @@ public class GPresetImporter {
             for (PresetFurni f : workingPresetConfig.getFurniture()) {
                 fakeDropInfo.add(new FurniDropInfo(-1, -1, furniData.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1));
             }
-            Map<String, Integer> missing = AvailabilityChecker.missingItems(fakeDropInfo, extension.getInventory(), extension.getCatalog(), furniData, floorState);
+            Map<String, Integer> missing = AvailabilityChecker.missingItems(fakeDropInfo, extension.getInventory(), extension.getCatalog(), furniData, floorState, extension.useRoomFurni());
             if (missing == null) {
                 extension.sendVisualChatInfo("ERROR: Inventory, catalog or furnidata is unavailable");
             }
             else {
-                if (missing.size() != 0) {
+                if (!missing.isEmpty()) {
                     if (extension.allowIncompleteBuilds()) {
                         extension.sendVisualChatInfo("Some items were not available, building anyways..");
                     }
@@ -245,7 +245,7 @@ public class GPresetImporter {
                 Set<String> allStacktileClasses = Arrays.stream(StackTileSetting.values()).map(StackTileSetting::getClassName).collect(Collectors.toSet());
                 allStacktileClasses.forEach(c -> {
                     List<HFloorItem> stackTiles = extension.getFloorState().getItemsFromType(furniData, c);
-                    if (stackTiles.size() > 0) {
+                    if (!stackTiles.isEmpty()) {
                         HFloorItem stackTile = stackTiles.get(0);
                         allAvailableStackTiles.add(new StackTileInfo(
                                 stackTile.getId(),
@@ -256,7 +256,7 @@ public class GPresetImporter {
                     }
                 });
 
-                if (allAvailableStackTiles.size() > 0) {
+                if (!allAvailableStackTiles.isEmpty()) {
                     extension.getLogger().log(String.format("Detected %d available types of stacktiles", allAvailableStackTiles.size()), "green");
                 }
 
@@ -338,7 +338,7 @@ public class GPresetImporter {
         boolean useBC = source == ItemSource.ONLY_BC || (source == ItemSource.PREFER_BC && catalogProduct != null)
                 || ( source == ItemSource.PREFER_INVENTORY && inventoryItems.isEmpty());
 
-        boolean useRoomFurni = extension.useRoomFurniCbx.isSelected();
+        boolean useRoomFurni = extension.useRoomFurni();
 
         if (useBC) {
             if (catalogProduct == null) {
@@ -365,7 +365,7 @@ public class GPresetImporter {
             Utils.sleep(230);
         }
         else {
-            if (inventoryItems.isEmpty() && !extension.useRoomFurniCbx.isSelected()) {
+            if (inventoryItems.isEmpty() && !useRoomFurni) {
                 if (!extension.allowIncompleteBuilds()) {
                     state = BuildingImportState.NONE;
                     extension.sendVisualChatInfo(String.format("ERROR: Couldn't find '%s' in inventory.. aborting", className));
