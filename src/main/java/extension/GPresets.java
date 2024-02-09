@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ExtensionInfo(
-        Title =  "G-Presets",
+        Title =  "G-Presets modified by Thauan",
         Description =  "Never do anything twice",
         Version =  "1.1",
         Author =  "sirjonasxx"
@@ -88,7 +88,7 @@ public class GPresets extends ExtensionForm {
     public CheckBox noExportWiredCbx;
     public Slider ratelimiter;
     public CheckBox onTopCbx;
-
+    public CheckBox useRoomFurniCbx;
     private List<FurniPostConfig> furniPostConfigs = new ArrayList<>();
 
     private Logger logger = new Logger();
@@ -445,7 +445,7 @@ public class GPresets extends ExtensionForm {
                 fakeDropInfo.add(new FurniDropInfo(-1, -1, furniDataTools.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1));
             }
 
-            AvailabilityChecker.printAvailability(logger, fakeDropInfo, inventory, catalog, furniDataTools);
+            AvailabilityChecker.printAvailability(logger, fakeDropInfo, inventory, catalog, furniDataTools, floorState);
         }
         else {
             logger.log("No preset chosen or furnidata not ready", "red");

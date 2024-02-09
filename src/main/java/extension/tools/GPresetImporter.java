@@ -78,6 +78,8 @@ public class GPresetImporter {
     private HPoint stackTileLocation = null;
 
     private List<StackTileInfo> allAvailableStackTiles = null;
+
+    private List<HFloorItem> roomItemsList = new ArrayList<>();
 //    private HPoint originalStackTileLocation = new HPoint(0, 0); // move back after movements
 
     private int heightOffset = 0;
@@ -89,6 +91,7 @@ public class GPresetImporter {
         extension.intercept(HMessage.Direction.TOSERVER, "MoveAvatar", this::moveAvatar);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectAdd", this::onObjectAdd);
+        extension.intercept(HMessage.Direction.TOCLIENT, "ObjectUpdate", this::onObjectAdd);
 
         extension.intercept(HMessage.Direction.TOSERVER, "PlaceObject", this::maybeBlockPlacements);
         extension.intercept(HMessage.Direction.TOSERVER, "BuildersClubPlaceRoomItem", this::maybeBlockPlacements);
@@ -214,14 +217,15 @@ public class GPresetImporter {
             expectFurniDrops = new HashMap<>();
             inventoryCache.clear();
             rootLocation = null;
-
             // check if user has enough furniture / BC items available (depending on settings)
             FurniDataTools furniData = extension.getFurniDataTools();
+            FloorState floorState = extension.getFloorState();
+            roomItemsList = new ArrayList<>(floorState.getItems());
             List<FurniDropInfo> fakeDropInfo = new ArrayList<>();
             for (PresetFurni f : workingPresetConfig.getFurniture()) {
                 fakeDropInfo.add(new FurniDropInfo(-1, -1, furniData.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1));
             }
-            Map<String, Integer> missing = AvailabilityChecker.missingItems(fakeDropInfo, extension.getInventory(), extension.getCatalog(), furniData);
+            Map<String, Integer> missing = AvailabilityChecker.missingItems(fakeDropInfo, extension.getInventory(), extension.getCatalog(), furniData, floorState);
             if (missing == null) {
                 extension.sendVisualChatInfo("ERROR: Inventory, catalog or furnidata is unavailable");
             }
@@ -330,8 +334,11 @@ public class GPresetImporter {
         }
         LinkedList<HInventoryItem> inventoryItems = inventoryCache.get(typeId);
 
+
         boolean useBC = source == ItemSource.ONLY_BC || (source == ItemSource.PREFER_BC && catalogProduct != null)
-                || ( source == ItemSource.PREFER_INVENTORY && inventoryItems.size() == 0 );
+                || ( source == ItemSource.PREFER_INVENTORY && inventoryItems.isEmpty());
+
+        boolean useRoomFurni = extension.useRoomFurniCbx.isSelected();
 
         if (useBC) {
             if (catalogProduct == null) {
@@ -358,7 +365,7 @@ public class GPresetImporter {
             Utils.sleep(230);
         }
         else {
-            if (inventoryItems.size() == 0) {
+            if (inventoryItems.isEmpty() && !extension.useRoomFurniCbx.isSelected()) {
                 if (!extension.allowIncompleteBuilds()) {
                     state = BuildingImportState.NONE;
                     extension.sendVisualChatInfo(String.format("ERROR: Couldn't find '%s' in inventory.. aborting", className));
@@ -368,7 +375,30 @@ public class GPresetImporter {
                 }
                 return;
             }
+
+            if(useRoomFurni) {
+                HFloorItem floorItem = roomItemsList
+                        .stream()
+                        .filter(furni -> furni.getTypeId() == dropInfo.getTypeId() && (furni.getTile().getX() != dropInfo.getX() && furni.getTile().getY() != dropInfo.getY()))
+                        .findFirst()
+                        .orElse(null);
+
+
+                if (floorItem != null) {
+                    roomItemsList.removeIf(item -> item.getId() == floorItem.getId());
+
+                    HPacket packet = new HPacket("MoveObject", HMessage.Direction.TOSERVER, floorItem.getId(), dropInfo.getX(), dropInfo.getY(), dropInfo.getRotation());
+                    extension.sendToServer(packet);
+
+                    Utils.sleep(600);
+
+                }
+
+                return;
+            }
+
             HInventoryItem item = inventoryItems.pollFirst();
+
             extension.sendToServer(new HPacket(
                     "PlaceObject",
                     HMessage.Direction.TOSERVER,
