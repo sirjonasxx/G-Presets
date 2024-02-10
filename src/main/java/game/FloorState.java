@@ -23,15 +23,12 @@ public class FloorState {
     private Logger logger;
 
     private long latestRequestTimestamp = -1;
-
     private volatile int roomId;
     private volatile int[][] heightmap = null; // 256 * 256
     private volatile Map<Integer, HFloorItem> furniIdToItem = null;
     private volatile Map<Integer, Set<HFloorItem>> typeIdToItems = null;
     private volatile List<List<Map<Integer, HFloorItem>>> furnimap = null;
     private volatile char[][] floorplan = null;
-
-
     private volatile Map<Integer, Set<Consumer<HFloorItem>>> stateUpdateListeners = new HashMap<>();
 
 
@@ -424,6 +421,15 @@ public class FloorState {
             if (inRoom()) {
                 Set<HFloorItem> result = typeIdToItems.get(typeId);
                 return result == null ? new ArrayList<>() : new ArrayList<>(result);
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    public List<HFloorItem> getItems() {
+        synchronized (lock) {
+            if (inRoom()) {
+                return new ArrayList<>(furniIdToItem.values());
             }
         }
         return new ArrayList<>();

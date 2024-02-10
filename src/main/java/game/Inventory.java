@@ -97,6 +97,7 @@ public class Inventory {
         }
     }
 
+
     private void removeItem(int id) {
         if (state == InventoryState.LOADED) {
             HInventoryItem item = itemPlacements.remove(id);

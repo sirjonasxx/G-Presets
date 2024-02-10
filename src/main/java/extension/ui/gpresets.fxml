@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 
-<TabPane prefHeight="303.0" prefWidth="686.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="extension.GPresets">
+<TabPane prefHeight="303.0" prefWidth="701.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="extension.GPresets">
   <tabs>
     <Tab text="Presets">
       <content>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="269.0" prefWidth="569.0">
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="289.0" prefWidth="709.0">
                <children>
                   <BorderPane fx:id="logsBorderPane" layoutX="232.0" layoutY="13.0" prefHeight="244.0" prefWidth="283.0" style="-fx-border-color: lightgrey;">
                      <opaqueInsets>
@@ -72,7 +85,7 @@
                   <Button layoutX="13.0" layoutY="223.0" mnemonicParsing="false" onAction="#openPresetsFolderClick" prefHeight="25.0" prefWidth="157.0" text="Open Presets Folder" />
                   <Button fx:id="currentPresetBtn" layoutX="187.0" layoutY="223.0" mnemonicParsing="false" onAction="#openCurrentPresetClick" prefHeight="25.0" prefWidth="222.0" text="Open Selected Preset In Editor" />
                   <Button layoutX="522.0" layoutY="124.0" mnemonicParsing="false" onAction="#reloadPresetsClick" prefHeight="25.0" prefWidth="150.0" text="Reload Presets" />
-                  <CheckBox fx:id="allowIncompleteBuildsCbx" layoutX="14.0" layoutY="187.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="205.0" text="Allow building without all furni" />
+                  <CheckBox fx:id="allowIncompleteBuildsCbx" layoutX="14.0" layoutY="187.0" mnemonicParsing="false" text="Allow building without all furni" />
                   <RadioButton layoutX="106.0" layoutY="14.0" mnemonicParsing="false" text="1x1" toggleGroup="$stacktile_tgl" />
                   <CheckBox fx:id="noExportWiredCbx" layoutX="14.0" layoutY="167.0" mnemonicParsing="false" text="Do not export wired" />
                   <Slider fx:id="ratelimiter" layoutX="82.0" layoutY="80.0" prefHeight="14.0" prefWidth="219.0" value="22.0" />
@@ -80,6 +93,7 @@
                   <CheckBox fx:id="onTopCbx" layoutX="576.0" layoutY="232.0" mnemonicParsing="false" onAction="#alwaysOnTopClick" text="Always on top" />
                   <Button layoutX="522.0" layoutY="159.0" mnemonicParsing="false" onAction="#clearBCClick" prefHeight="25.0" prefWidth="150.0" text="Clear BC Cache" />
                   <Button layoutX="522.0" layoutY="195.0" mnemonicParsing="false" onAction="#clearWiredClick" prefHeight="25.0" prefWidth="150.0" text="Clear Wired Cache" />
+                  <CheckBox fx:id="useRoomFurniCbx" layoutX="14.0" layoutY="147.0" mnemonicParsing="false" text="Use room furni" />
                </children></AnchorPane>
       </content>
     </Tab>

@@ -4,13 +4,14 @@ import extension.logger.Logger;
 import extension.tools.postconfig.ItemSource;
 import furnidata.FurniDataTools;
 import game.BCCatalog;
+import game.FloorState;
 import game.Inventory;
+import gearth.extensions.parsers.HFloorItem;
 import gearth.extensions.parsers.HInventoryItem;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class AvailabilityChecker {
@@ -18,7 +19,7 @@ public class AvailabilityChecker {
     // returns null if invalid resources to check availability
     // return map of counts of missing furniture
     // map is empty if you can start importing
-    public static Map<String, Integer> missingItems(List<FurniDropInfo> furniDrops, Inventory inventory, BCCatalog catalog, FurniDataTools furniDataTools) {
+    public static Map<String, Integer> missingItems(List<FurniDropInfo> furniDrops, Inventory inventory, BCCatalog catalog, FurniDataTools furniDataTools, FloorState floorState, boolean useRoomFurni) {
 
         if (inventory.getState() == Inventory.InventoryState.LOADED
                 && catalog.getState() == BCCatalog.CatalogState.COLLECTED
@@ -53,6 +54,19 @@ public class AvailabilityChecker {
                     else isMissing = true;
                 }
 
+
+                if(isMissing && useRoomFurni) {
+                    List<HFloorItem> itemsInFloor = floorState.getItemsFromType(typeId);
+                    long roomItemCount = itemsInFloor
+                            .stream()
+                            .filter(furni -> furni.getTile().getX() != furniDropInfo.getX() && furni.getTile().getY() != furniDropInfo.getY())
+                            .count();
+                    if (usedInventorySpots.get(typeId) < roomItemCount ) {
+                        useInventorySpace = true;
+                        isMissing = false;
+                    }
+                }
+
                 if (isMissing) {
                     missingItemCounts.putIfAbsent(typeId, 0);
                     missingItemCounts.put(typeId, missingItemCounts.get(typeId) + 1);
@@ -74,9 +88,9 @@ public class AvailabilityChecker {
         else return null;
     }
 
-    public static void printAvailability(Logger logger, List<FurniDropInfo> furniDrops, Inventory inventory, BCCatalog catalog, FurniDataTools furniDataTools) {
+    public static void printAvailability(Logger logger, List<FurniDropInfo> furniDrops, Inventory inventory, BCCatalog catalog, FurniDataTools furniDataTools, FloorState floorState, boolean useRoomFurni) {
 
-        Map<String, Integer> missing = missingItems(furniDrops, inventory, catalog, furniDataTools);
+        Map<String, Integer> missing = missingItems(furniDrops, inventory, catalog, furniDataTools, floorState, useRoomFurni);
         if (inventory.getState() == Inventory.InventoryState.LOADED
                 && catalog.getState() == BCCatalog.CatalogState.COLLECTED
                 && furniDataTools.isReady() && missing != null) {
