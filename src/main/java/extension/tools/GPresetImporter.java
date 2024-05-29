@@ -160,7 +160,8 @@ public class GPresetImporter {
         return extension.getFloorState().inRoom() && extension.furniDataReady() &&
                 extension.getInventory().getState() == Inventory.InventoryState.LOADED && extension.stackTile() != null &&
                 (postConfig.getItemSource() == ItemSource.ONLY_INVENTORY || extension.getCatalog().getState()
-                        == BCCatalog.CatalogState.COLLECTED) && presetConfig != null;
+                        == BCCatalog.CatalogState.COLLECTED) && presetConfig != null &&
+                extension.getPermissions().canMoveFurni() && (!extension.shouldExportWired() || extension.getPermissions().canModifyWired());
     }
 
     private void onChat(HMessage hMessage) {
@@ -415,6 +416,7 @@ public class GPresetImporter {
         Utils.sleep(60);
     }
 
+    // {out:WiredSetObjectVariableValue}{i:0}{i:2147418131}{i:-1}{i:-110}{i:3}
     private void attemptSetState(int furniId, String targetState) {
         FloorState floor = extension.getFloorState();
         FurniDataTools furniData = extension.getFurniDataTools();
