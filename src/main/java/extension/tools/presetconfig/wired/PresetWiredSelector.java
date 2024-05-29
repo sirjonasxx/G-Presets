@@ -14,8 +14,8 @@ public class PresetWiredSelector extends PresetWiredBase {
         super(packet);
     }
 
-    public PresetWiredSelector(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, boolean filter, boolean inverse, List<Integer> furniSources, List<Integer> userSources) {
-        super(wiredId, options, stringConfig, items, furniSources, userSources);
+    public PresetWiredSelector(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, boolean filter, boolean inverse, List<Integer> furniSources, List<Integer> userSources, List<Long> variableIds) {
+        super(wiredId, options, stringConfig, items, furniSources, userSources, variableIds);
         this.filter = filter;
         this.inverse = inverse;
     }

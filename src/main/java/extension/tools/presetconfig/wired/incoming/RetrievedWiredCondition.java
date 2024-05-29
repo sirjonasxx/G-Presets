@@ -9,8 +9,8 @@ public class RetrievedWiredCondition extends PresetWiredCondition implements Ret
 
     private final int typeId;
 
-    public RetrievedWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId, int quantifier, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
-        super(wiredId, options, stringConfig, items, quantifier, pickedFurniSources, pickedUserSources);
+    public RetrievedWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId, int quantifier, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds) {
+        super(wiredId, options, stringConfig, items, quantifier, pickedFurniSources, pickedUserSources, variableIds);
         this.typeId = typeId;
     }
 

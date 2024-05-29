@@ -65,6 +65,7 @@ public class GPresetImporter {
 
 
     private Map<Integer, Integer> realFurniIdMap = null;
+    private Map<Long, Long> realVariableIdMap = new HashMap<>();
 
     // expect furni drops on location described by key(string) -> "x|y|typeId"
     private Map<String, LinkedList<Integer>> expectFurniDrops = null;
@@ -485,7 +486,7 @@ public class GPresetImporter {
         wiredSaveConfirmation.drainPermits();
         PresetWiredBase presetWiredBase;
         synchronized (lock) {
-            presetWiredBase = presetWired.applyWiredConfig(extension, realFurniIdMap);
+            presetWiredBase = presetWired.applyWiredConfig(extension, realFurniIdMap, realVariableIdMap);
         }
 
         if (presetWired instanceof PresetWiredCondition) latestConditionSave = System.currentTimeMillis();

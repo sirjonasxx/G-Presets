@@ -9,8 +9,8 @@ public class RetrievedWiredEffect extends PresetWiredEffect implements Retrieved
 
     private final int typeId;
 
-    public RetrievedWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay, int typeId, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
-        super(wiredId, options, stringConfig, items, delay, pickedFurniSources, pickedUserSources);
+    public RetrievedWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay, int typeId, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds) {
+        super(wiredId, options, stringConfig, items, delay, pickedFurniSources, pickedUserSources, variableIds);
         this.typeId = typeId;
     }
 

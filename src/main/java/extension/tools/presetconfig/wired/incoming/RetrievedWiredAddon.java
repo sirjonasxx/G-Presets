@@ -9,8 +9,8 @@ public class RetrievedWiredAddon extends PresetWiredAddon implements RetrievedWi
 
     private final int typeId;
 
-    public RetrievedWiredAddon(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
-        super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources);
+    public RetrievedWiredAddon(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds) {
+        super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources, variableIds);
         this.typeId = typeId;
     }
 
