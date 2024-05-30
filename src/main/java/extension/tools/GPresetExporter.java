@@ -80,6 +80,12 @@ public class GPresetExporter {
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredAllVariables", this::onWiredAllVariables);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectRemove", this::onFurniRemoved);
+        extension.intercept(HMessage.Direction.TOCLIENT, "RoomReady", this::onRoomReady);
+    }
+
+    private void onRoomReady(HMessage hMessage) {
+        hasVariableMap = false;
+        variablesMap = new HashMap<>();
     }
 
     private void onWiredAllVariables(HMessage hMessage) {
@@ -661,11 +667,11 @@ public class GPresetExporter {
     private void attemptExport(String name, int x, int y, int dimX, int dimY) {
         if (isReady()) {
             List<Integer> unregisteredWired = unRegisteredWiredsInArea(x, y, dimX, dimY);
-            if (unregisteredWired.size() > 0 && extension.shouldExportWired()) {
-                hasVariableMap = false;
-                variablesMap = new HashMap<>();
+            if (((!hasVariableMap && hasWiredVariables()) || unregisteredWired.size() > 0) && extension.shouldExportWired()) {
                 exportName = name;
                 state = PresetExportState.FETCHING_UNKNOWN_CONFIGS;
+                hasVariableMap = false;
+                variablesMap = new HashMap<>();
                 extension.sendToServer(new HPacket("WiredGetAllVariables", HMessage.Direction.TOSERVER));
                 extension.sendVisualChatInfo(String.format(
                         "Fetching additional %s wired configurations before exporting... do not alter the room",
@@ -682,6 +688,42 @@ public class GPresetExporter {
             extension.sendVisualChatInfo("ERROR - Couldn't export due to missing floorstate or furnidata");
             extension.getLogger().log("Couldn't export due to missing floorstate or furnidata", "red");
         }
+    }
+
+    public boolean hasWiredVariables() {
+        if(wiredVariableConfigs.size() > 0)
+            return true;
+
+        for(PresetWiredTrigger preset : wiredTriggerConfigs.values()) {
+            if(preset.getVariableIds().size() > 0)
+                return true;
+        }
+
+
+        for(PresetWiredAddon preset : wiredAddonConfigs.values()) {
+            if(preset.getVariableIds().size() > 0)
+                return true;
+        }
+
+
+        for(PresetWiredCondition preset : wiredConditionConfigs.values()) {
+            if(preset.getVariableIds().size() > 0)
+                return true;
+        }
+
+
+        for(PresetWiredEffect preset : wiredEffectConfigs.values()) {
+            if(preset.getVariableIds().size() > 0)
+                return true;
+        }
+
+
+        for(PresetWiredSelector preset : wiredSelectorConfigs.values()) {
+            if(preset.getVariableIds().size() > 0)
+                return true;
+        }
+
+        return false;
     }
 
     public PresetExportState getState() {
