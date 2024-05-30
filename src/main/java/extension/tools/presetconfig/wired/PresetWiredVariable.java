@@ -42,7 +42,9 @@ public class PresetWiredVariable extends PresetWiredBase {
             }
             else if(wiredContext.referenceVariablesList != null && wiredContext.referenceVariablesList.sharedVariables.size() > 0) {
                 for(HSharedVariable var : wiredContext.referenceVariablesList.sharedVariables) {
-                    this.variableId = var.wiredVariable.id;
+                    if(var.wiredVariable.name.equals(stringConfig)) {
+                        this.variableId = var.wiredVariable.id;
+                    }
                 }
             }
         }

@@ -25,6 +25,7 @@ import utils.Utils;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class GPresetImporter {
@@ -32,6 +33,9 @@ public class GPresetImporter {
     private final Object lock = new Object();
 
     private GPresets extension = null;
+    private List<Long> needVariableIds = new ArrayList<>();
+    private int variablesProcessed;
+    private int variablesToProcess;
 
 
     public enum BuildingImportState {
@@ -118,7 +122,7 @@ public class GPresetImporter {
                 variables.add(new HWiredVariable(packet));
             }
 
-            if(workingPresetConfig != null && workingPresetConfig.getPresetWireds() != null && workingPresetConfig.getPresetWireds().getVariables() != null) {
+            if(workingPresetConfig != null && workingPresetConfig.getPresetWireds() != null) {
                 for (PresetWiredVariable origVar : workingPresetConfig.getPresetWireds().getVariables()) {
                     for(HWiredVariable newVar : variables) {
                         if(newVar.name.equals(origVar.getStringConfig())) {
@@ -128,7 +132,14 @@ public class GPresetImporter {
                 }
             }
 
-            wiredVariableConfirmation.release();
+            for(Long id : realVariableIdMap.keySet()) {
+                needVariableIds.remove(id);
+            }
+
+            if(needVariableIds.size() == 0) {
+                wiredVariableConfirmation.release();
+            }
+
         }
     }
 
@@ -515,6 +526,20 @@ public class GPresetImporter {
 
         wiredSaveConfirmation.drainPermits();
         wiredVariableConfirmation.drainPermits();
+
+        if (presetWired.getVariableIds() != null && presetWired.getVariableIds().size() > 0) {
+            needVariableIds.clear();
+            needVariableIds.addAll(presetWired.getVariableIds());
+            needVariableIds = needVariableIds.stream().filter(id -> realVariableIdMap.keySet().stream().noneMatch(x -> x.equals(id))).collect(Collectors.toList());
+
+            if(needVariableIds.size() > 0) {
+                extension.sendToServer(new HPacket("WiredGetAllVariables", HMessage.Direction.TOSERVER));
+                boolean gotVariableConfirmation = false;
+                try { gotVariableConfirmation = wiredVariableConfirmation.tryAcquire(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {}
+            }
+        }
+
         PresetWiredBase presetWiredBase;
         synchronized (lock) {
             presetWiredBase = presetWired.applyWiredConfig(extension, realFurniIdMap, realVariableIdMap);
@@ -531,11 +556,15 @@ public class GPresetImporter {
         try { gotConfirmation = wiredSaveConfirmation.tryAcquire(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {}
 
-
-        if (presetWired instanceof PresetWiredVariable || (presetWired.getVariableIds() != null && presetWired.getVariableIds().size() > 0)) {
-            boolean gotVariableConfirmation = false;
-            try { gotVariableConfirmation = wiredVariableConfirmation.tryAcquire(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {}
+        if (presetWired instanceof PresetWiredVariable) {
+            variablesProcessed++;
+            
+            if(variablesProcessed >= variablesToProcess) {
+                extension.sendToServer(new HPacket("WiredGetAllVariables", HMessage.Direction.TOSERVER));
+                boolean gotVariableConfirmation = false;
+                try { gotVariableConfirmation = wiredVariableConfirmation.tryAcquire(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {}
+            }
         }
 
         if (gotConfirmation) {
@@ -657,33 +686,27 @@ public class GPresetImporter {
                     )
             );
 
-            // ordered like this for better efficiency in wired save ratelimits
-            for (int i = 0; i < maxSize; i++) {
-                if (i < presetWireds.getVariables().size())
-                    allWireds.add(presetWireds.getVariables().get(i));
-                if (i < presetWireds.getConditions().size())
-                    allWireds.add(presetWireds.getConditions().get(i));
-                if (i < presetWireds.getEffects().size())
-                    allWireds.add(presetWireds.getEffects().get(i));
-                if (i < presetWireds.getTriggers().size())
-                    allWireds.add(presetWireds.getTriggers().get(i));
-                if (i < presetWireds.getAddons().size())
-                    allWireds.add(presetWireds.getAddons().get(i));
-                if (i < presetWireds.getSelectors().size())
-                    allWireds.add(presetWireds.getSelectors().get(i));
-            }
+            Predicate<PresetWiredBase> filter = (wiredBase) -> realFurniIdMap.containsKey(wiredBase.getWiredId());
 
-            allWireds = allWireds.stream()
-                    .filter(wiredBase -> realFurniIdMap.containsKey(wiredBase.getWiredId()))
-                    .collect(Collectors.toList());
+            List<PresetWiredVariable> variables = presetWireds.getVariables().stream().filter(filter).collect(Collectors.toList());
+            allWireds.addAll(variables);
+            allWireds.addAll(presetWireds.getConditions().stream().filter(filter).collect(Collectors.toList()));
+            allWireds.addAll(presetWireds.getEffects().stream().filter(filter).collect(Collectors.toList()));
+            allWireds.addAll(presetWireds.getTriggers().stream().filter(filter).collect(Collectors.toList()));
+            allWireds.addAll(presetWireds.getAddons().stream().filter(filter).collect(Collectors.toList()));
+            allWireds.addAll(presetWireds.getSelectors().stream().filter(filter).collect(Collectors.toList()));
+            allWireds.addAll(presetWireds.getAddons().stream().filter(filter).collect(Collectors.toList()));
 
             workingPresetConfig.getBindings().forEach(b -> {
                 if (!wiredBindings.containsKey(b.getWiredId())) wiredBindings.put(b.getWiredId(), new ArrayList<>());
                 wiredBindings.get(b.getWiredId()).add(b);
             });
             workingPresetConfig.getFurniture().forEach(p -> furni.put(p.getFurniId(), p));
+            
+            variablesProcessed = 0;
+            variablesToProcess = variables.size();
         }
-
+        
         int i = 0;
         while (state == BuildingImportState.SETUP_WIRED && i < allWireds.size()) {
             PresetWiredBase wiredBase = allWireds.get(i);

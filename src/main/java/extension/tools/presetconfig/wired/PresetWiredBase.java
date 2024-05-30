@@ -135,10 +135,6 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         }
 
         extension.sendToServer(packet);
-
-        if(this instanceof PresetWiredVariable || (this.variableIds != null && this.variableIds.size() > 0)) {
-            extension.sendToServer(new HPacket("WiredGetAllVariables", HMessage.Direction.TOSERVER));
-        }
     }
 
     protected abstract void applyTypeSpecificWiredConfig(HPacket packet);

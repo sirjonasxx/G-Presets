@@ -14,7 +14,7 @@ public interface RetrievedWired {
         public int delay;
         public boolean filter;
         public boolean invert;
-        public int quantifierType;
+        public byte quantifierType;
         public boolean isInvert;
     }
 
@@ -64,7 +64,7 @@ public interface RetrievedWired {
 
         // readTypeSpecifics
         if (cls == RetrievedWiredCondition.class) {
-            specifics.quantifierType = packet.readInteger();
+            specifics.quantifierType = packet.readByte();
             specifics.isInvert = packet.readBoolean();
         }
 
