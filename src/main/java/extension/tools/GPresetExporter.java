@@ -1,6 +1,7 @@
 package extension.tools;
 
 import extension.GPresets;
+import extension.parsers.HWiredVariable;
 import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.PresetConfigUtils;
 import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
@@ -25,6 +26,8 @@ import java.util.stream.Collectors;
 public class GPresetExporter {
 
     private final Object lock = new Object();
+    private HashMap<String, Long> variablesMap = new HashMap<>();
+    private boolean hasVariableMap = false;
 
     public enum PresetExportState {
         NONE,
@@ -74,8 +77,30 @@ public class GPresetExporter {
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniAddon", this::retrieveAddonConf);
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniSelector", this::retrieveSelectorConf);
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniVariable", this::retrieveVariableConf);
+        extension.intercept(HMessage.Direction.TOCLIENT, "WiredAllVariables", this::onWiredAllVariables);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectRemove", this::onFurniRemoved);
+    }
+
+    private void onWiredAllVariables(HMessage hMessage) {
+        if (state == PresetExportState.FETCHING_UNKNOWN_CONFIGS) {
+            HPacket packet = hMessage.getPacket();
+            packet.readInteger();
+            HashSet<HWiredVariable> variables = new HashSet<>();
+            int count = packet.readInteger();
+            for(int i = 0; i < count; i++) {
+                variables.add(new HWiredVariable(packet));
+            }
+
+            variablesMap = new HashMap<>();
+            variables.forEach(v -> {
+                if(v.id > 0) {
+                    variablesMap.put(v.name, v.id);
+                }
+            });
+            hasVariableMap = true;
+            maybeFinishExportAfterRetrieve();
+        }
     }
 
     private boolean isReady() {
@@ -430,7 +455,7 @@ public class GPresetExporter {
 
 
 
-            PresetWireds presetWireds = new PresetWireds(allConditions, allEffects, allTriggers, allAddons, allSelectors, allVariables);
+            PresetWireds presetWireds = new PresetWireds(allConditions, allEffects, allTriggers, allAddons, allSelectors, allVariables, variablesMap);
             PresetConfig presetConfig = new PresetConfig(allFurni, presetWireds, allBindings, allAdsBackgrounds);
 
             PresetConfigUtils.savePreset(name, presetConfig);
@@ -516,7 +541,7 @@ public class GPresetExporter {
                 if (y1 > y2) y1 = y2;
 
                 int remaining = unRegisteredWiredsInArea(x1, y1, dimX, dimY).size();
-                if (remaining == 0) {
+                if (remaining == 0 && hasVariableMap) {
                     export(exportName, x1, y1, dimX, dimY);
                 }
                 else if (remaining % 10 == 0) {
@@ -634,6 +659,7 @@ public class GPresetExporter {
             if (unregisteredWired.size() > 0 && extension.shouldExportWired()) {
                 exportName = name;
                 state = PresetExportState.FETCHING_UNKNOWN_CONFIGS;
+                extension.sendToServer(new HPacket("WiredGetAllVariables", HMessage.Direction.TOSERVER));
                 extension.sendVisualChatInfo(String.format(
                         "Fetching additional %s wired configurations before exporting... do not alter the room",
                         unregisteredWired.size()
@@ -722,6 +748,8 @@ public class GPresetExporter {
                 wiredSelectorConfigs.clear();
                 wiredAddonConfigs.clear();
                 wiredVariableConfigs.clear();
+                hasVariableMap = false;
+                variablesMap = new HashMap<>();
             }
         }
     }
