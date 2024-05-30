@@ -68,7 +68,12 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
                 object.getJSONArray("userSources").toList().stream().map(o -> (int)o).collect(Collectors.toList()) :
                 Collections.emptyList();
         variableIds = object.has("variableIds") ?
-                object.getJSONArray("variableIds").toList().stream().map(o -> (long)o).collect(Collectors.toList()) :
+                object.getJSONArray("variableIds").toList().stream().map(o -> {
+                    if(o instanceof Integer) {
+                        return new Long((int)o);
+                    }
+                    return (long)o;
+                }).collect(Collectors.toList()) :
                 Collections.emptyList();
     }
 
@@ -125,9 +130,15 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
             new PresetWiredAddon(packet);
         } else if (this instanceof PresetWiredCondition) {
             new PresetWiredCondition(packet);
+        } else if (this instanceof PresetWiredVariable) {
+            new PresetWiredVariable(packet);
         }
 
         extension.sendToServer(packet);
+
+        if(this instanceof PresetWiredVariable || (this.variableIds != null && this.variableIds.size() > 0)) {
+            extension.sendToServer(new HPacket("WiredGetAllVariables", HMessage.Direction.TOSERVER));
+        }
     }
 
     protected abstract void applyTypeSpecificWiredConfig(HPacket packet);

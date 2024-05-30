@@ -1,5 +1,6 @@
 package extension.tools.presetconfig.wired.incoming;
 
+import extension.parsers.HWiredContext;
 import extension.tools.presetconfig.wired.PresetWiredCondition;
 import gearth.protocol.HPacket;
 
@@ -9,7 +10,7 @@ public class RetrievedWiredCondition extends PresetWiredCondition implements Ret
 
     private final int typeId;
 
-    public RetrievedWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId, int quantifier, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds) {
+    public RetrievedWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId, int quantifier, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds, HWiredContext wiredContext) {
         super(wiredId, options, stringConfig, items, quantifier, pickedFurniSources, pickedUserSources, variableIds);
         this.typeId = typeId;
     }

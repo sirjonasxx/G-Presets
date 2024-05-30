@@ -1,5 +1,6 @@
 package extension.tools.presetconfig.wired.incoming;
 
+import extension.parsers.HWiredContext;
 import extension.tools.presetconfig.wired.PresetWiredEffect;
 import gearth.protocol.HPacket;
 
@@ -9,7 +10,7 @@ public class RetrievedWiredEffect extends PresetWiredEffect implements Retrieved
 
     private final int typeId;
 
-    public RetrievedWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay, int typeId, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds) {
+    public RetrievedWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay, int typeId, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds, HWiredContext wiredContext) {
         super(wiredId, options, stringConfig, items, delay, pickedFurniSources, pickedUserSources, variableIds);
         this.typeId = typeId;
     }
