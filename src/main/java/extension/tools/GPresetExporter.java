@@ -363,7 +363,12 @@ public class GPresetExporter {
                                 allSelectors.add(new PresetWiredSelector(wiredSelectorConfigs.get(key)));
                             }
                             else if (classname.startsWith("wf_var_")) {
-                                allVariables.add(new PresetWiredVariable(wiredVariableConfigs.get(key)));
+                                PresetWiredVariable presetVariable = new PresetWiredVariable(wiredVariableConfigs.get(key));
+                                if(hasVariableMap && presetVariable.variableId == 0) {
+                                    Optional<Map.Entry<String, Long>> op = variablesMap.entrySet().stream().filter(k -> k.getKey().equals(presetVariable.getStringConfig())).findFirst();
+                                    op.ifPresent(stringLongEntry -> presetVariable.variableId = stringLongEntry.getValue());
+                                }
+                                allVariables.add(presetVariable);
                             }
 
                             if (wiredFurniBindings.containsKey(key)) {
@@ -657,6 +662,8 @@ public class GPresetExporter {
         if (isReady()) {
             List<Integer> unregisteredWired = unRegisteredWiredsInArea(x, y, dimX, dimY);
             if (unregisteredWired.size() > 0 && extension.shouldExportWired()) {
+                hasVariableMap = false;
+                variablesMap = new HashMap<>();
                 exportName = name;
                 state = PresetExportState.FETCHING_UNKNOWN_CONFIGS;
                 extension.sendToServer(new HPacket("WiredGetAllVariables", HMessage.Direction.TOSERVER));

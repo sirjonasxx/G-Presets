@@ -148,7 +148,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
                     .map(realFurniIdMap::get)
                     .collect(Collectors.toList());
             presetWiredBase.variableIds = variableIds.stream()
-                    .map(id -> id < 0 ? id : realVariableIdMap.getOrDefault(id,0L))
+                    .map(id -> id < 0 ? id : realVariableIdMap.getOrDefault(id, this instanceof PresetWiredVariable && this.variableIds.size() == 1 ? this.variableIds.get(0) : 0L))
                     .collect(Collectors.toList());
 
             presetWiredBase.applyWiredConfig(extension);
