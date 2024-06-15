@@ -77,7 +77,7 @@ public class GPresetExporter {
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniAddon", this::retrieveAddonConf);
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniSelector", this::retrieveSelectorConf);
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniVariable", this::retrieveVariableConf);
-        extension.intercept(HMessage.Direction.TOCLIENT, "WiredAllVariables", this::onWiredAllVariables);
+        extension.intercept(HMessage.Direction.TOCLIENT, "WiredAllVariablesDiffs", this::onWiredAllVariables);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectRemove", this::onFurniRemoved);
         extension.intercept(HMessage.Direction.TOCLIENT, "RoomReady", this::onRoomReady);
@@ -91,21 +91,31 @@ public class GPresetExporter {
     private void onWiredAllVariables(HMessage hMessage) {
         if (state == PresetExportState.FETCHING_UNKNOWN_CONFIGS) {
             HPacket packet = hMessage.getPacket();
-            packet.readInteger();
+            int _allVariablesHash = packet.readInteger();
+            boolean isLastChunk = packet.readBoolean();
+
+            int removedVariablesLength = packet.readInteger();
+            for(int i = 0; i < removedVariablesLength; i++) {
+                packet.readLong();
+            }
+
             HashSet<HWiredVariable> variables = new HashSet<>();
             int count = packet.readInteger();
             for(int i = 0; i < count; i++) {
+                int addedOrUpdated = packet.readInteger();
                 variables.add(new HWiredVariable(packet));
             }
 
-            variablesMap = new HashMap<>();
             variables.forEach(v -> {
                 if(v.id > 0) {
                     variablesMap.put(v.name, v.id);
                 }
             });
-            hasVariableMap = true;
-            maybeFinishExportAfterRetrieve();
+
+            if(isLastChunk) {
+                maybeFinishExportAfterRetrieve();
+                hasVariableMap = true;
+            }
         }
     }
 
@@ -672,7 +682,7 @@ public class GPresetExporter {
                 state = PresetExportState.FETCHING_UNKNOWN_CONFIGS;
                 hasVariableMap = false;
                 variablesMap = new HashMap<>();
-                extension.sendToServer(new HPacket("WiredGetAllVariables", HMessage.Direction.TOSERVER));
+                extension.sendToServer(new HPacket("WiredGetAllVariablesDiffs", HMessage.Direction.TOSERVER, 0));
                 extension.sendVisualChatInfo(String.format(
                         "Fetching additional %s wired configurations before exporting... do not alter the room",
                         unregisteredWired.size()

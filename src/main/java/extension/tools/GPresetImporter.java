@@ -95,7 +95,7 @@ public class GPresetImporter {
         extension.intercept(HMessage.Direction.TOSERVER, "MoveAvatar", this::moveAvatar);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectAdd", this::onObjectAdd);
-        extension.intercept(HMessage.Direction.TOCLIENT, "WiredAllVariables", this::onWiredAllVariables);
+        extension.intercept(HMessage.Direction.TOCLIENT, "WiredAllVariablesDiffs", this::onWiredAllVariables);
 
         extension.intercept(HMessage.Direction.TOSERVER, "PlaceObject", this::maybeBlockPlacements);
         extension.intercept(HMessage.Direction.TOSERVER, "BuildersClubPlaceRoomItem", this::maybeBlockPlacements);
@@ -115,10 +115,19 @@ public class GPresetImporter {
     private void onWiredAllVariables(HMessage hMessage) {
         if (state == BuildingImportState.SETUP_WIRED) {
             HPacket packet = hMessage.getPacket();
-            packet.readInteger();
+            int _allVariablesHash = packet.readInteger();
+            boolean isLastChunk = packet.readBoolean();
+
+            int removedVariablesLength = packet.readInteger();
+            for(int i = 0; i < removedVariablesLength; i++) {
+                packet.readLong();
+            }
+
             HashSet<HWiredVariable> variables = new HashSet<>();
+
             int count = packet.readInteger();
             for(int i = 0; i < count; i++) {
+                int addedOrUpdated = packet.readInteger();
                 variables.add(new HWiredVariable(packet));
             }
 
@@ -540,7 +549,7 @@ public class GPresetImporter {
             needVariableIds = needVariableIds.stream().filter(id -> id > 0 && realVariableIdMap.keySet().stream().noneMatch(x -> x.equals(id))).collect(Collectors.toList());
 
             if(needVariableIds.size() > 0) {
-                extension.sendToServer(new HPacket("WiredGetAllVariables", HMessage.Direction.TOSERVER));
+                extension.sendToServer(new HPacket("WiredGetAllVariablesDiffs", HMessage.Direction.TOSERVER, 0));
                 boolean gotVariableConfirmation = false;
                 try { gotVariableConfirmation = wiredVariableConfirmation.tryAcquire(5, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {}
@@ -567,7 +576,7 @@ public class GPresetImporter {
             variablesProcessed++;
             
             if(variablesProcessed >= variablesToProcess) {
-                extension.sendToServer(new HPacket("WiredGetAllVariables", HMessage.Direction.TOSERVER));
+                extension.sendToServer(new HPacket("WiredGetAllVariablesDiffs", HMessage.Direction.TOSERVER, 0));
                 boolean gotVariableConfirmation = false;
                 try { gotVariableConfirmation = wiredVariableConfirmation.tryAcquire(5, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {}
