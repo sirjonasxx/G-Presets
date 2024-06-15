@@ -113,8 +113,8 @@ public class GPresetExporter {
             });
 
             if(isLastChunk) {
-                maybeFinishExportAfterRetrieve();
                 hasVariableMap = true;
+                maybeFinishExportAfterRetrieve();
             }
         }
     }
