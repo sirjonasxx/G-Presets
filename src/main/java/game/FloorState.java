@@ -297,6 +297,7 @@ public class FloorState {
                 int count = packet.readInteger();
                 for (int i = 0; i < count; i++) {
                     int type = packet.readInteger();
+                    // ok but wtf is this mess???
                     if (type == 0) { // user
                         packet.readInteger();
                         packet.readInteger();
@@ -326,7 +327,7 @@ public class FloorState {
 
                         updateFurniPosition(furniId, newX, newY, newZ);
                     }
-                    else { // wall item
+                    else if (type == 2) { // wall item
                         packet.readInteger();
                         packet.readBoolean();
 
@@ -336,6 +337,11 @@ public class FloorState {
                         packet.readInteger();
                         packet.readInteger();
                         packet.readInteger();
+                        packet.readInteger();
+                        packet.readInteger();
+                        packet.readInteger();
+                    }
+                    else if (type == 3) { // user direction
                         packet.readInteger();
                         packet.readInteger();
                         packet.readInteger();

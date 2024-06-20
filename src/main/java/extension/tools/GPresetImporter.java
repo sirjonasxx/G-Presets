@@ -1,6 +1,7 @@
 package extension.tools;
 
 import extension.GPresets;
+import extension.parsers.HWiredVariable;
 import extension.tools.importutils.*;
 import extension.tools.postconfig.ItemSource;
 import extension.tools.postconfig.PostConfig;
@@ -24,6 +25,7 @@ import utils.Utils;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class GPresetImporter {
@@ -31,6 +33,9 @@ public class GPresetImporter {
     private final Object lock = new Object();
 
     private GPresets extension = null;
+    private List<Long> needVariableIds = new ArrayList<>();
+    private int variablesProcessed;
+    private int variablesToProcess;
 
 
     public enum BuildingImportState {
@@ -65,6 +70,7 @@ public class GPresetImporter {
 
 
     private Map<Integer, Integer> realFurniIdMap = null;
+    private Map<Long, Long> realVariableIdMap = new HashMap<>();
 
     // expect furni drops on location described by key(string) -> "x|y|typeId"
     private Map<String, LinkedList<Integer>> expectFurniDrops = null;
@@ -89,6 +95,7 @@ public class GPresetImporter {
         extension.intercept(HMessage.Direction.TOSERVER, "MoveAvatar", this::moveAvatar);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectAdd", this::onObjectAdd);
+        extension.intercept(HMessage.Direction.TOCLIENT, "WiredAllVariablesDiffs", this::onWiredAllVariables);
 
         extension.intercept(HMessage.Direction.TOSERVER, "PlaceObject", this::maybeBlockPlacements);
         extension.intercept(HMessage.Direction.TOSERVER, "BuildersClubPlaceRoomItem", this::maybeBlockPlacements);
@@ -103,6 +110,53 @@ public class GPresetImporter {
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateSelector", this::blockFurniAdjustments);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredSaveSuccess", this::wiredSaved);
+    }
+
+    private void onWiredAllVariables(HMessage hMessage) {
+        if (state == BuildingImportState.SETUP_WIRED) {
+            HPacket packet = hMessage.getPacket();
+            int _allVariablesHash = packet.readInteger();
+            boolean isLastChunk = packet.readBoolean();
+
+            int removedVariablesLength = packet.readInteger();
+            for(int i = 0; i < removedVariablesLength; i++) {
+                packet.readLong();
+            }
+
+            HashSet<HWiredVariable> variables = new HashSet<>();
+
+            int count = packet.readInteger();
+            for(int i = 0; i < count; i++) {
+                int addedOrUpdated = packet.readInteger();
+                variables.add(new HWiredVariable(packet));
+            }
+
+            if(workingPresetConfig != null && workingPresetConfig.getPresetWireds() != null) {
+                HashMap<String, Long> map = workingPresetConfig.getPresetWireds().getVariablesMap();
+
+                for(HWiredVariable newVar : variables) {
+                    Optional<Map.Entry<String, Long>> op = map.entrySet().stream().filter(k -> k.getKey().equals(newVar.name)).findFirst();
+                    op.ifPresent(aLong -> realVariableIdMap.put(aLong.getValue(), newVar.id));
+                }
+
+                for (PresetWiredVariable origVar : workingPresetConfig.getPresetWireds().getVariables()) {
+                    for(HWiredVariable newVar : variables) {
+                        if(newVar.name.equals(origVar.getStringConfig())) {
+                            realVariableIdMap.put(origVar.variableId, newVar.id);
+                        }
+                    }
+                }
+            }
+
+            for(Long id : realVariableIdMap.keySet()) {
+                needVariableIds.remove(id);
+            }
+
+            if(needVariableIds.size() == 0) {
+                wiredVariableConfirmation.release();
+            }
+
+        }
     }
 
     private void blockFurniAdjustments(HMessage message) {
@@ -159,7 +213,8 @@ public class GPresetImporter {
         return extension.getFloorState().inRoom() && extension.furniDataReady() &&
                 extension.getInventory().getState() == Inventory.InventoryState.LOADED && extension.stackTile() != null &&
                 (postConfig.getItemSource() == ItemSource.ONLY_INVENTORY || extension.getCatalog().getState()
-                        == BCCatalog.CatalogState.COLLECTED) && presetConfig != null;
+                        == BCCatalog.CatalogState.COLLECTED) && presetConfig != null &&
+                extension.getPermissions().canMoveFurni() && (!extension.shouldExportWired() || extension.getPermissions().canModifyWired());
     }
 
     private void onChat(HMessage hMessage) {
@@ -459,8 +514,10 @@ public class GPresetImporter {
     private long latestEffectSave = -1;
     private long latestAddonSave = -1;
     private long latestSelectorSave = -1;
+    private long latestVariableSave = -1;
 
     private Semaphore wiredSaveConfirmation = new Semaphore(0);
+    private Semaphore wiredVariableConfirmation = new Semaphore(0);
 
     private void wiredSaved(HMessage hMessage) {
         if (state == BuildingImportState.SETUP_WIRED) {
@@ -478,14 +535,30 @@ public class GPresetImporter {
         else if (presetWired instanceof PresetWiredTrigger) latestSave = latestTriggerSave;
         else if (presetWired instanceof PresetWiredAddon) latestSave = latestAddonSave;
         else if (presetWired instanceof PresetWiredSelector) latestSave = latestSelectorSave;
+        else if (presetWired instanceof PresetWiredVariable) latestSave = latestVariableSave;
 
         int delay = 300 - ((int)(Math.min(300, System.currentTimeMillis() - latestSave)));
         if (delay > 0) Utils.sleep(delay);
 
         wiredSaveConfirmation.drainPermits();
+        wiredVariableConfirmation.drainPermits();
+
+        if (presetWired.getVariableIds() != null && presetWired.getVariableIds().size() > 0) {
+            needVariableIds.clear();
+            needVariableIds.addAll(presetWired.getVariableIds());
+            needVariableIds = needVariableIds.stream().filter(id -> id > 0 && realVariableIdMap.keySet().stream().noneMatch(x -> x.equals(id))).collect(Collectors.toList());
+
+            if(needVariableIds.size() > 0) {
+                extension.sendToServer(new HPacket("WiredGetAllVariablesDiffs", HMessage.Direction.TOSERVER, 0));
+                boolean gotVariableConfirmation = false;
+                try { gotVariableConfirmation = wiredVariableConfirmation.tryAcquire(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {}
+            }
+        }
+
         PresetWiredBase presetWiredBase;
         synchronized (lock) {
-            presetWiredBase = presetWired.applyWiredConfig(extension, realFurniIdMap);
+            presetWiredBase = presetWired.applyWiredConfig(extension, realFurniIdMap, realVariableIdMap);
         }
 
         if (presetWired instanceof PresetWiredCondition) latestConditionSave = System.currentTimeMillis();
@@ -493,10 +566,22 @@ public class GPresetImporter {
         else if (presetWired instanceof PresetWiredTrigger) latestTriggerSave = System.currentTimeMillis();
         else if (presetWired instanceof PresetWiredAddon) latestAddonSave = System.currentTimeMillis();
         else if (presetWired instanceof PresetWiredSelector) latestSelectorSave = System.currentTimeMillis();
+        else if (presetWired instanceof PresetWiredVariable) latestVariableSave = System.currentTimeMillis();
 
         boolean gotConfirmation = false;
         try { gotConfirmation = wiredSaveConfirmation.tryAcquire(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {}
+
+        if (presetWired instanceof PresetWiredVariable) {
+            variablesProcessed++;
+            
+            if(variablesProcessed >= variablesToProcess) {
+                extension.sendToServer(new HPacket("WiredGetAllVariablesDiffs", HMessage.Direction.TOSERVER, 0));
+                boolean gotVariableConfirmation = false;
+                try { gotVariableConfirmation = wiredVariableConfirmation.tryAcquire(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {}
+            }
+        }
 
         if (gotConfirmation) {
             if (presetWiredBase != null) {
@@ -609,33 +694,35 @@ public class GPresetImporter {
                     Math.max(presetWireds.getEffects().size(),
                             Math.max(presetWireds.getTriggers().size(),
                                     Math.max(presetWireds.getAddons().size(),
-                                            presetWireds.getSelectors().size()))));
+                                            Math.max(presetWireds.getSelectors().size(),
+                                                presetWireds.getVariables().size()
+                                            )
+                                    )
+                            )
+                    )
+            );
 
-            // ordered like this for better efficiency in wired save ratelimits
-            for (int i = 0; i < maxSize; i++) {
-                if (i < presetWireds.getConditions().size())
-                    allWireds.add(presetWireds.getConditions().get(i));
-                if (i < presetWireds.getEffects().size())
-                    allWireds.add(presetWireds.getEffects().get(i));
-                if (i < presetWireds.getTriggers().size())
-                    allWireds.add(presetWireds.getTriggers().get(i));
-                if (i < presetWireds.getAddons().size())
-                    allWireds.add(presetWireds.getAddons().get(i));
-                if (i < presetWireds.getSelectors().size())
-                    allWireds.add(presetWireds.getSelectors().get(i));
-            }
+            Predicate<PresetWiredBase> filter = (wiredBase) -> realFurniIdMap.containsKey(wiredBase.getWiredId());
 
-            allWireds = allWireds.stream()
-                    .filter(wiredBase -> realFurniIdMap.containsKey(wiredBase.getWiredId()))
-                    .collect(Collectors.toList());
+            List<PresetWiredVariable> variables = presetWireds.getVariables().stream().filter(filter).collect(Collectors.toList());
+            allWireds.addAll(variables);
+            allWireds.addAll(presetWireds.getConditions().stream().filter(filter).collect(Collectors.toList()));
+            allWireds.addAll(presetWireds.getEffects().stream().filter(filter).collect(Collectors.toList()));
+            allWireds.addAll(presetWireds.getTriggers().stream().filter(filter).collect(Collectors.toList()));
+            allWireds.addAll(presetWireds.getAddons().stream().filter(filter).collect(Collectors.toList()));
+            allWireds.addAll(presetWireds.getSelectors().stream().filter(filter).collect(Collectors.toList()));
+            allWireds.addAll(presetWireds.getAddons().stream().filter(filter).collect(Collectors.toList()));
 
             workingPresetConfig.getBindings().forEach(b -> {
                 if (!wiredBindings.containsKey(b.getWiredId())) wiredBindings.put(b.getWiredId(), new ArrayList<>());
                 wiredBindings.get(b.getWiredId()).add(b);
             });
             workingPresetConfig.getFurniture().forEach(p -> furni.put(p.getFurniId(), p));
+            
+            variablesProcessed = 0;
+            variablesToProcess = variables.size();
         }
-
+        
         int i = 0;
         while (state == BuildingImportState.SETUP_WIRED && i < allWireds.size()) {
             PresetWiredBase wiredBase = allWireds.get(i);

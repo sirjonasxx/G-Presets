@@ -28,6 +28,7 @@
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                            </rowConstraints>
                            <children>
                               <Label fx:id="cndConnectedLbl" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" text="Connected to Habbo" />
@@ -36,6 +37,7 @@
                               <Label fx:id="cndStackTileLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="86.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" text="Stack tile found" GridPane.rowIndex="5" />
                               <Label fx:id="cndFurnidataLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="86.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" text="Furnidata parsed" GridPane.rowIndex="2" />
                               <Label fx:id="cndBCShopLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="58.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" text="BC Catalog parsed" GridPane.rowIndex="3" />
+                              <Label fx:id="cndPermissionsLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="58.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" text="Required permissions" GridPane.rowIndex="6" />
                            </children>
                         </GridPane>
                         <Button layoutX="22.0" layoutY="168.0" mnemonicParsing="false" onAction="#loadInventoryClick" prefHeight="25.0" prefWidth="160.0" text="Load Inventory" />

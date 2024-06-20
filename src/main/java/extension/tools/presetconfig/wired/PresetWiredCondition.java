@@ -13,8 +13,8 @@ public class PresetWiredCondition extends PresetWiredBase {
         super(packet);
     }
 
-    public PresetWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int quantifier, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
-        super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources);
+    public PresetWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int quantifier, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds) {
+        super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources, variableIds);
         this.quantifier = quantifier;
     }
 

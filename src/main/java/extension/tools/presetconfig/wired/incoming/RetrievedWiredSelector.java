@@ -1,5 +1,6 @@
 package extension.tools.presetconfig.wired.incoming;
 
+import extension.parsers.HWiredContext;
 import extension.tools.presetconfig.wired.PresetWiredSelector;
 import gearth.protocol.HPacket;
 
@@ -9,8 +10,8 @@ public class RetrievedWiredSelector extends PresetWiredSelector implements Retri
 
     private final int typeId;
 
-    public RetrievedWiredSelector(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId, boolean filter, boolean invert, List<Integer> pickedFurniSources, List<Integer> pickedUserSources) {
-        super(wiredId, options, stringConfig, items, filter, invert, pickedFurniSources, pickedUserSources);
+    public RetrievedWiredSelector(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId, boolean filter, boolean invert, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds, HWiredContext wiredContext) {
+        super(wiredId, options, stringConfig, items, filter, invert, pickedFurniSources, pickedUserSources, variableIds);
         this.typeId = typeId;
     }
 

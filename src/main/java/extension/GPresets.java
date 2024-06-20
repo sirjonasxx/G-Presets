@@ -17,6 +17,7 @@ import furnidata.FurniDataTools;
 import game.BCCatalog;
 import game.FloorState;
 import game.Inventory;
+import game.RoomPermissions;
 import gearth.extensions.ExtensionForm;
 import gearth.extensions.ExtensionInfo;
 import gearth.extensions.parsers.HFloorItem;
@@ -66,6 +67,7 @@ public class GPresets extends ExtensionForm {
     public Label cndStackTileLbl;
     public Label cndFurnidataLbl;
     public Label cndBCShopLbl;
+    public Label cndPermissionsLbl;
 
     public ToggleGroup stacktile_tgl;
 
@@ -97,6 +99,7 @@ public class GPresets extends ExtensionForm {
     private Inventory inventory = null;
     private FloorState floorState = null;
     private BCCatalog catalog = null;
+    private RoomPermissions permissions = null;
     private volatile boolean isConnected = false;
 
     private GPresetExporter exporter = null;
@@ -127,9 +130,10 @@ public class GPresets extends ExtensionForm {
             updateUI();
         });
 
-        noExportWiredCbx.selectedProperty().addListener(observable ->
-                Cacher.put("noExportWired", noExportWiredCbx.isSelected())
-        );
+        noExportWiredCbx.selectedProperty().addListener(observable -> {
+            Cacher.put("noExportWired", noExportWiredCbx.isSelected());
+            updateUI();
+        });
 
         allowIncompleteBuildsCbx.selectedProperty().addListener(observable ->
                 Cacher.put("allowIncompleteBuilds", allowIncompleteBuildsCbx.isSelected())
@@ -200,6 +204,7 @@ public class GPresets extends ExtensionForm {
         });
         this.inventory = new Inventory(this, logger, this::updateUI);
         this.catalog = new BCCatalog(this, logger, this::updateUI);
+        this.permissions = new RoomPermissions(this, logger, this::updateUI);
 
         this.exporter = new GPresetExporter(this);
         this.importer = new GPresetImporter(this);
@@ -357,6 +362,7 @@ public class GPresets extends ExtensionForm {
             updateLabel(cndInventoryLbl, inventory.getState() == Inventory.InventoryState.LOADED,
                     inventory.getState() == Inventory.InventoryState.LOADING);
             updateLabel(cndStackTileLbl, stackTile() != null);
+            updateLabel(cndPermissionsLbl, permissions.canMoveFurni() && (noExportWiredCbx.isSelected() || permissions.canModifyWired()));
 
             availabilityBtn.setDisable(importer.getPresetConfig() == null);
             currentPresetBtn.setDisable(presetListView.getSelectionModel().getSelectedItem() == null);
@@ -405,6 +411,10 @@ public class GPresets extends ExtensionForm {
 
     public BCCatalog getCatalog() {
         return catalog;
+    }
+
+    public RoomPermissions getPermissions() {
+        return permissions;
     }
 
     public StackTileSetting getStackTileSetting() {
