@@ -68,7 +68,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
                 object.getJSONArray("userSources").toList().stream().map(o -> (int)o).collect(Collectors.toList()) :
                 Collections.emptyList();
         variableIds = object.has("variableIds") ?
-                object.getJSONArray("variableIds").toList().stream().map(o -> (long)o).collect(Collectors.toList()) :
+                object.getJSONArray("variableIds").toList().stream().map(o -> ((Number) o).longValue()).collect(Collectors.toList()) :
                 Collections.emptyList();
     }
 
@@ -125,6 +125,8 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
             new PresetWiredAddon(packet);
         } else if (this instanceof PresetWiredCondition) {
             new PresetWiredCondition(packet);
+        } else if (this instanceof PresetWiredVariable) {
+            new PresetWiredVariable(packet);
         }
 
         extension.sendToServer(packet);
@@ -141,7 +143,12 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
                     .map(realFurniIdMap::get)
                     .collect(Collectors.toList());
             presetWiredBase.variableIds = variableIds.stream()
-                    .map(id -> realVariableIdMap.getOrDefault(id,0L))
+                    .map(id -> {
+                        // negative IDs are internal variables (the @variables)
+                        if(id < 0) return id;
+
+                        return realVariableIdMap.getOrDefault(id, 0L);
+                    })
                     .collect(Collectors.toList());
 
             presetWiredBase.applyWiredConfig(extension);

@@ -17,6 +17,8 @@ import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import utils.StateExtractor;
 import utils.Utils;
+import utils.parsers.WiredAllVariablesDiffs;
+import utils.parsers.WiredVariable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -45,6 +47,10 @@ public class GPresetExporter {
     private final Map<String, PresetWiredTrigger> wiredTriggerConfigs = Collections.synchronizedMap(new HashMap<>());
     private final Map<String, PresetWiredAddon> wiredAddonConfigs = Collections.synchronizedMap(new HashMap<>());
     private final Map<String, PresetWiredSelector> wiredSelectorConfigs = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, PresetWiredVariable> wiredVariableConfigs = Collections.synchronizedMap(new HashMap<>());
+
+    private final List<WiredVariable> roomVariables = Collections.synchronizedList(new ArrayList<>());
+    private boolean gotAllVariables = false;
 
     private static final Set<String> requireBindings = new HashSet<>(Arrays.asList(
             "wf_act_match_to_sshot", "wf_cnd_match_snapshot", "wf_cnd_not_match_snap", "wf_trg_stuff_state"));
@@ -61,6 +67,7 @@ public class GPresetExporter {
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateAddon", this::saveAddon);
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateSelector", this::saveSelector);
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateAction", this::saveEffect);
+        extension.intercept(HMessage.Direction.TOSERVER, "UpdateVariable", this::saveVariable);
 
         extension.intercept(HMessage.Direction.TOSERVER, "Chat", this::onChat);
         extension.intercept(HMessage.Direction.TOSERVER, "MoveAvatar", this::moveAvatar);
@@ -71,6 +78,9 @@ public class GPresetExporter {
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniAction", this::retrieveActionConf);
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniAddon", this::retrieveAddonConf);
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniSelector", this::retrieveSelectorConf);
+        extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniVariable", this::retrieveVariableConf);
+
+        extension.intercept(HMessage.Direction.TOCLIENT, "WiredAllVariablesDiffs", this::retrieveVariables);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectRemove", this::onFurniRemoved);
     }
@@ -202,6 +212,14 @@ public class GPresetExporter {
         }
     }
 
+    private void saveVariable(HMessage hMessage) {
+        if (isReady()) {
+            PresetWiredVariable preset = new PresetWiredVariable(hMessage.getPacket());
+            wiredVariableConfigs.put(wiredCacheKey(preset.getWiredId()), preset);
+            maybeSaveBindings(preset);
+        }
+    }
+
     private void saveTrigger(HMessage hMessage) {
         if (isReady()) {
             PresetWiredTrigger preset = new PresetWiredTrigger(hMessage.getPacket());
@@ -255,7 +273,8 @@ public class GPresetExporter {
                                 || (classname.startsWith("wf_cnd_") && !wiredConditionConfigs.containsKey(wiredCacheKey(f.getId())))
                                 || (classname.startsWith("wf_act_") && !wiredEffectConfigs.containsKey(wiredCacheKey(f.getId())))
                                 || (classname.startsWith("wf_xtra_") && !wiredAddonConfigs.containsKey(wiredCacheKey(f.getId())))
-                                || (classname.startsWith("wf_slc_") && !wiredSelectorConfigs.containsKey(wiredCacheKey(f.getId())))) {
+                                || (classname.startsWith("wf_slc_") && !wiredSelectorConfigs.containsKey(wiredCacheKey(f.getId())))
+                                || (classname.startsWith("wf_var_") && !wiredVariableConfigs.containsKey(wiredCacheKey(f.getId())))) {
                             unregisteredWired.add(f.getId());
                         }
                     });
@@ -278,7 +297,8 @@ public class GPresetExporter {
             List<PresetWiredTrigger> allTriggers = new ArrayList<>();
             List<PresetWiredAddon> allAddons = new ArrayList<>();
             List<PresetWiredSelector> allSelectors = new ArrayList<>();
-            List<List<? extends PresetWiredBase>> wiredLists = Arrays.asList(allConditions, allEffects, allTriggers, allAddons, allSelectors);
+            List<PresetWiredVariable> allVariables = new ArrayList<>();
+            List<List<? extends PresetWiredBase>> wiredLists = Arrays.asList(allConditions, allEffects, allTriggers, allAddons, allSelectors, allVariables);
             List<PresetWiredFurniBinding> allBindings = new ArrayList<>();
             List<PresetAdsBackground> allAdsBackgrounds = new ArrayList<>();
 
@@ -323,6 +343,15 @@ public class GPresetExporter {
                             }
                             else if (classname.startsWith("wf_slc_")) {
                                 allSelectors.add(new PresetWiredSelector(wiredSelectorConfigs.get(key)));
+                            }
+                            else if (classname.startsWith("wf_var_")) {
+                                PresetWiredVariable variable = new PresetWiredVariable(wiredVariableConfigs.get(key));
+                                WiredVariable linkedVariable = roomVariables
+                                        .stream().filter(v -> v.getVariableName().equals(variable.getStringConfig()))
+                                        .findAny().orElse(null);
+                                variable.setVariableId(linkedVariable != null ? linkedVariable.getVariableId() : null);
+
+                                allVariables.add(variable);
                             }
 
                             if (wiredFurniBindings.containsKey(key)) {
@@ -406,14 +435,14 @@ public class GPresetExporter {
 
                 if (className.startsWith("wf_trg_") || className.startsWith("wf_cnd_")
                         || className.startsWith("wf_act_") || className.startsWith("wf_xtra_")
-                        || className.startsWith("wf_slc_")) {
+                        || className.startsWith("wf_slc_") || className.startsWith("wf_var_")) {
                     presetFurni.setState(null);
                 }
             });
 
 
 
-            PresetWireds presetWireds = new PresetWireds(allConditions, allEffects, allTriggers, allAddons, allSelectors);
+            PresetWireds presetWireds = new PresetWireds(allConditions, allEffects, allTriggers, allAddons, allSelectors, allVariables);
             PresetConfig presetConfig = new PresetConfig(allFurni, presetWireds, allBindings, allAdsBackgrounds);
 
             PresetConfigUtils.savePreset(name, presetConfig);
@@ -438,7 +467,7 @@ public class GPresetExporter {
 
             int originalRemaining = linkedList.size();
 
-            while (state == PresetExportState.FETCHING_UNKNOWN_CONFIGS && linkedList.size() > 0) {
+            while (state == PresetExportState.FETCHING_UNKNOWN_CONFIGS && !linkedList.isEmpty()) {
                 Integer wiredId = linkedList.pollFirst();
 //                Utils.sleep(570);
                 Utils.sleep(100);
@@ -499,7 +528,7 @@ public class GPresetExporter {
                 if (y1 > y2) y1 = y2;
 
                 int remaining = unRegisteredWiredsInArea(x1, y1, dimX, dimY).size();
-                if (remaining == 0) {
+                if (remaining == 0 && gotAllVariables) {
                     export(exportName, x1, y1, dimX, dimY);
                 }
                 else if (remaining % 10 == 0) {
@@ -571,6 +600,17 @@ public class GPresetExporter {
         }
     }
 
+    private void retrieveVariableConf(HMessage hMessage) {
+        if (state == PresetExportState.FETCHING_UNKNOWN_CONFIGS) {
+            hMessage.setBlocked(true);
+            RetrievedWiredVariable variable = RetrievedWiredVariable.fromPacket(hMessage.getPacket());
+            wiredVariableConfigs.put(wiredCacheKey(variable.getWiredId()), variable);
+
+            maybeRetrieveBindings(variable.getTypeId(), variable); // not needed
+            maybeFinishExportAfterRetrieve();
+        }
+    }
+
     private void retrieveConditionConf(HMessage hMessage) {
         if (state == PresetExportState.FETCHING_UNKNOWN_CONFIGS) {
             hMessage.setBlocked(true);
@@ -593,6 +633,20 @@ public class GPresetExporter {
         }
     }
 
+    private void retrieveVariables(HMessage hMessage) {
+        if (state == PresetExportState.FETCHING_UNKNOWN_CONFIGS) {
+            hMessage.setBlocked(true);
+            WiredAllVariablesDiffs diffs = new WiredAllVariablesDiffs(hMessage.getPacket());
+            roomVariables.addAll(diffs.getAddedVariables().values().stream().filter(v -> v.getVariableId() > 0).collect(Collectors.toList()));
+
+            if (diffs.isLastChunk()) {
+                gotAllVariables = true;
+            }
+
+            maybeFinishExportAfterRetrieve();
+        }
+    }
+
     private void openWired(HMessage hMessage) {
         if (state == PresetExportState.FETCHING_UNKNOWN_CONFIGS) {
             hMessage.setBlocked(true);
@@ -603,13 +657,19 @@ public class GPresetExporter {
     private void attemptExport(String name, int x, int y, int dimX, int dimY) {
         if (isReady()) {
             List<Integer> unregisteredWired = unRegisteredWiredsInArea(x, y, dimX, dimY);
-            if (unregisteredWired.size() > 0 && extension.shouldExportWired()) {
+            if (unregisteredWired.size() > 0 && extension.shouldExportWired() && !gotAllVariables) {
                 exportName = name;
                 state = PresetExportState.FETCHING_UNKNOWN_CONFIGS;
                 extension.sendVisualChatInfo(String.format(
                         "Fetching additional %s wired configurations before exporting... do not alter the room",
                         unregisteredWired.size()
                 ));
+
+                // re-get all variables
+                roomVariables.clear();
+                gotAllVariables = false;
+                extension.sendToServer(new HPacket("WiredGetAllVariablesDiffs", HMessage.Direction.TOSERVER, 0, 0));
+
                 new Thread(() -> requestWiredConfigsLoop(x, y, dimX, dimY)).start();
             }
             else {
@@ -663,6 +723,10 @@ public class GPresetExporter {
             PresetWiredSelector selector = (PresetWiredSelector) presetWiredBase;
             wiredSelectorConfigs.put(wiredCacheKey(selector.getWiredId()), selector);
         }
+        if (presetWiredBase instanceof PresetWiredVariable) {
+            PresetWiredVariable variable = (PresetWiredVariable) presetWiredBase;
+            wiredVariableConfigs.put(wiredCacheKey(variable.getWiredId()), variable);
+        }
     }
 
     private void onFurniRemoved(HMessage hMessage) {
@@ -674,6 +738,7 @@ public class GPresetExporter {
         wiredEffectConfigs.remove(key);
         wiredSelectorConfigs.remove(key);
         wiredAddonConfigs.remove(key);
+        wiredVariableConfigs.remove(key);
     }
 
     private String wiredCacheKey(int id) {
@@ -688,6 +753,7 @@ public class GPresetExporter {
                 wiredEffectConfigs.clear();
                 wiredSelectorConfigs.clear();
                 wiredAddonConfigs.clear();
+                wiredVariableConfigs.clear();
             }
         }
     }

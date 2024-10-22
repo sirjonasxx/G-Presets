@@ -41,6 +41,8 @@ public interface RetrievedWired {
             boolean filter = packet.readBoolean();
             boolean invert = packet.readBoolean();
             return cls.cast(new RetrievedWiredSelector(wiredId, options, configString, items, typeId, filter, invert, furniSources, userSources, variableIds));
+        } else if (cls == RetrievedWiredVariable.class) {
+            return cls.cast(new RetrievedWiredVariable(wiredId, options, configString, items, typeId, furniSources, userSources, variableIds));
         }
 
         return null;

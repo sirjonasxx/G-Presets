@@ -38,8 +38,8 @@ public class PresetConfigUtils {
             for (File presetFile : files) {
                 if (presetFile.isFile()) {
                     String name = presetFile.getName();
-                    if (name.endsWith(".txt")) {
-                        name = name.substring(0, name.length() - 4);
+                    if (name.endsWith(".json")) {
+                        name = name.substring(0, name.length() - 5);
                         presets.add(name);
                     }
                 }
@@ -52,7 +52,7 @@ public class PresetConfigUtils {
         File presetPath = new File(presetPath());
         presetPath.mkdirs();
 
-        try (Writer file = new OutputStreamWriter(new FileOutputStream(new File(presetPath(), name + ".txt")), StandardCharsets.UTF_8)) {
+        try (Writer file = new OutputStreamWriter(new FileOutputStream(new File(presetPath(), name + ".json")), StandardCharsets.UTF_8)) {
             file.write(config.toJsonObject().toString(4));
             file.flush();
             return true;
@@ -64,7 +64,7 @@ public class PresetConfigUtils {
     }
 
     public static PresetConfig loadPreset(String name) {
-        File file = new File(presetPath(), name + ".txt");
+        File file = new File(presetPath(), name + ".json");
         if (file.exists() && file.isFile()) {
             try {
                 String contents = String.join("\n", Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));

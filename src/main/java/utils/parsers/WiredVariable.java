@@ -41,4 +41,57 @@ public class WiredVariable {
             }
         }
     }
+
+
+    public long getVariableId() {
+        return variableId;
+    }
+
+    public String getVariableName() {
+        return variableName;
+    }
+
+    public int getAvailabilityType() {
+        return availabilityType;
+    }
+
+    public int getVariableType() {
+        return variableType;
+    }
+
+    public boolean isAlwaysAvailable() {
+        return alwaysAvailable;
+    }
+
+    public boolean isCanCreateAndDelete() {
+        return canCreateAndDelete;
+    }
+
+    public boolean isHasValue() {
+        return hasValue;
+    }
+
+    public boolean isCanWriteValue() {
+        return canWriteValue;
+    }
+
+    public boolean isCanInterceptChanges() {
+        return canInterceptChanges;
+    }
+
+    public boolean isInvisible() {
+        return isInvisible;
+    }
+
+    public boolean isCanReadCreationTime() {
+        return canReadCreationTime;
+    }
+
+    public boolean isCanReadLastUpdateTime() {
+        return canReadLastUpdateTime;
+    }
+
+    public HashMap<Integer, String> getTextConnector() {
+        return textConnector;
+    }
 }
