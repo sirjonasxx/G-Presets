@@ -10,7 +10,7 @@ public class RetrievedWiredSelector extends PresetWiredSelector implements Retri
 
     private final int typeId;
 
-    public RetrievedWiredSelector(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId, boolean filter, boolean invert, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds, HWiredContext wiredContext) {
+    public RetrievedWiredSelector(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int typeId, boolean filter, boolean invert, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds, HWiredContext wiredContext) {
         super(wiredId, options, stringConfig, items, filter, invert, pickedFurniSources, pickedUserSources, variableIds);
         this.typeId = typeId;
     }

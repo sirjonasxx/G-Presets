@@ -11,7 +11,7 @@ public class PresetWiredTrigger extends PresetWiredBase {
         super(packet);
     }
 
-    public PresetWiredTrigger(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds) {
+    public PresetWiredTrigger(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds) {
         super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources, variableIds);
     }
 

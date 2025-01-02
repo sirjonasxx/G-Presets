@@ -33,6 +33,16 @@ public class Utils {
         return intList;
     }
 
+    public static List<String> readStringList(HPacket packet) {
+        int size = packet.readInteger();
+        List<String> stringList = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            stringList.add(packet.readString());
+        }
+
+        return stringList;
+    }
+
     public static List<Long> readLongList(HPacket packet) {
         int size = packet.readInteger();
         List<Long> longList = new ArrayList<>();

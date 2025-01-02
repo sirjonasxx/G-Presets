@@ -2,6 +2,7 @@ package extension.tools;
 
 import extension.GPresets;
 import extension.parsers.HWiredVariable;
+import extension.parsers.VariableInternalType;
 import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.PresetConfigUtils;
 import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 public class GPresetExporter {
 
     private final Object lock = new Object();
-    private HashMap<String, Long> variablesMap = new HashMap<>();
+    private HashMap<String, String> variablesMap = new HashMap<>();
     private boolean hasVariableMap = false;
 
     public enum PresetExportState {
@@ -96,7 +97,7 @@ public class GPresetExporter {
 
             int removedVariablesLength = packet.readInteger();
             for(int i = 0; i < removedVariablesLength; i++) {
-                packet.readLong();
+                packet.readString();
             }
 
             HashSet<HWiredVariable> variables = new HashSet<>();
@@ -107,7 +108,7 @@ public class GPresetExporter {
             }
 
             variables.forEach(v -> {
-                if(v.id > 0) {
+                if(v.variableInternalType == VariableInternalType.USER_CREATED) {
                     variablesMap.put(v.name, v.id);
                 }
             });
@@ -380,9 +381,9 @@ public class GPresetExporter {
                             }
                             else if (classname.startsWith("wf_var_")) {
                                 PresetWiredVariable presetVariable = new PresetWiredVariable(wiredVariableConfigs.get(key));
-                                if(hasVariableMap && presetVariable.variableId == 0) {
-                                    Optional<Map.Entry<String, Long>> op = variablesMap.entrySet().stream().filter(k -> k.getKey().equals(presetVariable.getStringConfig())).findFirst();
-                                    op.ifPresent(stringLongEntry -> presetVariable.variableId = stringLongEntry.getValue());
+                                if(hasVariableMap && presetVariable.variableId.equals("0")) {
+                                    Optional<Map.Entry<String, String>> op = variablesMap.entrySet().stream().filter(k -> k.getKey().equals(presetVariable.getStringConfig())).findFirst();
+                                    op.ifPresent(stringStringEntry -> presetVariable.variableId = stringStringEntry.getValue());
                                 }
                                 allVariables.add(presetVariable);
                             }

@@ -5,7 +5,8 @@ import gearth.protocol.HPacket;
 import java.util.HashMap;
 
 public class HWiredVariable {
-    public final long id;
+    public final String id;
+    public final VariableInternalType variableInternalType;
     public final String name;
     public final int availabilityType;
     public final int variableType;
@@ -20,7 +21,8 @@ public class HWiredVariable {
     public HashMap<Integer, String> textConnector;
 
     public HWiredVariable(HPacket packet) {
-        this.id = packet.readLong();
+        this.id = packet.readString();
+        this.variableInternalType = VariableInternalType.fromInt(packet.readInteger());
         this.name = packet.readString();
         this.availabilityType = packet.readInteger();
         this.variableType = packet.readInteger();

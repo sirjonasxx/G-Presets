@@ -5,7 +5,7 @@ import gearth.protocol.HPacket;
 import java.util.HashMap;
 
 public class HAllVariablesInRoom {
-    public final HashMap<Long, HWiredVariable> variables = new HashMap<>();
+    public final HashMap<String, HWiredVariable> variables = new HashMap<>();
 
     public HAllVariablesInRoom(HPacket packet) {
         int count = packet.readInteger();

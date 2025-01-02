@@ -22,7 +22,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
 
     protected List<Integer> pickedFurniSources; // set in subclass
     protected List<Integer> pickedUserSources;
-    protected List<Long> variableIds;
+    protected List<String> variableIds;
 
     public PresetWiredBase(HPacket packet) {
         wiredId = packet.readInteger();
@@ -32,7 +32,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         readTypeSpecific(packet);
         pickedFurniSources = Utils.readIntList(packet);
         pickedUserSources = Utils.readIntList(packet);
-        variableIds = Utils.readLongList(packet);
+        variableIds = Utils.readStringList(packet);
     }
 
     // deep copy constructor
@@ -46,7 +46,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         this.variableIds = new ArrayList<>(base.variableIds);
     }
 
-    public PresetWiredBase(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds) {
+    public PresetWiredBase(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds) {
         this.wiredId = wiredId;
         this.options = options;
         this.stringConfig = stringConfig;
@@ -68,12 +68,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
                 object.getJSONArray("userSources").toList().stream().map(o -> (int)o).collect(Collectors.toList()) :
                 Collections.emptyList();
         variableIds = object.has("variableIds") ?
-                object.getJSONArray("variableIds").toList().stream().map(o -> {
-                    if(o instanceof Integer) {
-                        return new Long((int)o);
-                    }
-                    return (long)o;
-                }).collect(Collectors.toList()) :
+                object.getJSONArray("variableIds").toList().stream().map(o -> (String)o).collect(Collectors.toList()) :
                 Collections.emptyList();
     }
 
@@ -118,7 +113,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         pickedUserSources.forEach(packet::appendInt);
 
         packet.appendInt(variableIds.size());
-        variableIds.forEach(packet::appendLong);
+        variableIds.forEach(packet::appendString);
 
         if (this instanceof PresetWiredTrigger) {
             new PresetWiredTrigger(packet);
@@ -139,7 +134,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
 
     protected abstract void applyTypeSpecificWiredConfig(HPacket packet);
 
-    public <T extends PresetWiredBase> T applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap, Map<Long, Long> realVariableIdMap) {
+    public <T extends PresetWiredBase> T applyWiredConfig(IExtension extension, Map<Integer, Integer> realFurniIdMap, Map<String, String> realVariableIdMap) {
         if (realFurniIdMap.containsKey(wiredId)) {
             PresetWiredBase presetWiredBase = this.clone();
             presetWiredBase.wiredId = realFurniIdMap.get(wiredId);
@@ -148,17 +143,17 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
                     .map(realFurniIdMap::get)
                     .collect(Collectors.toList());
 
-            Long _defaultId = 0L;
+            String _defaultId = "0";
             // Variables from another room
             if(this instanceof PresetWiredVariable && this.variableIds.size() == 1) {
                 _defaultId = this.variableIds.get(0);
                 realVariableIdMap.put(_defaultId, _defaultId);
             }
 
-            Long defaultId = _defaultId;
+            String defaultId = _defaultId;
 
             presetWiredBase.variableIds = variableIds.stream()
-                    .map(id -> id < 0 ? id : realVariableIdMap.getOrDefault(id, defaultId))
+                    .map(id -> id.equals("0") ? id : realVariableIdMap.getOrDefault(id, defaultId))
                     .collect(Collectors.toList());
 
             presetWiredBase.applyWiredConfig(extension);
@@ -191,7 +186,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         return pickedUserSources;
     }
 
-    public List<Long> getVariableIds() {
+    public List<String> getVariableIds() {
         return variableIds;
     }
 
@@ -219,7 +214,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         this.pickedUserSources = pickedUserSources;
     }
 
-    public void setVariableIds(List<Long> variableIds) {
+    public void setVariableIds(List<String> variableIds) {
         this.variableIds = variableIds;
     }
 
