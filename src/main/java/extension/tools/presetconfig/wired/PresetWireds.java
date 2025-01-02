@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class PresetWireds implements PresetJsonConfigurable {
 
-    private HashMap<String, String> variablesMap;
+    private final HashMap<String, String> variablesMap;
     private List<PresetWiredCondition> conditions;
     private List<PresetWiredEffect> effects;
     private List<PresetWiredTrigger> triggers;
