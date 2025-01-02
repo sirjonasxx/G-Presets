@@ -13,18 +13,18 @@ import java.util.List;
  */
 public class PresetWiredVariable extends PresetWiredBase {
 
-    public long variableId;
+    public String variableId;
 
     public PresetWiredVariable(HPacket packet) {
         super(packet);
     }
 
-    public PresetWiredVariable(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<Long> variableIds, HWiredContext wiredContext) {
+    public PresetWiredVariable(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds, HWiredContext wiredContext) {
         super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources, variableIds);
-        this.variableId = 0;
+        this.variableId = "";
 
         if(wiredContext != null) {
-            if(wiredContext.roomVariablesList != null && wiredContext.roomVariablesList.variables.size() > 0) {
+            if(wiredContext.roomVariablesList != null && !wiredContext.roomVariablesList.variables.isEmpty()) {
                 for(HWiredVariable var : wiredContext.roomVariablesList.variables.values()) {
                     if(var.name.equals(stringConfig)) {
                         this.variableId = var.id;
@@ -40,7 +40,7 @@ public class PresetWiredVariable extends PresetWiredBase {
             else if(wiredContext.globalVariableInfo != null && wiredContext.globalVariableInfo.variable.name.equals(stringConfig)) {
                 this.variableId = wiredContext.globalVariableInfo.variable.id;
             }
-            else if(wiredContext.referenceVariablesList != null && wiredContext.referenceVariablesList.sharedVariables.size() > 0) {
+            else if(wiredContext.referenceVariablesList != null && !wiredContext.referenceVariablesList.sharedVariables.isEmpty()) {
                 for(HSharedVariable var : wiredContext.referenceVariablesList.sharedVariables) {
                     if(var.wiredVariable.name.equals(stringConfig)) {
                         this.variableId = var.wiredVariable.id;
@@ -60,14 +60,14 @@ public class PresetWiredVariable extends PresetWiredBase {
         super(object);
 
         try {
-            this.variableId = object.optLong("variableId");
+            this.variableId = object.optString("variableId");
         }
         catch(Exception e) {
             try {
-                this.variableId = new Long((Integer)object.optInt("variableId"));
+                this.variableId = object.optString("variableId");
             }
             catch(Exception ex) {
-                this.variableId = (Long)object.get("variableId");
+                this.variableId = (String)object.get("variableId");
             }
         }
     }

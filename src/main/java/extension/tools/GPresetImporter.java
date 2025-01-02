@@ -33,7 +33,7 @@ public class GPresetImporter {
     private final Object lock = new Object();
 
     private GPresets extension = null;
-    private List<Long> needVariableIds = new ArrayList<>();
+    private List<String> needVariableIds = new ArrayList<>();
     private int variablesProcessed;
     private int variablesToProcess;
 
@@ -70,7 +70,7 @@ public class GPresetImporter {
 
 
     private Map<Integer, Integer> realFurniIdMap = null;
-    private Map<Long, Long> realVariableIdMap = new HashMap<>();
+    private Map<String, String> realVariableIdMap = new HashMap<>();
 
     // expect furni drops on location described by key(string) -> "x|y|typeId"
     private Map<String, LinkedList<Integer>> expectFurniDrops = null;
@@ -132,11 +132,11 @@ public class GPresetImporter {
             }
 
             if(workingPresetConfig != null && workingPresetConfig.getPresetWireds() != null) {
-                HashMap<String, Long> map = workingPresetConfig.getPresetWireds().getVariablesMap();
+                HashMap<String, String> map = workingPresetConfig.getPresetWireds().getVariablesMap();
 
                 for(HWiredVariable newVar : variables) {
-                    Optional<Map.Entry<String, Long>> op = map.entrySet().stream().filter(k -> k.getKey().equals(newVar.name)).findFirst();
-                    op.ifPresent(aLong -> realVariableIdMap.put(aLong.getValue(), newVar.id));
+                    Optional<Map.Entry<String, String>> op = map.entrySet().stream().filter(k -> k.getKey().equals(newVar.name)).findFirst();
+                    op.ifPresent(stringStringEntry -> realVariableIdMap.put(stringStringEntry.getValue(), newVar.id));
                 }
 
                 for (PresetWiredVariable origVar : workingPresetConfig.getPresetWireds().getVariables()) {
@@ -148,7 +148,7 @@ public class GPresetImporter {
                 }
             }
 
-            for(Long id : realVariableIdMap.keySet()) {
+            for(String id : realVariableIdMap.keySet()) {
                 needVariableIds.remove(id);
             }
 
@@ -546,7 +546,7 @@ public class GPresetImporter {
         if (presetWired.getVariableIds() != null && presetWired.getVariableIds().size() > 0) {
             needVariableIds.clear();
             needVariableIds.addAll(presetWired.getVariableIds());
-            needVariableIds = needVariableIds.stream().filter(id -> id > 0 && realVariableIdMap.keySet().stream().noneMatch(x -> x.equals(id))).collect(Collectors.toList());
+            needVariableIds = needVariableIds.stream().filter(id -> id.equals("0") && realVariableIdMap.keySet().stream().noneMatch(x -> x.equals(id))).collect(Collectors.toList());
 
             if(needVariableIds.size() > 0) {
                 extension.sendToServer(new HPacket("WiredGetAllVariablesDiffs", HMessage.Direction.TOSERVER, 0));

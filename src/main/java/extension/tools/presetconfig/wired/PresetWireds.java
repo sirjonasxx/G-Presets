@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class PresetWireds implements PresetJsonConfigurable {
 
-    private HashMap<String, Long> variablesMap;
+    private HashMap<String, String> variablesMap;
     private List<PresetWiredCondition> conditions;
     private List<PresetWiredEffect> effects;
     private List<PresetWiredTrigger> triggers;
@@ -20,7 +20,7 @@ public class PresetWireds implements PresetJsonConfigurable {
     private List<PresetWiredSelector> selectors;
     private List<PresetWiredVariable> variables;
 
-    public PresetWireds(List<PresetWiredCondition> conditions, List<PresetWiredEffect> effects, List<PresetWiredTrigger> triggers, List<PresetWiredAddon> addons, List<PresetWiredSelector> selectors, List<PresetWiredVariable> variables, HashMap<String, Long> variablesMap) {
+    public PresetWireds(List<PresetWiredCondition> conditions, List<PresetWiredEffect> effects, List<PresetWiredTrigger> triggers, List<PresetWiredAddon> addons, List<PresetWiredSelector> selectors, List<PresetWiredVariable> variables, HashMap<String, String> variablesMap) {
         this.conditions = conditions;
         this.effects = effects;
         this.triggers = triggers;
@@ -59,7 +59,7 @@ public class PresetWireds implements PresetJsonConfigurable {
         if(object.has("variables_map")) {
             JSONObject map = object.getJSONObject("variables_map");
             for(String key : map.keySet()) {
-                variablesMap.put(key, map.getLong(key));
+                variablesMap.put(key, map.getString(key));
             }
         }
     }
@@ -137,7 +137,7 @@ public class PresetWireds implements PresetJsonConfigurable {
         this.variables = variables;
     }
 
-    public HashMap<String, Long> getVariablesMap() {
+    public HashMap<String, String> getVariablesMap() {
         return variablesMap;
     }
 }

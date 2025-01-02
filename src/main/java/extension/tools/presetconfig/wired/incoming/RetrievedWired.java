@@ -31,7 +31,7 @@ public interface RetrievedWired {
         String configString = packet.readString();
         List<Integer> options = Utils.readIntList(packet);
 
-        List<Long> variableIds = Utils.readLongList(packet);
+        List<String> variableIds = Utils.readStringList(packet);
 
         List<Integer> furniSources = Utils.readIntList(packet);
         List<Integer> userSources = Utils.readIntList(packet);
