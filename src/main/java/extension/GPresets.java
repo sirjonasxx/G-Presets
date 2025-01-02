@@ -475,7 +475,7 @@ public class GPresets extends ExtensionForm {
         String selectedPreset = presetListView.getSelectionModel().getSelectedItem();
         if (selectedPreset != null) {
             try {
-                Desktop.getDesktop().edit(new File(PresetConfigUtils.presetPath(), selectedPreset + ".json"));
+                Desktop.getDesktop().edit(new File(PresetConfigUtils.presetPath(), selectedPreset + PresetConfigUtils.PRESET_EXT));
             } catch (IOException e) {
                 e.printStackTrace();
             }
