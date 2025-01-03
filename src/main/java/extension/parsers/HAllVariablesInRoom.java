@@ -2,16 +2,16 @@ package extension.parsers;
 
 import gearth.protocol.HPacket;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class HAllVariablesInRoom {
-    public final HashMap<String, HWiredVariable> variables = new HashMap<>();
-
+    private final List<Integer> variableList = new ArrayList<Integer>();
     public HAllVariablesInRoom(HPacket packet) {
-        int count = packet.readInteger();
-        for(int ii = 0; ii < count; ii++) {
-            HWiredVariable info = new HWiredVariable(packet);
-            this.variables.put(info.id, info);
-        }
+        variableList.add(packet.readInteger());
+    }
+    public List<Integer> getVariableList() {
+        return variableList;
     }
 }

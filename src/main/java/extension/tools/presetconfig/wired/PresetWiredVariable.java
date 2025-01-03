@@ -24,11 +24,9 @@ public class PresetWiredVariable extends PresetWiredBase {
         this.variableId = "";
 
         if(wiredContext != null) {
-            if(wiredContext.roomVariablesList != null && !wiredContext.roomVariablesList.variables.isEmpty()) {
-                for(HWiredVariable var : wiredContext.roomVariablesList.variables.values()) {
-                    if(var.name.equals(stringConfig)) {
-                        this.variableId = var.id;
-                    }
+            if(wiredContext.roomVariablesList != null && wiredContext.roomVariablesList.getVariableList() != null) {
+                for(Integer var : wiredContext.roomVariablesList.getVariableList()) {
+                    this.variableId = String.valueOf(var.intValue());
                 }
             }
             else if(wiredContext.furniVariableInfo != null && wiredContext.furniVariableInfo.variable.name.equals(stringConfig)) {
