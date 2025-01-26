@@ -153,7 +153,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
             String defaultId = _defaultId;
 
             presetWiredBase.variableIds = variableIds.stream()
-                    .map(id -> id.equals("0") ? id : realVariableIdMap.getOrDefault(id, defaultId))
+                    .map(id -> id.equals("0") || id.startsWith("-") ? id : realVariableIdMap.getOrDefault(id, defaultId))
                     .collect(Collectors.toList());
 
             presetWiredBase.applyWiredConfig(extension);

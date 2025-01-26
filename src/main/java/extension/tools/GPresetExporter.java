@@ -381,7 +381,7 @@ public class GPresetExporter {
                             }
                             else if (classname.startsWith("wf_var_")) {
                                 PresetWiredVariable presetVariable = new PresetWiredVariable(wiredVariableConfigs.get(key));
-                                if(hasVariableMap && presetVariable.variableId.equals("0")) {
+                                if(hasVariableMap && (presetVariable.variableId == null || presetVariable.variableId.equals("0"))) {
                                     Optional<Map.Entry<String, String>> op = variablesMap.entrySet().stream().filter(k -> k.getKey().equals(presetVariable.getStringConfig())).findFirst();
                                     op.ifPresent(stringStringEntry -> presetVariable.variableId = stringStringEntry.getValue());
                                 }
