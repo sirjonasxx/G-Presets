@@ -6,12 +6,9 @@ import java.util.HashMap;
 
 public class HAllVariablesInRoom {
     public final HashMap<String, HWiredVariable> variables = new HashMap<>();
+    public final int hash;
 
     public HAllVariablesInRoom(HPacket packet) {
-        int count = packet.readInteger();
-        for(int ii = 0; ii < count; ii++) {
-            HWiredVariable info = new HWiredVariable(packet);
-            this.variables.put(info.id, info);
-        }
+        this.hash = packet.readInteger();
     }
 }

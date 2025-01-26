@@ -8,6 +8,8 @@ public class HWiredContext {
     public HVariableInfoAndHolders userVariableInfo;
     public HVariableInfoAndValue globalVariableInfo;
     public HSharedVariableList referenceVariablesList;
+    public HVariableList rulesetVariables;
+    public HSharedGlobalPlaceholderList referencePlaceholderList;
 
     public HWiredContext(HPacket packet) {
         int amount = packet.readInteger();
@@ -30,6 +32,12 @@ public class HWiredContext {
                     break;
                 case 4:
                     this.referenceVariablesList = new HSharedVariableList(packet);
+                    break;
+                case 5:
+                    this.rulesetVariables = new HVariableList(packet);
+                    break;
+                case 6:
+                    this.referencePlaceholderList = new HSharedGlobalPlaceholderList(packet);
                     break;
             }
         }
