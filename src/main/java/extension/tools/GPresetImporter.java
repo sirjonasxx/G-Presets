@@ -446,7 +446,7 @@ public class GPresetImporter {
             if (stackInfo != null) {
                 moveFurni(stackInfo.getFurniId(), stackInfo.getLocation().getX(), stackInfo.getLocation().getY(),
                         stackInfo.getRotation(), false, -1);
-                if (height != -1) {
+                if (height != -1 && !extension.getPermissions().canModifyWired()) {
                     extension.sendToServer(new HPacket(
                             "SetCustomStackingHeight",
                             HMessage.Direction.TOSERVER,
@@ -467,6 +467,12 @@ public class GPresetImporter {
         ));
 
         Utils.sleep(60);
+
+        if (height != -1 && extension.getPermissions().canModifyWired()) {
+            // Set altitude using the @altitude variable
+            extension.sendToServer(new HPacket("WiredSetObjectVariableValue", HMessage.Direction.TOSERVER, 0, furniId, "-123", ((int) (height * 100)) + heightOffset * 100));
+            Utils.sleep(Math.max(extension.getSafeFeedbackTimeout(), 40));
+        }
     }
 
     private void attemptSetState(int furniId, String targetState) {
@@ -482,6 +488,7 @@ public class GPresetImporter {
         if (extension.getPermissions().canModifyWired()) {
             // Set state using the @state variable
             extension.sendToServer(new HPacket("WiredSetObjectVariableValue", HMessage.Direction.TOSERVER, 0, furniId, "-110", Integer.parseInt(targetState)));
+            Utils.sleep(Math.max(extension.getSafeFeedbackTimeout(), 60));
         } else {
             String currentState = StateExtractor.stateFromItem(item);
             if (currentState == null || currentState.equals(targetState)) {
