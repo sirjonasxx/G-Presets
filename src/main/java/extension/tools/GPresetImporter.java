@@ -479,30 +479,35 @@ public class GPresetImporter {
         HPoint originalLocation = item.getTile();
         int originalRotation = item.getFacing().ordinal();
 
-        String currentState = StateExtractor.stateFromItem(item);
-        if (currentState == null || currentState.equals(targetState)) {
-            return;
-        }
-
-        synchronized (lock) {
-            if (state != BuildingImportState.NONE) {
-                moveFurni(furniId, reservedSpace.getX(), reservedSpace.getY(), 0, false, -1);
+        if (extension.getPermissions().canModifyWired()) {
+            // Set state using the @state variable
+            extension.sendToServer(new HPacket("WiredSetObjectVariableValue", HMessage.Direction.TOSERVER, 0, furniId, "-110", Integer.parseInt(targetState)));
+        } else {
+            String currentState = StateExtractor.stateFromItem(item);
+            if (currentState == null || currentState.equals(targetState)) {
+                return;
             }
-        }
 
-        String newState = "-1";
+            synchronized (lock) {
+                if (state != BuildingImportState.NONE) {
+                    moveFurni(furniId, reservedSpace.getX(), reservedSpace.getY(), 0, false, -1);
+                }
+            }
 
-        int i = 0;
-        while (state != BuildingImportState.NONE && newState != null && !currentState.equals(newState) && !newState.equals(targetState) && i < 20) {
-            currentState = newState;
+            String newState = "-1";
 
-            extension.sendToServer(new HPacket("UseFurniture", HMessage.Direction.TOSERVER, furniId, 0));
-            Utils.sleep(Math.max(extension.getSafeFeedbackTimeout(), 60));
+            int i = 0;
+            while (state != BuildingImportState.NONE && newState != null && !currentState.equals(newState) && !newState.equals(targetState) && i < 20) {
+                currentState = newState;
 
-            HFloorItem itemNew = floor.furniFromId(furniId);
-            newState = StateExtractor.stateFromItem(itemNew);
+                extension.sendToServer(new HPacket("UseFurniture", HMessage.Direction.TOSERVER, furniId, 0));
+                Utils.sleep(Math.max(extension.getSafeFeedbackTimeout(), 60));
 
-            i++;
+                HFloorItem itemNew = floor.furniFromId(furniId);
+                newState = StateExtractor.stateFromItem(itemNew);
+
+                i++;
+            }
         }
 
         moveFurni(furniId, originalLocation.getX(), originalLocation.getY(), originalRotation, isStackable, -1);
