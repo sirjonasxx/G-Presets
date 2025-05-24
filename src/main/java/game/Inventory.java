@@ -38,8 +38,12 @@ public class Inventory {
 
         extension.intercept(HMessage.Direction.TOCLIENT, "FurniList", this::loadItems);
         extension.intercept(HMessage.Direction.TOCLIENT, "FurniListAddOrUpdate", (m) -> {
-            HInventoryItem item = new HInventoryItem(m.getPacket());
-            updateOrAddItem(item);
+            HPacket packet = m.getPacket();
+            int count = packet.readInteger();
+            for (int i = 0; i < count; i++) {
+                HInventoryItem item = new HInventoryItem(m.getPacket());
+                updateOrAddItem(item);
+            }
         });
         extension.intercept(HMessage.Direction.TOCLIENT, "FurniListRemove", (m) ->
                 removeItem(m.getPacket().readInteger()));
