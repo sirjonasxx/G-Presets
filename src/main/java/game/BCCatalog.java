@@ -113,7 +113,7 @@ public class BCCatalog {
             extension.sendToServer(new HPacket("GetCatalogPage", HMessage.Direction.TOSERVER,
                     pageIds.get(i), -1, "BUILDERS_CLUB"));
 
-            Utils.sleep(150);
+            Utils.sleep(180);
 
             i++;
             if (i % 10 == 0) {
