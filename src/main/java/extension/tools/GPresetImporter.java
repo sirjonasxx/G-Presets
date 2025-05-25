@@ -11,7 +11,6 @@ import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
 import extension.tools.presetconfig.furni.PresetFurni;
 import extension.tools.presetconfig.wired.*;
 import furnidata.FurniDataTools;
-import game.BCCatalog;
 import game.FloorState;
 import game.Inventory;
 import gearth.extensions.parsers.HFloorItem;
@@ -212,8 +211,7 @@ public class GPresetImporter {
     public boolean isReady() {
         return extension.getFloorState().inRoom() && extension.furniDataReady() &&
                 extension.getInventory().getState() == Inventory.InventoryState.LOADED && extension.stackTile() != null &&
-                (postConfig.getItemSource() == ItemSource.ONLY_INVENTORY || extension.getCatalog().getState()
-                        == BCCatalog.CatalogState.COLLECTED) && presetConfig != null &&
+                presetConfig != null &&
                 extension.getPermissions().canMoveFurni() && (!extension.shouldExportWired() || extension.getPermissions().canModifyWired());
     }
 
@@ -276,7 +274,7 @@ public class GPresetImporter {
             for (PresetFurni f : workingPresetConfig.getFurniture()) {
                 fakeDropInfo.add(new FurniDropInfo(-1, -1, furniData.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1));
             }
-            Map<String, Integer> missing = AvailabilityChecker.missingItems(fakeDropInfo, extension.getInventory(), extension.getCatalog(), furniData);
+            Map<String, Integer> missing = AvailabilityChecker.missingItems(fakeDropInfo, extension.getInventory(), furniData);
             if (missing == null) {
                 extension.sendVisualChatInfo("ERROR: Inventory, catalog or furnidata is unavailable");
             }
@@ -376,20 +374,19 @@ public class GPresetImporter {
 
         ItemSource source = dropInfo.getItemSource();
 
-        BCCatalog catalog = extension.getCatalog();
         Inventory inventory = extension.getInventory();
 
-        BCCatalog.SingleFurniProduct catalogProduct = catalog.getProductFromTypeId(typeId);
+        int offerId = furniData.getFloorItemDetails(className).bcOfferId;
         if (!inventoryCache.containsKey(typeId)) {
             inventoryCache.put(typeId, new LinkedList<>(inventory.getFloorItemsByType(typeId)));
         }
         LinkedList<HInventoryItem> inventoryItems = inventoryCache.get(typeId);
 
-        boolean useBC = source == ItemSource.ONLY_BC || (source == ItemSource.PREFER_BC && catalogProduct != null)
+        boolean useBC = source == ItemSource.ONLY_BC || (source == ItemSource.PREFER_BC && offerId != -1)
                 || ( source == ItemSource.PREFER_INVENTORY && inventoryItems.size() == 0 );
 
         if (useBC) {
-            if (catalogProduct == null) {
+            if (offerId == -1) {
                 if (!extension.allowIncompleteBuilds()) {
                     state = BuildingImportState.NONE;
                     extension.sendVisualChatInfo(String.format("ERROR: Couldn't find the item '%s' in BC warehouse.. aborting", className));
@@ -402,9 +399,9 @@ public class GPresetImporter {
             extension.sendToServer(new HPacket(
                     "BuildersClubPlaceRoomItem",
                     HMessage.Direction.TOSERVER,
-                    catalogProduct.getPageId(),
-                    catalogProduct.getOfferId(),
-                    catalogProduct.getExtraParam(),
+                    -1,
+                    offerId,
+                    "",
                     dropInfo.getX(),
                     dropInfo.getY(),
                     dropInfo.getRotation()

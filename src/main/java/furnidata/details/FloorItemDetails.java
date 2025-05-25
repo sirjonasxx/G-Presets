@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 // by wiredspast & kouris
 public class FloorItemDetails extends FurniDetails {
     public final String customParams;
-    public final int xDim, yDim, defaultDir, specialType;
+    public final int xDim, yDim, defaultDir, specialType, bcOfferId;
     public final boolean canStandOn, canSitOn, canLayOn;
     public final List<String> partColors;
 
@@ -23,6 +23,7 @@ public class FloorItemDetails extends FurniDetails {
         this.yDim = jsonObject.getInt("ydim");
         this.defaultDir = jsonObject.getInt("defaultdir");
         this.specialType = jsonObject.getInt("specialtype");
+        this.bcOfferId = jsonObject.getInt("bcofferid");
 
         this.canStandOn = jsonObject.getBoolean("canstandon");
         this.canSitOn = jsonObject.getBoolean("cansiton");
