@@ -14,7 +14,6 @@ import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.PresetConfigUtils;
 import extension.tools.presetconfig.furni.PresetFurni;
 import furnidata.FurniDataTools;
-import game.BCCatalog;
 import game.FloorState;
 import game.Inventory;
 import game.RoomPermissions;
@@ -66,7 +65,6 @@ public class GPresets extends ExtensionForm {
     public Label cndInventoryLbl;
     public Label cndStackTileLbl;
     public Label cndFurnidataLbl;
-    public Label cndBCShopLbl;
     public Label cndPermissionsLbl;
 
     public ToggleGroup stacktile_tgl;
@@ -98,7 +96,6 @@ public class GPresets extends ExtensionForm {
     private FurniDataTools furniDataTools = null;
     private Inventory inventory = null;
     private FloorState floorState = null;
-    private BCCatalog catalog = null;
     private RoomPermissions permissions = null;
     private volatile boolean isConnected = false;
 
@@ -203,7 +200,6 @@ public class GPresets extends ExtensionForm {
             logger.log("Leaving room..", "blue");
         });
         this.inventory = new Inventory(this, logger, this::updateUI);
-        this.catalog = new BCCatalog(this, logger, this::updateUI);
         this.permissions = new RoomPermissions(this, logger, this::updateUI);
 
         this.exporter = new GPresetExporter(this);
@@ -310,7 +306,6 @@ public class GPresets extends ExtensionForm {
         furniDataTools = null;
         floorState.reset();
         inventory.clear();
-        catalog.clear();
         exporter.reset();
         importer.reset();
         updateUI();
@@ -357,8 +352,6 @@ public class GPresets extends ExtensionForm {
             updateLabel(cndConnectedLbl, isConnected);
             updateLabel(cndRoomLbl, floorState.inRoom());
             updateLabel(cndFurnidataLbl, furniDataReady());
-            updateLabel(cndBCShopLbl, catalog.getState() == BCCatalog.CatalogState.COLLECTED,
-                    catalog.getState() == BCCatalog.CatalogState.COLLECTING_PAGES);
             updateLabel(cndInventoryLbl, inventory.getState() == Inventory.InventoryState.LOADED,
                     inventory.getState() == Inventory.InventoryState.LOADING);
             updateLabel(cndStackTileLbl, stackTile() != null);
@@ -385,14 +378,6 @@ public class GPresets extends ExtensionForm {
         inventory.requestInventory();
     }
 
-    public void loadBCClick(ActionEvent actionEvent) {
-        catalog.requestIndex();
-    }
-
-    public void clearBCClick(ActionEvent actionEvent) throws URISyntaxException {
-        catalog.clearCache();
-    }
-
     public FurniDataTools getFurniDataTools() {
         return furniDataTools;
     }
@@ -407,10 +392,6 @@ public class GPresets extends ExtensionForm {
 
     public FloorState getFloorState() {
         return floorState;
-    }
-
-    public BCCatalog getCatalog() {
-        return catalog;
     }
 
     public RoomPermissions getPermissions() {
@@ -455,7 +436,7 @@ public class GPresets extends ExtensionForm {
                 fakeDropInfo.add(new FurniDropInfo(-1, -1, furniDataTools.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1));
             }
 
-            AvailabilityChecker.printAvailability(logger, fakeDropInfo, inventory, catalog, furniDataTools);
+            AvailabilityChecker.printAvailability(logger, fakeDropInfo, inventory, furniDataTools);
         }
         else {
             logger.log("No preset chosen or furnidata not ready", "red");

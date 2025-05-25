@@ -3,14 +3,14 @@ package extension.tools.importutils;
 import extension.logger.Logger;
 import extension.tools.postconfig.ItemSource;
 import furnidata.FurniDataTools;
-import game.BCCatalog;
+import furnidata.details.FloorItemDetails;
+//import game.BCCatalog;
 import game.Inventory;
 import gearth.extensions.parsers.HInventoryItem;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class AvailabilityChecker {
@@ -18,10 +18,9 @@ public class AvailabilityChecker {
     // returns null if invalid resources to check availability
     // return map of counts of missing furniture
     // map is empty if you can start importing
-    public static Map<String, Integer> missingItems(List<FurniDropInfo> furniDrops, Inventory inventory, BCCatalog catalog, FurniDataTools furniDataTools) {
+    public static Map<String, Integer> missingItems(List<FurniDropInfo> furniDrops, Inventory inventory, FurniDataTools furniDataTools) {
 
         if (inventory.getState() == Inventory.InventoryState.LOADED
-                && catalog.getState() == BCCatalog.CatalogState.COLLECTED
                 && furniDataTools.isReady()) {
 
             Map<Integer, Integer> usedInventorySpots = new HashMap<>();
@@ -32,21 +31,22 @@ public class AvailabilityChecker {
                 ItemSource src = furniDropInfo.getItemSource();
 
                 List<HInventoryItem> invItems = inventory.getFloorItemsByType(typeId);
+                FloorItemDetails floorItemDetails = furniDataTools.getFloorItemDetails(furniDataTools.getFloorItemName(typeId));
                 boolean isMissing = false;
                 boolean useInventorySpace = false;
 
                 if (src == ItemSource.ONLY_BC) {
-                    if (catalog.getProductFromTypeId(typeId) == null) isMissing = true;
+                    if (floorItemDetails.bcOfferId == -1) isMissing = true;
                 }
                 else if (src == ItemSource.PREFER_BC) {
-                    if (catalog.getProductFromTypeId(typeId) == null) {
+                    if (floorItemDetails.bcOfferId == -1) {
                         if (usedInventorySpots.get(typeId) < invItems.size()) useInventorySpace = true;
                         else isMissing = true;
                     }
                 }
                 else if (src == ItemSource.PREFER_INVENTORY) {
                     if (usedInventorySpots.get(typeId) < invItems.size()) useInventorySpace = true;
-                    else isMissing = catalog.getProductFromTypeId(typeId) == null;
+                    else isMissing = floorItemDetails.bcOfferId == -1;
                 }
                 else if (src == ItemSource.ONLY_INVENTORY) {
                     if (usedInventorySpots.get(typeId) < invItems.size()) useInventorySpace = true;
@@ -74,11 +74,10 @@ public class AvailabilityChecker {
         else return null;
     }
 
-    public static void printAvailability(Logger logger, List<FurniDropInfo> furniDrops, Inventory inventory, BCCatalog catalog, FurniDataTools furniDataTools) {
+    public static void printAvailability(Logger logger, List<FurniDropInfo> furniDrops, Inventory inventory, FurniDataTools furniDataTools) {
 
-        Map<String, Integer> missing = missingItems(furniDrops, inventory, catalog, furniDataTools);
+        Map<String, Integer> missing = missingItems(furniDrops, inventory, furniDataTools);
         if (inventory.getState() == Inventory.InventoryState.LOADED
-                && catalog.getState() == BCCatalog.CatalogState.COLLECTED
                 && furniDataTools.isReady() && missing != null) {
 
             List<String> allItems = furniDrops.stream()
