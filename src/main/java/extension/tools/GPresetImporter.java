@@ -433,7 +433,7 @@ public class GPresetImporter {
             ));
 
 //            Utils.sleep(600);
-            Utils.sleep(230);
+            Utils.sleep(150);
         }
     }
 

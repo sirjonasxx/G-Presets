@@ -24,6 +24,7 @@ public interface RetrievedWired {
         packet.readInteger(); // selection limit
 
         List<Integer> items = Utils.readIntList(packet);
+        List<Integer> secondItems = Utils.readIntList(packet);
 
         int typeId = packet.readInteger(); // typeid
         int wiredId = packet.readInteger(); // furni id
@@ -76,17 +77,17 @@ public interface RetrievedWired {
         }
 
         if (cls == RetrievedWiredAddon.class) {
-            return cls.cast(new RetrievedWiredAddon(wiredId, options, configString, items, typeId, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(new RetrievedWiredAddon(wiredId, options, configString, items, secondItems, typeId, furniSources, userSources, variableIds, wiredContext));
         } else if (cls == RetrievedWiredTrigger.class) {
-            return cls.cast(new RetrievedWiredTrigger(wiredId, options, configString, items, typeId, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(new RetrievedWiredTrigger(wiredId, options, configString, items, secondItems, typeId, furniSources, userSources, variableIds, wiredContext));
         } else if (cls == RetrievedWiredEffect.class) {
-            return cls.cast(new RetrievedWiredEffect(wiredId, options, configString, items, specifics.delay, typeId, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(new RetrievedWiredEffect(wiredId, options, configString, items, secondItems, specifics.delay, typeId, furniSources, userSources, variableIds, wiredContext));
         } else if (cls == RetrievedWiredCondition.class) {
-            return cls.cast(new RetrievedWiredCondition(wiredId, options, configString, items, typeId, specifics.quantifier, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(new RetrievedWiredCondition(wiredId, options, configString, items, secondItems, typeId, specifics.quantifier, furniSources, userSources, variableIds, wiredContext));
         } else if (cls == RetrievedWiredSelector.class) {
-            return cls.cast(new RetrievedWiredSelector(wiredId, options, configString, items, typeId, specifics.filter, specifics.invert, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(new RetrievedWiredSelector(wiredId, options, configString, items, secondItems, typeId, specifics.filter, specifics.invert, furniSources, userSources, variableIds, wiredContext));
         } else if (cls == RetrievedWiredVariable.class) {
-            return cls.cast(new RetrievedWiredVariable(wiredId, options, configString, items, typeId, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(new RetrievedWiredVariable(wiredId, options, configString, items, secondItems, typeId, furniSources, userSources, variableIds, wiredContext));
         }
 
         return null;

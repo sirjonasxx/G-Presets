@@ -19,8 +19,8 @@ public class PresetWiredVariable extends PresetWiredBase {
         super(packet);
     }
 
-    public PresetWiredVariable(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds, HWiredContext wiredContext) {
-        super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources, variableIds);
+    public PresetWiredVariable(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> secondItems, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds, HWiredContext wiredContext) {
+        super(wiredId, options, stringConfig, items, secondItems, pickedFurniSources, pickedUserSources, variableIds);
         this.variableId = "";
 
         if(wiredContext != null) {

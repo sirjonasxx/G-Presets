@@ -19,6 +19,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
     protected List<Integer> options;
     protected String stringConfig;
     protected List<Integer> items;
+    protected List<Integer> items2;
 
     protected List<Integer> pickedFurniSources; // set in subclass
     protected List<Integer> pickedUserSources;
@@ -33,6 +34,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         pickedFurniSources = Utils.readIntList(packet);
         pickedUserSources = Utils.readIntList(packet);
         variableIds = Utils.readStringList(packet);
+        items2 = Utils.readIntList(packet);
     }
 
     // deep copy constructor
@@ -41,16 +43,18 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         this.options = new ArrayList<>(base.options);
         this.stringConfig = base.stringConfig;
         this.items = new ArrayList<>(base.items);
+        this.items2 = new ArrayList<>(base.items2);
         this.pickedFurniSources = new ArrayList<>(base.pickedFurniSources);
         this.pickedUserSources = new ArrayList<>(base.pickedUserSources);
         this.variableIds = new ArrayList<>(base.variableIds);
     }
 
-    public PresetWiredBase(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds) {
+    public PresetWiredBase(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> items2, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds) {
         this.wiredId = wiredId;
         this.options = options;
         this.stringConfig = stringConfig;
         this.items = items;
+        this.items2 = items2;
         this.pickedFurniSources = pickedFurniSources;
         this.pickedUserSources = pickedUserSources;
         this.variableIds = variableIds;
@@ -61,6 +65,9 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         options = object.getJSONArray("options").toList().stream().map(o -> (int)o).collect(Collectors.toList());
         stringConfig = object.getString("config");
         items = object.getJSONArray("items").toList().stream().map(o -> (int)o).collect(Collectors.toList());
+        items2 = object.has("secondItems") ?
+                object.getJSONArray("secondItems").toList().stream().map(o -> (int)o).collect(Collectors.toList()) :
+                Collections.emptyList();
         pickedFurniSources = object.has("furniSources") ?
                 object.getJSONArray("furniSources").toList().stream().map(o -> (int)o).collect(Collectors.toList()) :
                 Collections.emptyList();
@@ -79,6 +86,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         object.put("options", options);
         object.put("config", stringConfig);
         object.put("items", items);
+        object.put("secondItems", items);
         object.put("furniSources", pickedFurniSources);
         object.put("userSources", pickedUserSources);
         object.put("variableIds", variableIds);
@@ -115,6 +123,9 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         packet.appendInt(variableIds.size());
         variableIds.forEach(packet::appendString);
 
+        packet.appendInt(items2.size());
+        items2.forEach(packet::appendInt);
+
         if (this instanceof PresetWiredTrigger) {
             new PresetWiredTrigger(packet);
         } else if (this instanceof PresetWiredSelector) {
@@ -139,6 +150,10 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
             PresetWiredBase presetWiredBase = this.clone();
             presetWiredBase.wiredId = realFurniIdMap.get(wiredId);
             presetWiredBase.items = items.stream()
+                    .filter(realFurniIdMap::containsKey)
+                    .map(realFurniIdMap::get)
+                    .collect(Collectors.toList());
+            presetWiredBase.items2 = items2.stream()
                     .filter(realFurniIdMap::containsKey)
                     .map(realFurniIdMap::get)
                     .collect(Collectors.toList());
@@ -176,6 +191,10 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
 
     public List<Integer> getItems() {
         return items;
+    }
+
+    public List<Integer> getSecondItems() {
+        return items2;
     }
 
     public List<Integer> getPickedFurniSources() {

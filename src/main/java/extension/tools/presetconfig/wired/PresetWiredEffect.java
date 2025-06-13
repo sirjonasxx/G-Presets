@@ -13,8 +13,8 @@ public class PresetWiredEffect extends PresetWiredBase {
         super(packet);
     }
 
-    public PresetWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, int delay, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds) {
-        super(wiredId, options, stringConfig, items, pickedFurniSources, pickedUserSources, variableIds);
+    public PresetWiredEffect(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> secondItems, int delay, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds) {
+        super(wiredId, options, stringConfig, items, secondItems, pickedFurniSources, pickedUserSources, variableIds);
         this.delay = delay;
     }
 

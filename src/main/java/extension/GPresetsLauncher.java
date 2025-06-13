@@ -1,5 +1,6 @@
 package extension;
 
+import gearth.extensions.ExtensionInfo;
 import gearth.extensions.ThemedExtensionFormCreator;
 import javafx.stage.Stage;
 
@@ -9,7 +10,7 @@ public class GPresetsLauncher extends ThemedExtensionFormCreator {
 
     @Override
     protected String getTitle() {
-        return "G-Presets - Building & Wired Presets";
+        return "G-Presets - Building & Wired Presets - " + GPresets.class.getAnnotation(ExtensionInfo.class).Version();
     }
 
     @Override
