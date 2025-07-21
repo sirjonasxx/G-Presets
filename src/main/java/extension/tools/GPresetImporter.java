@@ -476,30 +476,36 @@ public class GPresetImporter {
         HPoint originalLocation = item.getTile();
         int originalRotation = item.getFacing().ordinal();
 
-        String currentState = StateExtractor.stateFromItem(item);
-        if (currentState == null || currentState.equals(targetState)) {
-            return;
-        }
-
-        synchronized (lock) {
-            if (state != BuildingImportState.NONE) {
-                moveFurni(furniId, reservedSpace.getX(), reservedSpace.getY(), 0, false, -1);
-            }
-        }
-
-        String newState = "-1";
-
-        int i = 0;
-        while (state != BuildingImportState.NONE && newState != null && !currentState.equals(newState) && !newState.equals(targetState) && i < 20) {
-            currentState = newState;
-
-            extension.sendToServer(new HPacket("UseFurniture", HMessage.Direction.TOSERVER, furniId, 0));
+        if (extension.getPermissions().canModifyWired()) {
+            // Set state using the @state variable
+            extension.sendToServer(new HPacket("WiredSetObjectVariableValue", HMessage.Direction.TOSERVER, 0, furniId, "-110", Integer.parseInt(targetState)));
             Utils.sleep(Math.max(extension.getSafeFeedbackTimeout(), 60));
+        } else {
+            String currentState = StateExtractor.stateFromItem(item);
+            if (currentState == null || currentState.equals(targetState)) {
+                return;
+            }
 
-            HFloorItem itemNew = floor.furniFromId(furniId);
-            newState = StateExtractor.stateFromItem(itemNew);
+            synchronized (lock) {
+                if (state != BuildingImportState.NONE) {
+                    moveFurni(furniId, reservedSpace.getX(), reservedSpace.getY(), 0, false, -1);
+                }
+            }
 
-            i++;
+            String newState = "-1";
+
+            int i = 0;
+            while (state != BuildingImportState.NONE && newState != null && !currentState.equals(newState) && !newState.equals(targetState) && i < 20) {
+                currentState = newState;
+
+                extension.sendToServer(new HPacket("UseFurniture", HMessage.Direction.TOSERVER, furniId, 0));
+                Utils.sleep(Math.max(extension.getSafeFeedbackTimeout(), 60));
+
+                HFloorItem itemNew = floor.furniFromId(furniId);
+                newState = StateExtractor.stateFromItem(itemNew);
+
+                i++;
+            }
         }
 
         moveFurni(furniId, originalLocation.getX(), originalLocation.getY(), originalRotation, isStackable, -1);
@@ -629,6 +635,11 @@ public class GPresetImporter {
                     true,
                     moveFurni.getLocation().getZ()// + rootLocation.getZ()
             );
+            if (extension.getPermissions().canModifyWired()) {
+                // set rotation
+                extension.sendToServer(new HPacket("WiredSetObjectVariableValue", HMessage.Direction.TOSERVER, 0, realFurniId, "-122", moveFurni.getRotation()));
+                Utils.sleep(Math.max(extension.getSafeFeedbackTimeout(), 60));
+            }
         }
 
 

@@ -86,7 +86,7 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         object.put("options", options);
         object.put("config", stringConfig);
         object.put("items", items);
-        object.put("secondItems", items);
+        object.put("secondItems", items2);
         object.put("furniSources", pickedFurniSources);
         object.put("userSources", pickedUserSources);
         object.put("variableIds", variableIds);
