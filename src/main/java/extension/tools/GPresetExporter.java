@@ -127,8 +127,30 @@ public class GPresetExporter {
     private void onChat(HMessage hMessage) {
         synchronized (lock) {
             String text = hMessage.getPacket().readString();
+            if (text.equals(":abort") || text.equals(":a")) {
+                hMessage.setBlocked(true);
+                if (state != PresetExportState.NONE) {
+                    reset();
+                    extension.sendVisualChatInfo("Aborted preset export");
+                }
+            } else if(text.equals(":ep") || text.equals(":exportpreset") || text.equals(":ep all") || text.equals(":exportpreset all")) {
+                hMessage.setBlocked(true);
 
-            if (state == PresetExportState.AWAITING_NAME) {
+                if (state != PresetExportState.NONE) {
+                    extension.sendVisualChatInfo("Already exporting preset.. finish up or abort first");
+                } else if (!isReady()) {
+                    extension.sendVisualChatInfo("Error: no room detected or furnidata not available");
+                } else if (text.equals(":ep") || text.equals(":exportpreset")) {
+                    state = PresetExportState.AWAITING_RECT1;
+                    extension.sendVisualChatInfo("Select the start of the rectangle");
+                } else {
+                    // export all
+                    rectCorner1 = new HPoint(0,0 );
+                    rectCorner2 = new HPoint(100, 100);
+                    state = PresetExportState.AWAITING_NAME;
+                    extension.sendVisualChatInfo("Enter the name of the preset");
+                }
+            } else if (state == PresetExportState.AWAITING_NAME) {
                 hMessage.setBlocked(true);
                 int x1 = rectCorner1.getX();
                 int y1 = rectCorner1.getY();
@@ -142,37 +164,6 @@ public class GPresetExporter {
                 if (y1 > y2) y1 = y2;
 
                 attemptExport(text, x1, y1, dimX, dimY);
-            }
-            else if(text.equals(":ep") || text.equals(":exportpreset") || text.equals(":ep all") || text.equals(":exportpreset all")) {
-                hMessage.setBlocked(true);
-
-                if (state != PresetExportState.NONE) {
-                    extension.sendVisualChatInfo("Already exporting preset.. finish up or abort first");
-                }
-                else if (!isReady()) {
-                    extension.sendVisualChatInfo("Error: no room detected or furnidata not available");
-                }
-                else {
-                    if (text.equals(":ep") || text.equals(":exportpreset")) {
-                        state = PresetExportState.AWAITING_RECT1;
-                        extension.sendVisualChatInfo("Select the start of the rectangle");
-                    }
-                    else {
-                        // export all
-                        rectCorner1 = new HPoint(0,0 );
-                        rectCorner2 = new HPoint(100, 100);
-                        state = PresetExportState.AWAITING_NAME;
-                        extension.sendVisualChatInfo("Enter the name of the preset");
-                    }
-
-                }
-            }
-            else if (text.equals(":abort") || text.equals(":a")) {
-                hMessage.setBlocked(true);
-                if (state != PresetExportState.NONE) {
-                    reset();
-                    extension.sendVisualChatInfo("Aborted preset export");
-                }
             }
         }
     }
