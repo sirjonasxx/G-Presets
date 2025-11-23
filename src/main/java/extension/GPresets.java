@@ -119,6 +119,7 @@ public class GPresets extends ExtensionForm {
         logger.log("Use the following commands:", "purple");
         logger.log("* :exportpreset [all] / :ep [all]", "purple");
         logger.log("* :importpreset [x,y] / :ip [x,y]", "purple");
+        logger.log("* :abort / :a", "purple");
 
         stacktile_tgl.selectedToggleProperty().addListener(observable -> {
             String option = ((RadioButton)(stacktile_tgl.getSelectedToggle())).getText();
