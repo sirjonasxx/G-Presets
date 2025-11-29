@@ -18,9 +18,12 @@ public class RoomPermissions {
         this.logger = logger;
         this.stateChangeCallback = stateChangeCallback;
 
-        extension.intercept(HMessage.Direction.TOCLIENT, "WiredPermissions", this::onWiredPermissions);
-        extension.intercept(HMessage.Direction.TOCLIENT, "YouAreController", this::onYouAreController);
-        extension.intercept(HMessage.Direction.TOCLIENT, "YouAreNotController", this::onYouAreNotController);
+        extension.intercept(
+                HMessage.Direction.TOCLIENT, "WiredPermissions", this::onWiredPermissions);
+        extension.intercept(
+                HMessage.Direction.TOCLIENT, "YouAreController", this::onYouAreController);
+        extension.intercept(
+                HMessage.Direction.TOCLIENT, "YouAreNotController", this::onYouAreNotController);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "CloseConnection", m -> clear());
         extension.intercept(HMessage.Direction.TOSERVER, "Quit", m -> clear());

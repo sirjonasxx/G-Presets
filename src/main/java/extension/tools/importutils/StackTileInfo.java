@@ -9,7 +9,7 @@ public class StackTileInfo {
     private HPoint location;
     private int rotation;
 
-    private int dimension;  // -1 means 1x2
+    private int dimension; // -1 means 1x2
 
     public StackTileInfo(int furniId, HPoint location, int rotation, int dimension) {
         this.furniId = furniId;

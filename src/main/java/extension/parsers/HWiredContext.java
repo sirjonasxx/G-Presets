@@ -14,10 +14,10 @@ public class HWiredContext {
     public HWiredContext(HPacket packet) {
         int amount = packet.readInteger();
 
-        for(int i = 0; i < amount; i++) {
+        for (int i = 0; i < amount; i++) {
             int type = packet.readInteger();
 
-            switch(type) {
+            switch (type) {
                 case 0:
                     this.roomVariablesList = new HAllVariablesInRoom(packet);
                     break;
@@ -42,5 +42,4 @@ public class HWiredContext {
             }
         }
     }
-
 }

@@ -1,7 +1,6 @@
 package extension.tools.postconfig;
 
 import gearth.extensions.parsers.HPoint;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,9 +22,19 @@ public class FurniPostConfig {
 
     private final Map<Integer, Integer> wiredRotationMapping;
     private final Map<String, String> wiredStateMapping;
-//    private final Map<HPoint, HPoint> wiredLocationMapping;
 
-    public FurniPostConfig(String furniIdentifier, boolean useExistingFurni, int existingFurniId, String overrideClassName, HPoint overrideLocation, Integer overrideRotation, String overrideState, Map<Integer, Integer> wiredRotationMapping, Map<String, String> wiredStateMapping/*, Map<HPoint, HPoint> wiredLocationMapping*/) {
+    //    private final Map<HPoint, HPoint> wiredLocationMapping;
+
+    public FurniPostConfig(
+            String furniIdentifier,
+            boolean useExistingFurni,
+            int existingFurniId,
+            String overrideClassName,
+            HPoint overrideLocation,
+            Integer overrideRotation,
+            String overrideState,
+            Map<Integer, Integer> wiredRotationMapping,
+            Map<String, String> wiredStateMapping /*, Map<HPoint, HPoint> wiredLocationMapping*/) {
         this.furniIdentifier = furniIdentifier;
         this.useExistingFurni = useExistingFurni;
         this.existingFurniId = existingFurniId;
@@ -35,7 +44,7 @@ public class FurniPostConfig {
         this.overrideState = overrideState;
         this.wiredRotationMapping = wiredRotationMapping;
         this.wiredStateMapping = wiredStateMapping;
-//        this.wiredLocationMapping = wiredLocationMapping;
+        //        this.wiredLocationMapping = wiredLocationMapping;
     }
 
     public FurniPostConfig(String furniIdentifier) {
@@ -51,9 +60,8 @@ public class FurniPostConfig {
 
         wiredRotationMapping = new HashMap<>();
         wiredStateMapping = new HashMap<>();
-//        wiredLocationMapping = new HashMap<>();
+        //        wiredLocationMapping = new HashMap<>();
     }
-
 
     public String getFurniIdentifier() {
         return furniIdentifier;
@@ -91,7 +99,7 @@ public class FurniPostConfig {
         return wiredStateMapping;
     }
 
-//    public Map<HPoint, HPoint> getWiredLocationMapping() {
-//        return wiredLocationMapping;
-//    }
+    //    public Map<HPoint, HPoint> getWiredLocationMapping() {
+    //        return wiredLocationMapping;
+    //    }
 }

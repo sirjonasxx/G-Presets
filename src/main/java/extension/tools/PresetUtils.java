@@ -4,7 +4,6 @@ import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.furni.PresetFurni;
 import game.FloorState;
 import gearth.extensions.parsers.HPoint;
-
 import java.util.List;
 
 public class PresetUtils {
@@ -35,25 +34,21 @@ public class PresetUtils {
 
         if (Character.isDigit(x)) {
             return x - '0';
-        }
-        else if (Character.isLetter(x) && Character.isLowerCase(x)) {
+        } else if (Character.isLetter(x) && Character.isLowerCase(x)) {
             return x - 'a' + 10;
         }
-        
+
         return 256;
     }
 
-    public static int lowestFloorPoint(FloorState floor, PresetConfig presetConfig, HPoint presetRoot) {
+    public static int lowestFloorPoint(
+            FloorState floor, PresetConfig presetConfig, HPoint presetRoot) {
         HPoint dim = presetDimensions(presetConfig);
-        
+
         return lowestFloorPoint(
                 floor,
                 presetRoot,
-                new HPoint(
-                        presetRoot.getX() + dim.getX(),
-                        presetRoot.getY() + dim.getY()
-                )
-        );
+                new HPoint(presetRoot.getX() + dim.getX(), presetRoot.getY() + dim.getY()));
     }
 
     public static int lowestFloorPoint(FloorState floor, HPoint start, HPoint end) {
@@ -70,5 +65,4 @@ public class PresetUtils {
 
         return lowestPoint;
     }
-
 }

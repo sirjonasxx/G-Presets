@@ -9,10 +9,9 @@ import gearth.extensions.parsers.HPoint;
 import gearth.extensions.parsers.stuffdata.IStuffData;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
-import utils.Callback;
-
 import java.util.*;
 import java.util.function.Consumer;
+import utils.Callback;
 
 public class FloorState {
 
@@ -31,11 +30,13 @@ public class FloorState {
     private volatile List<List<Map<Integer, HFloorItem>>> furnimap = null;
     private volatile char[][] floorplan = null;
 
-
     private volatile Map<Integer, Set<Consumer<HFloorItem>>> stateUpdateListeners = new HashMap<>();
 
-
-    public FloorState(IExtension extension, Logger logger, Callback onFloorItemsChange, Callback onRoomLeave) {
+    public FloorState(
+            IExtension extension,
+            Logger logger,
+            Callback onFloorItemsChange,
+            Callback onRoomLeave) {
         this.logger = logger;
         this.onFloorStateChange = onFloorItemsChange;
         this.onRoomLeave = onRoomLeave;
@@ -57,7 +58,6 @@ public class FloorState {
         extension.intercept(HMessage.Direction.TOCLIENT, "FloorHeightMap", this::parseFloorPlan);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "RoomEntryInfo", this::roomEntryInfo);
-
 
         extension.intercept(HMessage.Direction.TOCLIENT, "CloseConnection", m -> reset());
         extension.intercept(HMessage.Direction.TOSERVER, "Quit", m -> reset());
@@ -99,6 +99,7 @@ public class FloorState {
     public boolean inRoom() {
         return furnimap != null && floorplan != null && heightmap != null && roomId != 0;
     }
+
     public void reset() {
         if (heightmap != null || furnimap != null || floorplan != null) {
             synchronized (lock) {
@@ -119,7 +120,7 @@ public class FloorState {
 
         int columns = packet.readInteger();
         int tiles = packet.readInteger();
-        int rows = tiles/columns;
+        int rows = tiles / columns;
 
         int[][] heightmap = new int[columns][];
         for (int col = 0; col < columns; col++) {
@@ -138,6 +139,7 @@ public class FloorState {
 
         logger.log("Parsed heightmap", "blue");
     }
+
     private void heightmapUpdate(HMessage hMessage) {
         if (heightmap != null) {
             HPacket packet = hMessage.getPacket();
@@ -184,6 +186,7 @@ public class FloorState {
             onFloorStateChange.call();
         }
     }
+
     private void removeObject(int furniId) {
         synchronized (lock) {
             HFloorItem item = furniIdToItem.remove(furniId);
@@ -193,13 +196,14 @@ public class FloorState {
             }
         }
     }
+
     private void onObjectAdd(HMessage hMessage) {
         if (inRoom()) {
             addObject(hMessage.getPacket(), null);
             onFloorStateChange.call();
         }
-
     }
+
     private void addObject(HPacket packet, String ownerName) {
         synchronized (lock) {
             HFloorItem item = new HFloorItem(packet);
@@ -219,7 +223,6 @@ public class FloorState {
             typeIdToItems.put(item.getTypeId(), new HashSet<>());
         }
         typeIdToItems.get(item.getTypeId()).add(item);
-
     }
 
     private void onObjectUpdate(HMessage hMessage) {
@@ -258,7 +261,7 @@ public class FloorState {
                 }
             }
 
-//            int roller = packet.readInteger();
+            //            int roller = packet.readInteger();
         }
     }
 
@@ -311,8 +314,7 @@ public class FloorState {
                         packet.readInteger();
                         packet.readInteger();
                         packet.readInteger();
-                    }
-                    else if (type == 1) { // furni
+                    } else if (type == 1) { // furni
                         int oldX = packet.readInteger();
                         int oldY = packet.readInteger();
                         int newX = packet.readInteger();
@@ -326,8 +328,7 @@ public class FloorState {
                         int direction = packet.readInteger();
 
                         updateFurniPosition(furniId, newX, newY, newZ);
-                    }
-                    else if (type == 2) { // wall item
+                    } else if (type == 2) { // wall item
                         packet.readInteger();
                         packet.readBoolean();
 
@@ -340,8 +341,7 @@ public class FloorState {
                         packet.readInteger();
                         packet.readInteger();
                         packet.readInteger();
-                    }
-                    else if (type == 3) { // user direction
+                    } else if (type == 3) { // user direction
                         packet.readInteger();
                         packet.readInteger();
                         packet.readInteger();
@@ -350,7 +350,6 @@ public class FloorState {
             }
         }
     }
-
 
     private void onDataUpdate(HPacket hPacket, int id) {
         IStuffData stuff = IStuffData.read(hPacket);
@@ -374,7 +373,6 @@ public class FloorState {
                 l.accept(item);
             }
         }
-
     }
 
     private void onDataUpdates(HMessage hMessage) {
@@ -413,7 +411,7 @@ public class FloorState {
 
     public double getTileHeight(int x, int y) {
         synchronized (lock) {
-            return ((double)(heightmap[x][y] & 16383)) / 256;
+            return ((double) (heightmap[x][y] & 16383)) / 256;
         }
     }
 
@@ -438,8 +436,14 @@ public class FloorState {
     public char floorHeight(int x, int y) {
         char result;
         synchronized (lock) {
-            result = (floorplan != null && x >= 0 && y >= 0 &&
-                    x < floorplan.length && y < floorplan[x].length) ? floorplan[x][y] : 'x';
+            result =
+                    (floorplan != null
+                                    && x >= 0
+                                    && y >= 0
+                                    && x < floorplan.length
+                                    && y < floorplan[x].length)
+                            ? floorplan[x][y]
+                            : 'x';
         }
         return result;
     }

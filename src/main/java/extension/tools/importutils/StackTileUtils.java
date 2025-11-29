@@ -2,15 +2,16 @@ package extension.tools.importutils;
 
 import game.FloorState;
 import gearth.extensions.parsers.HPoint;
-
 import java.util.*;
 
 public class StackTileUtils {
 
-    public static StackTileInfo findBestDropLocation(int x, int y, List<StackTileInfo> potentialStacktiles, FloorState floorState) {
+    public static StackTileInfo findBestDropLocation(
+            int x, int y, List<StackTileInfo> potentialStacktiles, FloorState floorState) {
         if (!floorState.inRoom()) return null;
 
-        potentialStacktiles.sort((o1, o2) -> -Integer.compare(o1.getDimension(), o2.getDimension()));
+        potentialStacktiles.sort(
+                (o1, o2) -> -Integer.compare(o1.getDimension(), o2.getDimension()));
 
         for (StackTileInfo info : potentialStacktiles) {
             int dimension = info.getDimension();
@@ -20,8 +21,7 @@ public class StackTileUtils {
                 if (dropLocation != null) {
                     return new StackTileInfo(info.getFurniId(), dropLocation, 0, dimension);
                 }
-            }
-            else {
+            } else {
                 // is 1x2 tile
                 char rootChar = floorState.floorHeight(x, y);
                 if (rootChar == 'x') continue;
@@ -29,20 +29,17 @@ public class StackTileUtils {
                 HPoint location = null;
                 int rotation = -1;
 
-                if (floorState.floorHeight(x+1, y) == rootChar) {
+                if (floorState.floorHeight(x + 1, y) == rootChar) {
                     location = new HPoint(x, y);
                     rotation = 0;
-                }
-                else if (floorState.floorHeight(x, y+1) == rootChar) {
+                } else if (floorState.floorHeight(x, y + 1) == rootChar) {
                     location = new HPoint(x, y);
                     rotation = 2;
-                }
-                else if (floorState.floorHeight(x-1, y) == rootChar) {
-                    location = new HPoint(x-1, y);
+                } else if (floorState.floorHeight(x - 1, y) == rootChar) {
+                    location = new HPoint(x - 1, y);
                     rotation = 0;
-                }
-                else if (floorState.floorHeight(x, y-1) == rootChar) {
-                    location = new HPoint(x, y-1);
+                } else if (floorState.floorHeight(x, y - 1) == rootChar) {
+                    location = new HPoint(x, y - 1);
                     rotation = 2;
                 }
 
@@ -55,7 +52,8 @@ public class StackTileUtils {
         return null;
     }
 
-    public static HPoint findBestDropLocation(int x, int y, int stackDimensions, FloorState floorState) {
+    public static HPoint findBestDropLocation(
+            int x, int y, int stackDimensions, FloorState floorState) {
         List<HPoint> possibleLocations = new ArrayList<>();
 
         for (int x2 = x; x2 > Math.max(x - stackDimensions, 0); x2--) {
@@ -64,12 +62,15 @@ public class StackTileUtils {
             }
         }
 
-        possibleLocations.sort((o1, o2) -> {
-            int score1 = (x-o1.getX())*(x-o1.getX()) + (y-o1.getY())*(y-o1.getY());
-            int score2 = (x-o2.getX())*(x-o2.getX()) + (y-o2.getY())*(y-o2.getY());
+        possibleLocations.sort(
+                (o1, o2) -> {
+                    int score1 =
+                            (x - o1.getX()) * (x - o1.getX()) + (y - o1.getY()) * (y - o1.getY());
+                    int score2 =
+                            (x - o2.getX()) * (x - o2.getX()) + (y - o2.getY()) * (y - o2.getY());
 
-            return score1 - score2;
-        });
+                    return score1 - score2;
+                });
 
         outerloop:
         for (HPoint p : possibleLocations) {
@@ -80,7 +81,8 @@ public class StackTileUtils {
 
             for (int x3 = 0; x3 < stackDimensions; x3++) {
                 for (int y3 = 0; y3 < stackDimensions; y3++) {
-                    if (floorState.floorHeight(x2 + x3, y2 + y3) != referenceChar) continue outerloop;
+                    if (floorState.floorHeight(x2 + x3, y2 + y3) != referenceChar)
+                        continue outerloop;
                 }
             }
 
@@ -89,5 +91,4 @@ public class StackTileUtils {
 
         return null;
     }
-
 }

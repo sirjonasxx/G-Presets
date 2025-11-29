@@ -3,7 +3,6 @@ package extension.tools;
 import java.util.Arrays;
 
 public enum StackTileSetting {
-
     Small("tile_stackmagic", 1),
     Medium("tile_stackmagic1", -1),
     Large("tile_stackmagic2", 2),
@@ -46,7 +45,10 @@ public enum StackTileSetting {
     }
 
     public static StackTileSetting fromClassName(String className) {
-        return Arrays.stream(values()).filter(v -> v.getClassName().equals(className)).findFirst().orElse(null);
+        return Arrays.stream(values())
+                .filter(v -> v.getClassName().equals(className))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override

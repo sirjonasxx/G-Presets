@@ -1,8 +1,6 @@
 package extension.tools.presetconfig;
 
 import extension.GPresets;
-import org.json.JSONObject;
-
 import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -10,21 +8,28 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONObject;
 
 public class PresetConfigUtils {
     public static final String PRESET_EXT = ".json";
 
     public static String presetPath() {
         try {
-            String path = (new File(GPresets.class.getProtectionDomain().getCodeSource().getLocation().toURI()))
-                    .getParentFile().toString();
+            String path =
+                    (new File(
+                                    GPresets.class
+                                            .getProtectionDomain()
+                                            .getCodeSource()
+                                            .getLocation()
+                                            .toURI()))
+                            .getParentFile()
+                            .toString();
             return Paths.get(path, "presets").toString();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
         return "";
     }
-
 
     public static List<String> listPresets() {
         List<String> presets = new ArrayList<>();
@@ -53,7 +58,10 @@ public class PresetConfigUtils {
         File presetPath = new File(presetPath());
         presetPath.mkdirs();
 
-        try (Writer file = new OutputStreamWriter(Files.newOutputStream(new File(presetPath(), name + PRESET_EXT).toPath()), StandardCharsets.UTF_8)) {
+        try (Writer file =
+                new OutputStreamWriter(
+                        Files.newOutputStream(new File(presetPath(), name + PRESET_EXT).toPath()),
+                        StandardCharsets.UTF_8)) {
             file.write(config.toJsonObject().toString(4));
             file.flush();
             return true;
@@ -68,7 +76,9 @@ public class PresetConfigUtils {
         File file = new File(presetPath(), name + PRESET_EXT);
         if (file.exists() && file.isFile()) {
             try {
-                String contents = String.join("\n", Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
+                String contents =
+                        String.join(
+                                "\n", Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
                 return new PresetConfig(new JSONObject(contents));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -77,5 +87,4 @@ public class PresetConfigUtils {
 
         return null;
     }
-
 }

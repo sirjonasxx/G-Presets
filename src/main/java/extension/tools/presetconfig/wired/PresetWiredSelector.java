@@ -1,9 +1,8 @@
 package extension.tools.presetconfig.wired;
 
 import gearth.protocol.HPacket;
-import org.json.JSONObject;
-
 import java.util.List;
+import org.json.JSONObject;
 
 public class PresetWiredSelector extends PresetWiredBase {
 
@@ -14,8 +13,26 @@ public class PresetWiredSelector extends PresetWiredBase {
         super(packet);
     }
 
-    public PresetWiredSelector(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> secondItems, boolean filter, boolean inverse, List<Integer> furniSources, List<Integer> userSources, List<String> variableIds) {
-        super(wiredId, options, stringConfig, items, secondItems, furniSources, userSources, variableIds);
+    public PresetWiredSelector(
+            int wiredId,
+            List<Integer> options,
+            String stringConfig,
+            List<Integer> items,
+            List<Integer> secondItems,
+            boolean filter,
+            boolean inverse,
+            List<Integer> furniSources,
+            List<Integer> userSources,
+            List<String> variableIds) {
+        super(
+                wiredId,
+                options,
+                stringConfig,
+                items,
+                secondItems,
+                furniSources,
+                userSources,
+                variableIds);
         this.filter = filter;
         this.inverse = inverse;
     }
@@ -60,5 +77,4 @@ public class PresetWiredSelector extends PresetWiredBase {
     public PresetWiredSelector clone() {
         return new PresetWiredSelector(this);
     }
-
 }

@@ -4,9 +4,8 @@ import extension.parsers.HSharedVariable;
 import extension.parsers.HWiredContext;
 import extension.parsers.HWiredVariable;
 import gearth.protocol.HPacket;
-import org.json.JSONObject;
-
 import java.util.List;
+import org.json.JSONObject;
 
 /**
  * @author Beny.
@@ -19,30 +18,48 @@ public class PresetWiredVariable extends PresetWiredBase {
         super(packet);
     }
 
-    public PresetWiredVariable(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> secondItems, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds, HWiredContext wiredContext) {
-        super(wiredId, options, stringConfig, items, secondItems, pickedFurniSources, pickedUserSources, variableIds);
+    public PresetWiredVariable(
+            int wiredId,
+            List<Integer> options,
+            String stringConfig,
+            List<Integer> items,
+            List<Integer> secondItems,
+            List<Integer> pickedFurniSources,
+            List<Integer> pickedUserSources,
+            List<String> variableIds,
+            HWiredContext wiredContext) {
+        super(
+                wiredId,
+                options,
+                stringConfig,
+                items,
+                secondItems,
+                pickedFurniSources,
+                pickedUserSources,
+                variableIds);
         this.variableId = "";
 
-        if(wiredContext != null) {
-            if(wiredContext.roomVariablesList != null && !wiredContext.roomVariablesList.variables.isEmpty()) {
-                for(HWiredVariable var : wiredContext.roomVariablesList.variables.values()) {
-                    if(var.name.equals(stringConfig)) {
+        if (wiredContext != null) {
+            if (wiredContext.roomVariablesList != null
+                    && !wiredContext.roomVariablesList.variables.isEmpty()) {
+                for (HWiredVariable var : wiredContext.roomVariablesList.variables.values()) {
+                    if (var.name.equals(stringConfig)) {
                         this.variableId = var.id;
                     }
                 }
-            }
-            else if(wiredContext.furniVariableInfo != null && wiredContext.furniVariableInfo.variable.name.equals(stringConfig)) {
+            } else if (wiredContext.furniVariableInfo != null
+                    && wiredContext.furniVariableInfo.variable.name.equals(stringConfig)) {
                 this.variableId = wiredContext.furniVariableInfo.variable.id;
-            }
-            else if(wiredContext.userVariableInfo != null && wiredContext.userVariableInfo.variable.name.equals(stringConfig)) {
+            } else if (wiredContext.userVariableInfo != null
+                    && wiredContext.userVariableInfo.variable.name.equals(stringConfig)) {
                 this.variableId = wiredContext.userVariableInfo.variable.id;
-            }
-            else if(wiredContext.globalVariableInfo != null && wiredContext.globalVariableInfo.variable.name.equals(stringConfig)) {
+            } else if (wiredContext.globalVariableInfo != null
+                    && wiredContext.globalVariableInfo.variable.name.equals(stringConfig)) {
                 this.variableId = wiredContext.globalVariableInfo.variable.id;
-            }
-            else if(wiredContext.referenceVariablesList != null && !wiredContext.referenceVariablesList.sharedVariables.isEmpty()) {
-                for(HSharedVariable var : wiredContext.referenceVariablesList.sharedVariables) {
-                    if(var.wiredVariable.name.equals(stringConfig)) {
+            } else if (wiredContext.referenceVariablesList != null
+                    && !wiredContext.referenceVariablesList.sharedVariables.isEmpty()) {
+                for (HSharedVariable var : wiredContext.referenceVariablesList.sharedVariables) {
+                    if (var.wiredVariable.name.equals(stringConfig)) {
                         this.variableId = var.wiredVariable.id;
                     }
                 }
@@ -61,20 +78,17 @@ public class PresetWiredVariable extends PresetWiredBase {
 
         try {
             this.variableId = object.optString("variableId");
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             try {
                 this.variableId = object.optString("variableId");
-            }
-            catch(Exception ex) {
-                this.variableId = (String)object.get("variableId");
+            } catch (Exception ex) {
+                this.variableId = (String) object.get("variableId");
             }
         }
     }
 
     @Override
-    protected void readTypeSpecific(HPacket packet) {
-    }
+    protected void readTypeSpecific(HPacket packet) {}
 
     @Override
     protected void appendJsonFields(JSONObject object) {
@@ -87,9 +101,7 @@ public class PresetWiredVariable extends PresetWiredBase {
     }
 
     @Override
-    protected void applyTypeSpecificWiredConfig(HPacket packet) {
-
-    }
+    protected void applyTypeSpecificWiredConfig(HPacket packet) {}
 
     @Override
     public PresetWiredVariable clone() {

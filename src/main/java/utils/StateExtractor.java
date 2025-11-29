@@ -18,5 +18,4 @@ public class StateExtractor {
 
         return Integer.toString(state);
     }
-
 }

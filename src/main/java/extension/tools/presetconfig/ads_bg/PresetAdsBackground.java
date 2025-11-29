@@ -11,7 +11,8 @@ public class PresetAdsBackground {
     private String offsetY;
     private String offsetZ;
 
-    public PresetAdsBackground(int furniId, String imageUrl, String offsetX, String offsetY, String offsetZ) {
+    public PresetAdsBackground(
+            int furniId, String imageUrl, String offsetX, String offsetY, String offsetZ) {
         this.furniId = furniId;
         this.imageUrl = imageUrl;
         this.offsetX = offsetX;
