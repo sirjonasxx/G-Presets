@@ -6,9 +6,8 @@ import gearth.extensions.parsers.HInventoryItem;
 import gearth.extensions.parsers.HProductType;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
-import utils.Callback;
-
 import java.util.*;
+import utils.Callback;
 
 public class Inventory {
 
@@ -37,16 +36,21 @@ public class Inventory {
         this.onInventoryStateChange = onInventoryStateChange;
 
         extension.intercept(HMessage.Direction.TOCLIENT, "FurniList", this::loadItems);
-        extension.intercept(HMessage.Direction.TOCLIENT, "FurniListAddOrUpdate", (m) -> {
-            HPacket packet = m.getPacket();
-            int count = packet.readInteger();
-            for (int i = 0; i < count; i++) {
-                HInventoryItem item = new HInventoryItem(m.getPacket());
-                updateOrAddItem(item);
-            }
-        });
-        extension.intercept(HMessage.Direction.TOCLIENT, "FurniListRemove", (m) ->
-                removeItem(m.getPacket().readInteger()));
+        extension.intercept(
+                HMessage.Direction.TOCLIENT,
+                "FurniListAddOrUpdate",
+                (m) -> {
+                    HPacket packet = m.getPacket();
+                    int count = packet.readInteger();
+                    for (int i = 0; i < count; i++) {
+                        HInventoryItem item = new HInventoryItem(m.getPacket());
+                        updateOrAddItem(item);
+                    }
+                });
+        extension.intercept(
+                HMessage.Direction.TOCLIENT,
+                "FurniListRemove",
+                (m) -> removeItem(m.getPacket().readInteger()));
     }
 
     public InventoryState getState() {
@@ -57,7 +61,7 @@ public class Inventory {
         if (virtualRequest) {
             hMessage.setBlocked(true);
         }
-        
+
         boolean stateChanged = false;
 
         HPacket inventoryLoadPacket = hMessage.getPacket();
@@ -66,7 +70,8 @@ public class Inventory {
 
         if (i == 0) {
             clear();
-            logger.log((itemPlacements.isEmpty() ? "Loading" : "Updating") + " inventory...", "blue");
+            logger.log(
+                    (itemPlacements.isEmpty() ? "Loading" : "Updating") + " inventory...", "blue");
             buffer = new ArrayList<>();
             stateChanged = true;
             state = InventoryState.LOADING;
@@ -79,7 +84,9 @@ public class Inventory {
         boolean inventoryComplete = i == total - 1;
         if (inventoryComplete) {
             buffer.forEach(this::updateOrAddItem);
-            logger.log(String.format("Inventory loaded: found %d items.", itemPlacements.size()), "blue");
+            logger.log(
+                    String.format("Inventory loaded: found %d items.", itemPlacements.size()),
+                    "blue");
             buffer = null;
             stateChanged = true;
             virtualRequest = false;
@@ -94,9 +101,9 @@ public class Inventory {
     private void updateOrAddItem(HInventoryItem item) {
         if (state != InventoryState.UNAVAILABLE) {
             itemPlacements.put(item.getPlacementId(), item);
-            Map<Integer, Map<Integer, HInventoryItem>> map = item.getType() == HProductType.FloorItem ? floorItemsByType : wallItemsByType;
-            if (!map.containsKey(item.getTypeId()))
-                map.put(item.getTypeId(), new HashMap<>());
+            Map<Integer, Map<Integer, HInventoryItem>> map =
+                    item.getType() == HProductType.FloorItem ? floorItemsByType : wallItemsByType;
+            if (!map.containsKey(item.getTypeId())) map.put(item.getTypeId(), new HashMap<>());
             map.get(item.getTypeId()).put(item.getId(), item);
         }
     }
@@ -108,8 +115,7 @@ public class Inventory {
                 if (item.getType() == HProductType.FloorItem) {
                     if (floorItemsByType.containsKey(item.getTypeId()))
                         floorItemsByType.get(item.getTypeId()).remove(item.getId());
-                }
-                else {
+                } else {
                     if (wallItemsByType.containsKey(item.getTypeId()))
                         wallItemsByType.get(item.getTypeId()).remove(item.getId());
                 }
@@ -120,17 +126,16 @@ public class Inventory {
     public List<HInventoryItem> getInventoryItems() {
         return new ArrayList<>(itemPlacements.values());
     }
+
     public List<HInventoryItem> getFloorItemsByType(int typeId) {
         Map<Integer, HInventoryItem> items = floorItemsByType.get(typeId);
-        if (items == null)
-            return Collections.emptyList();
+        if (items == null) return Collections.emptyList();
         return new ArrayList<>(items.values());
     }
 
     public List<HInventoryItem> getWallItemsByType(int typeId) {
         Map<Integer, HInventoryItem> items = wallItemsByType.get(typeId);
-        if (items == null)
-            return Collections.emptyList();
+        if (items == null) return Collections.emptyList();
         return new ArrayList<>(items.values());
     }
 

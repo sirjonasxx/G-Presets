@@ -5,5 +5,4 @@ import org.json.JSONObject;
 public interface PresetJsonConfigurable {
 
     JSONObject toJsonObject();
-
 }

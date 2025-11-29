@@ -1,15 +1,14 @@
 package extension.logger;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.layout.BorderPane;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class Logger {
 
@@ -20,7 +19,7 @@ public class Logger {
     public void initialize(BorderPane borderPane) {
         area = new StyleClassedTextArea();
         area.getStyleClass().add("themed-background");
-//        area.setWrapText(true);
+        //        area.setWrapText(true);
         area.setEditable(false);
 
         VirtualizedScrollPane<StyleClassedTextArea> vsPane = new VirtualizedScrollPane<>(area);
@@ -36,26 +35,29 @@ public class Logger {
     }
 
     private synchronized void appendLog(List<Element> elements) {
-        Platform.runLater(() -> {
-            StringBuilder sb = new StringBuilder();
-            StyleSpansBuilder<Collection<String>> styleSpansBuilder = new StyleSpansBuilder<>(0);
+        Platform.runLater(
+                () -> {
+                    StringBuilder sb = new StringBuilder();
+                    StyleSpansBuilder<Collection<String>> styleSpansBuilder =
+                            new StyleSpansBuilder<>(0);
 
-            for (Element element : elements) {
-                sb.append(element.text);
+                    for (Element element : elements) {
+                        sb.append(element.text);
 
-                styleSpansBuilder.add(Collections.singleton(element.className), element.text.length());
-            }
+                        styleSpansBuilder.add(
+                                Collections.singleton(element.className), element.text.length());
+                    }
 
-            int oldLen = area.getLength();
-            area.appendText(sb.toString());
-//            System.out.println(sb.toString());
-            area.setStyleSpans(oldLen, styleSpansBuilder.create());
+                    int oldLen = area.getLength();
+                    area.appendText(sb.toString());
+                    //            System.out.println(sb.toString());
+                    area.setStyleSpans(oldLen, styleSpansBuilder.create());
 
-//            if (autoScroll) {
-            area.moveTo(area.getLength());
-            area.requestFollowCaret();
-//            }
-        });
+                    //            if (autoScroll) {
+                    area.moveTo(area.getLength());
+                    area.requestFollowCaret();
+                    //            }
+                });
     }
 
     public void log(String s, String className) {
@@ -71,26 +73,23 @@ public class Logger {
         synchronized (appendOnLoad) {
             if (initialized) {
                 appendLog(elements);
-            }
-            else {
+            } else {
                 appendOnLoad.addAll(elements);
             }
         }
     }
 
-    private static String cleanTextContent(String text)
-    {
-//        // strips off all non-ASCII characters
-//        text = text.replaceAll("[^\\x00-\\x7F]", "");
-//
-//        // erases all the ASCII control characters
+    private static String cleanTextContent(String text) {
+        //        // strips off all non-ASCII characters
+        //        text = text.replaceAll("[^\\x00-\\x7F]", "");
+        //
+        //        // erases all the ASCII control characters
         text = text.replaceAll("[\\p{Cntrl}&&[^\n\t]]", "");
 
         // removes non-printable characters from Unicode
-//        text = text.replaceAll("\\p{C}", "");
+        //        text = text.replaceAll("\\p{C}", "");
 
-//        return text.trim();
+        //        return text.trim();
         return text;
     }
-
 }

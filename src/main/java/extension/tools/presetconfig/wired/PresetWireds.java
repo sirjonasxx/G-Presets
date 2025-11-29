@@ -1,14 +1,13 @@
 package extension.tools.presetconfig.wired;
 
 import extension.tools.presetconfig.PresetJsonConfigurable;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class PresetWireds implements PresetJsonConfigurable {
 
@@ -20,7 +19,14 @@ public class PresetWireds implements PresetJsonConfigurable {
     private List<PresetWiredSelector> selectors;
     private List<PresetWiredVariable> variables;
 
-    public PresetWireds(List<PresetWiredCondition> conditions, List<PresetWiredEffect> effects, List<PresetWiredTrigger> triggers, List<PresetWiredAddon> addons, List<PresetWiredSelector> selectors, List<PresetWiredVariable> variables, HashMap<String, String> variablesMap) {
+    public PresetWireds(
+            List<PresetWiredCondition> conditions,
+            List<PresetWiredEffect> effects,
+            List<PresetWiredTrigger> triggers,
+            List<PresetWiredAddon> addons,
+            List<PresetWiredSelector> selectors,
+            List<PresetWiredVariable> variables,
+            HashMap<String, String> variablesMap) {
         this.conditions = conditions;
         this.effects = effects;
         this.triggers = triggers;
@@ -31,50 +37,85 @@ public class PresetWireds implements PresetJsonConfigurable {
     }
 
     public PresetWireds(JSONObject object) {
-        conditions = object.getJSONArray("conditions").toList().stream()
-                .map(o -> new PresetWiredCondition(new JSONObject((Map)o))).collect(Collectors.toList());
+        conditions =
+                object.getJSONArray("conditions").toList().stream()
+                        .map(o -> new PresetWiredCondition(new JSONObject((Map) o)))
+                        .collect(Collectors.toList());
 
-        effects = object.getJSONArray("effects").toList().stream()
-                .map(o -> new PresetWiredEffect(new JSONObject((Map)o))).collect(Collectors.toList());
+        effects =
+                object.getJSONArray("effects").toList().stream()
+                        .map(o -> new PresetWiredEffect(new JSONObject((Map) o)))
+                        .collect(Collectors.toList());
 
-        triggers = object.getJSONArray("triggers").toList().stream()
-                .map(o -> new PresetWiredTrigger(new JSONObject((Map)o))).collect(Collectors.toList());
+        triggers =
+                object.getJSONArray("triggers").toList().stream()
+                        .map(o -> new PresetWiredTrigger(new JSONObject((Map) o)))
+                        .collect(Collectors.toList());
 
-        addons = object.has("addons") ?
-                object.getJSONArray("addons").toList().stream()
-                        .map(o -> new PresetWiredAddon(new JSONObject((Map)o))).collect(Collectors.toList()) :
-                new ArrayList<>();
+        addons =
+                object.has("addons")
+                        ? object.getJSONArray("addons").toList().stream()
+                                .map(o -> new PresetWiredAddon(new JSONObject((Map) o)))
+                                .collect(Collectors.toList())
+                        : new ArrayList<>();
 
-        selectors = object.has("selectors") ?
-                object.getJSONArray("selectors").toList().stream()
-                        .map(o -> new PresetWiredSelector(new JSONObject((Map)o))).collect(Collectors.toList()) :
-                new ArrayList<>();
+        selectors =
+                object.has("selectors")
+                        ? object.getJSONArray("selectors").toList().stream()
+                                .map(o -> new PresetWiredSelector(new JSONObject((Map) o)))
+                                .collect(Collectors.toList())
+                        : new ArrayList<>();
 
-        variables = object.has("variables") ?
-                object.getJSONArray("variables").toList().stream()
-                        .map(o -> new PresetWiredVariable(new JSONObject((Map)o))).collect(Collectors.toList()) :
-                new ArrayList<>();
+        variables =
+                object.has("variables")
+                        ? object.getJSONArray("variables").toList().stream()
+                                .map(o -> new PresetWiredVariable(new JSONObject((Map) o)))
+                                .collect(Collectors.toList())
+                        : new ArrayList<>();
 
         variablesMap = new HashMap<>();
-        if(object.has("variables_map")) {
+        if (object.has("variables_map")) {
             JSONObject map = object.getJSONObject("variables_map");
-            for(String key : map.keySet()) {
+            for (String key : map.keySet()) {
                 variablesMap.put(key, map.getString(key));
             }
         }
     }
 
-
     @Override
     public JSONObject toJsonObject() {
         JSONObject object = new JSONObject();
 
-        JSONArray jsonConditions = new JSONArray(conditions.stream().map(PresetWiredCondition::toJsonObject).collect(Collectors.toList()));
-        JSONArray jsonEffects = new JSONArray(effects.stream().map(PresetWiredEffect::toJsonObject).collect(Collectors.toList()));
-        JSONArray jsonTriggers = new JSONArray(triggers.stream().map(PresetWiredTrigger::toJsonObject).collect(Collectors.toList()));
-        JSONArray jsonAddons = new JSONArray(addons.stream().map(PresetWiredAddon::toJsonObject).collect(Collectors.toList()));
-        JSONArray jsonSelectors = new JSONArray(selectors.stream().map(PresetWiredSelector::toJsonObject).collect(Collectors.toList()));
-        JSONArray jsonVariables = new JSONArray(variables.stream().map(PresetWiredVariable::toJsonObject).collect(Collectors.toList()));
+        JSONArray jsonConditions =
+                new JSONArray(
+                        conditions.stream()
+                                .map(PresetWiredCondition::toJsonObject)
+                                .collect(Collectors.toList()));
+        JSONArray jsonEffects =
+                new JSONArray(
+                        effects.stream()
+                                .map(PresetWiredEffect::toJsonObject)
+                                .collect(Collectors.toList()));
+        JSONArray jsonTriggers =
+                new JSONArray(
+                        triggers.stream()
+                                .map(PresetWiredTrigger::toJsonObject)
+                                .collect(Collectors.toList()));
+        JSONArray jsonAddons =
+                new JSONArray(
+                        addons.stream()
+                                .map(PresetWiredAddon::toJsonObject)
+                                .collect(Collectors.toList()));
+        JSONArray jsonSelectors =
+                new JSONArray(
+                        selectors.stream()
+                                .map(PresetWiredSelector::toJsonObject)
+                                .collect(Collectors.toList()));
+        JSONArray jsonVariables =
+                new JSONArray(
+                        variables.stream()
+                                .map(PresetWiredVariable::toJsonObject)
+                                .collect(Collectors.toList()));
         JSONObject jsonVariablesMap = new JSONObject();
         this.variablesMap.forEach(jsonVariablesMap::put);
 

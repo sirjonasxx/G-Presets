@@ -1,14 +1,12 @@
 package utils;
 
 import gearth.protocol.HPacket;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class Utils {
 
     private static int extraSleepTime = 0;
-
 
     public static void sleep(int ms) {
         try {
@@ -17,7 +15,6 @@ public class Utils {
             e.printStackTrace();
         }
     }
-
 
     public static void setExtraSleepTime(int extraSleepTime) {
         Utils.extraSleepTime = extraSleepTime;

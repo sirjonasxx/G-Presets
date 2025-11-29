@@ -1,9 +1,8 @@
 package extension.tools.presetconfig.wired;
 
 import gearth.protocol.HPacket;
-import org.json.JSONObject;
-
 import java.util.List;
+import org.json.JSONObject;
 
 public class PresetWiredTrigger extends PresetWiredBase {
 
@@ -11,8 +10,24 @@ public class PresetWiredTrigger extends PresetWiredBase {
         super(packet);
     }
 
-    public PresetWiredTrigger(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> secondItems, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds) {
-        super(wiredId, options, stringConfig, items, secondItems, pickedFurniSources, pickedUserSources, variableIds);
+    public PresetWiredTrigger(
+            int wiredId,
+            List<Integer> options,
+            String stringConfig,
+            List<Integer> items,
+            List<Integer> secondItems,
+            List<Integer> pickedFurniSources,
+            List<Integer> pickedUserSources,
+            List<String> variableIds) {
+        super(
+                wiredId,
+                options,
+                stringConfig,
+                items,
+                secondItems,
+                pickedFurniSources,
+                pickedUserSources,
+                variableIds);
     }
 
     // deep copy constructor
@@ -25,12 +40,10 @@ public class PresetWiredTrigger extends PresetWiredBase {
     }
 
     @Override
-    protected void readTypeSpecific(HPacket packet) {
-    }
+    protected void readTypeSpecific(HPacket packet) {}
 
     @Override
-    protected void appendJsonFields(JSONObject object) {
-    }
+    protected void appendJsonFields(JSONObject object) {}
 
     @Override
     protected String getPacketName() {
@@ -38,12 +51,10 @@ public class PresetWiredTrigger extends PresetWiredBase {
     }
 
     @Override
-    protected void applyTypeSpecificWiredConfig(HPacket packet) {
-    }
+    protected void applyTypeSpecificWiredConfig(HPacket packet) {}
 
     @Override
     public PresetWiredTrigger clone() {
         return new PresetWiredTrigger(this);
     }
-
 }

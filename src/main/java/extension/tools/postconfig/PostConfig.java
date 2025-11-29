@@ -42,5 +42,4 @@ public class PostConfig {
     public void setItemSource(ItemSource itemSource) {
         this.itemSource = itemSource;
     }
-
 }

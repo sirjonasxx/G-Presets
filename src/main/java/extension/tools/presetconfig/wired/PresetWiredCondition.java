@@ -1,9 +1,8 @@
 package extension.tools.presetconfig.wired;
 
 import gearth.protocol.HPacket;
-import org.json.JSONObject;
-
 import java.util.List;
+import org.json.JSONObject;
 
 public class PresetWiredCondition extends PresetWiredBase {
 
@@ -13,8 +12,25 @@ public class PresetWiredCondition extends PresetWiredBase {
         super(packet);
     }
 
-    public PresetWiredCondition(int wiredId, List<Integer> options, String stringConfig, List<Integer> items, List<Integer> secondItems, int quantifier, List<Integer> pickedFurniSources, List<Integer> pickedUserSources, List<String> variableIds) {
-        super(wiredId, options, stringConfig, items, secondItems, pickedFurniSources, pickedUserSources, variableIds);
+    public PresetWiredCondition(
+            int wiredId,
+            List<Integer> options,
+            String stringConfig,
+            List<Integer> items,
+            List<Integer> secondItems,
+            int quantifier,
+            List<Integer> pickedFurniSources,
+            List<Integer> pickedUserSources,
+            List<String> variableIds) {
+        super(
+                wiredId,
+                options,
+                stringConfig,
+                items,
+                secondItems,
+                pickedFurniSources,
+                pickedUserSources,
+                variableIds);
         this.quantifier = quantifier;
     }
 
@@ -53,5 +69,4 @@ public class PresetWiredCondition extends PresetWiredBase {
     public PresetWiredCondition clone() {
         return new PresetWiredCondition(this);
     }
-
 }

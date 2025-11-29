@@ -1,7 +1,6 @@
 package extension.parsers;
 
 import gearth.protocol.HPacket;
-
 import java.util.HashMap;
 
 public class HAllVariablesInRoom {

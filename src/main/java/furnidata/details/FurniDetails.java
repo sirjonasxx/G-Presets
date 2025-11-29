@@ -2,7 +2,8 @@ package furnidata.details;
 
 import org.json.JSONObject;
 
-// source: https://github.com/kouris-h/HabboAPI/blob/master/src/main/java/gamedata/furnidata/furnidetails/FurniDetails.java
+// source:
+// https://github.com/kouris-h/HabboAPI/blob/master/src/main/java/gamedata/furnidata/furnidetails/FurniDetails.java
 // by wiredspast & kouris
 abstract class FurniDetails {
     public final String className, category, name, description, furniline, adUrl, environment;
@@ -10,14 +11,14 @@ abstract class FurniDetails {
     public final boolean isBC, isRare, isBuyOut, isRentBuyOut, isExcludedDynamic;
 
     public FurniDetails(JSONObject jsonObject) {
-        this.className = jsonObject.optString("classname",null);
-        this.category = jsonObject.optString("category",null);
-        this.name = jsonObject.optString("name",null);
-        this.description = jsonObject.optString("description",null);
-        this.furniline = jsonObject.optString("furniline",null);
+        this.className = jsonObject.optString("classname", null);
+        this.category = jsonObject.optString("category", null);
+        this.name = jsonObject.optString("name", null);
+        this.description = jsonObject.optString("description", null);
+        this.furniline = jsonObject.optString("furniline", null);
 
-        this.adUrl = jsonObject.optString("adurl",null);
-        this.environment = jsonObject.optString("environment",null);
+        this.adUrl = jsonObject.optString("adurl", null);
+        this.environment = jsonObject.optString("environment", null);
 
         this.id = jsonObject.getInt("id");
         this.revision = jsonObject.getInt("revision");
@@ -30,5 +31,4 @@ abstract class FurniDetails {
         this.isRentBuyOut = jsonObject.getBoolean("rentbuyout");
         this.isExcludedDynamic = jsonObject.getBoolean("excludeddynamic");
     }
-
 }

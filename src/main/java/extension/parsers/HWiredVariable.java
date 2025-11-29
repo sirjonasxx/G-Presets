@@ -1,7 +1,6 @@
 package extension.parsers;
 
 import gearth.protocol.HPacket;
-
 import java.util.HashMap;
 
 public class HWiredVariable {
@@ -35,10 +34,10 @@ public class HWiredVariable {
         this.canReadCreationTime = packet.readBoolean();
         this.canReadLastUpdateTime = packet.readBoolean();
 
-        if(packet.readBoolean()) {
+        if (packet.readBoolean()) {
             this.textConnector = new HashMap<>();
             int textConnectorCount = packet.readInteger();
-            for(int i = 0; i < textConnectorCount; i++) {
+            for (int i = 0; i < textConnectorCount; i++) {
                 this.textConnector.put(packet.readInteger(), packet.readString());
             }
         }

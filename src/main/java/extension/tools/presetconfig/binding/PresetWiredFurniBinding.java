@@ -9,21 +9,25 @@ public class PresetWiredFurniBinding implements PresetJsonConfigurable {
     private int furniId;
     private int wiredId;
 
-
     // binding only required if != null (-> means the checkbox is checked)
-    private HPoint location;        // relative to selection, only x & y matters
+    private HPoint location; // relative to selection, only x & y matters
     private Integer rotation;
-
 
     // only needs to be applied if state can be changed with UseFurniture packets
     // and if furni category = LegacyStuffData (0) & state is a number
-    // or if furni category = MapStuffData (1) and contains "state" & is a number? / check if this can ever be toggled with UseFurniture
+    // or if furni category = MapStuffData (1) and contains "state" & is a number? / check if this
+    // can ever be toggled with UseFurniture
     private String state;
 
     private Integer altitude;
 
-
-    public PresetWiredFurniBinding(int furniId, int wiredId, HPoint location, Integer rotation, String state, Integer altitude) {
+    public PresetWiredFurniBinding(
+            int furniId,
+            int wiredId,
+            HPoint location,
+            Integer rotation,
+            String state,
+            Integer altitude) {
         this.furniId = furniId;
         this.wiredId = wiredId;
         this.location = location;
@@ -36,7 +40,10 @@ public class PresetWiredFurniBinding implements PresetJsonConfigurable {
     public PresetWiredFurniBinding(PresetWiredFurniBinding binding) {
         this.furniId = binding.furniId;
         this.wiredId = binding.wiredId;
-        this.location = binding.location == null ? null : new HPoint(binding.location.getX(), binding.location.getY());
+        this.location =
+                binding.location == null
+                        ? null
+                        : new HPoint(binding.location.getX(), binding.location.getY());
         this.rotation = binding.rotation;
         this.state = binding.state;
         this.altitude = binding.altitude;
@@ -46,10 +53,12 @@ public class PresetWiredFurniBinding implements PresetJsonConfigurable {
         this.furniId = object.getInt("furniId");
         this.wiredId = object.getInt("wiredId");
 
-        this.location = object.has("location") ? new HPoint(
-                object.getJSONObject("location").getInt("x"),
-                object.getJSONObject("location").getInt("y")
-        ) : null;
+        this.location =
+                object.has("location")
+                        ? new HPoint(
+                                object.getJSONObject("location").getInt("x"),
+                                object.getJSONObject("location").getInt("y"))
+                        : null;
         this.rotation = object.has("rotation") ? object.getInt("rotation") : null;
         this.state = object.has("state") ? object.getString("state") : null;
         this.altitude = object.has("altitude") ? object.getInt("altitude") : null;

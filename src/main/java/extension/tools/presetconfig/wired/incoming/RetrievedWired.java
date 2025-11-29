@@ -2,9 +2,8 @@ package extension.tools.presetconfig.wired.incoming;
 
 import extension.parsers.HWiredContext;
 import gearth.protocol.HPacket;
-import utils.Utils;
-
 import java.util.List;
+import utils.Utils;
 
 public interface RetrievedWired {
 
@@ -44,11 +43,9 @@ public interface RetrievedWired {
 
         if (cls == RetrievedWiredEffect.class) {
             specifics.delay = packet.readInteger();
-        }
-        else if (cls == RetrievedWiredCondition.class) {
+        } else if (cls == RetrievedWiredCondition.class) {
             specifics.quantifier = packet.readInteger();
-        }
-        else if (cls == RetrievedWiredSelector.class) {
+        } else if (cls == RetrievedWiredSelector.class) {
             specifics.filter = packet.readBoolean();
             specifics.invert = packet.readBoolean();
         }
@@ -71,23 +68,93 @@ public interface RetrievedWired {
 
         HWiredContext wiredContext = null;
 
-        if(packet.isEOF() == 0) {
+        if (packet.isEOF() == 0) {
             // WiredContext
             wiredContext = new HWiredContext(packet);
         }
 
         if (cls == RetrievedWiredAddon.class) {
-            return cls.cast(new RetrievedWiredAddon(wiredId, options, configString, items, secondItems, typeId, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(
+                    new RetrievedWiredAddon(
+                            wiredId,
+                            options,
+                            configString,
+                            items,
+                            secondItems,
+                            typeId,
+                            furniSources,
+                            userSources,
+                            variableIds,
+                            wiredContext));
         } else if (cls == RetrievedWiredTrigger.class) {
-            return cls.cast(new RetrievedWiredTrigger(wiredId, options, configString, items, secondItems, typeId, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(
+                    new RetrievedWiredTrigger(
+                            wiredId,
+                            options,
+                            configString,
+                            items,
+                            secondItems,
+                            typeId,
+                            furniSources,
+                            userSources,
+                            variableIds,
+                            wiredContext));
         } else if (cls == RetrievedWiredEffect.class) {
-            return cls.cast(new RetrievedWiredEffect(wiredId, options, configString, items, secondItems, specifics.delay, typeId, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(
+                    new RetrievedWiredEffect(
+                            wiredId,
+                            options,
+                            configString,
+                            items,
+                            secondItems,
+                            specifics.delay,
+                            typeId,
+                            furniSources,
+                            userSources,
+                            variableIds,
+                            wiredContext));
         } else if (cls == RetrievedWiredCondition.class) {
-            return cls.cast(new RetrievedWiredCondition(wiredId, options, configString, items, secondItems, typeId, specifics.quantifier, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(
+                    new RetrievedWiredCondition(
+                            wiredId,
+                            options,
+                            configString,
+                            items,
+                            secondItems,
+                            typeId,
+                            specifics.quantifier,
+                            furniSources,
+                            userSources,
+                            variableIds,
+                            wiredContext));
         } else if (cls == RetrievedWiredSelector.class) {
-            return cls.cast(new RetrievedWiredSelector(wiredId, options, configString, items, secondItems, typeId, specifics.filter, specifics.invert, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(
+                    new RetrievedWiredSelector(
+                            wiredId,
+                            options,
+                            configString,
+                            items,
+                            secondItems,
+                            typeId,
+                            specifics.filter,
+                            specifics.invert,
+                            furniSources,
+                            userSources,
+                            variableIds,
+                            wiredContext));
         } else if (cls == RetrievedWiredVariable.class) {
-            return cls.cast(new RetrievedWiredVariable(wiredId, options, configString, items, secondItems, typeId, furniSources, userSources, variableIds, wiredContext));
+            return cls.cast(
+                    new RetrievedWiredVariable(
+                            wiredId,
+                            options,
+                            configString,
+                            items,
+                            secondItems,
+                            typeId,
+                            furniSources,
+                            userSources,
+                            variableIds,
+                            wiredContext));
         }
 
         return null;
@@ -95,12 +162,12 @@ public interface RetrievedWired {
 
     static void readAllowedSources(HPacket packet) {
         int count = packet.readInteger();
-        for(int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) {
             Utils.readIntList(packet);
         }
     }
+
     static void readDefaultSources(HPacket packet) {
         Utils.readIntList(packet);
     }
-
 }

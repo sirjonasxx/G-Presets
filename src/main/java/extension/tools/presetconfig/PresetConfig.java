@@ -6,14 +6,13 @@ import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
 import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
 import extension.tools.presetconfig.furni.PresetFurni;
 import extension.tools.presetconfig.wired.PresetWireds;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class PresetConfig implements PresetJsonConfigurable {
 
@@ -22,7 +21,11 @@ public class PresetConfig implements PresetJsonConfigurable {
     private List<PresetWiredFurniBinding> bindings;
     private List<PresetAdsBackground> adsBackgrounds;
 
-    public PresetConfig(List<PresetFurni> furniture, PresetWireds presetWireds, List<PresetWiredFurniBinding> bindings, List<PresetAdsBackground> adsBackgrounds) {
+    public PresetConfig(
+            List<PresetFurni> furniture,
+            PresetWireds presetWireds,
+            List<PresetWiredFurniBinding> bindings,
+            List<PresetAdsBackground> adsBackgrounds) {
         this.furniture = furniture;
         this.presetWireds = presetWireds;
         this.bindings = bindings;
@@ -30,25 +33,40 @@ public class PresetConfig implements PresetJsonConfigurable {
     }
 
     public PresetConfig(JSONObject object) {
-        furniture = object.getJSONArray("furni").toList().stream()
-                .map(o -> new PresetFurni(new JSONObject((Map)o))).collect(Collectors.toList());
+        furniture =
+                object.getJSONArray("furni").toList().stream()
+                        .map(o -> new PresetFurni(new JSONObject((Map) o)))
+                        .collect(Collectors.toList());
 
         presetWireds = new PresetWireds(object.getJSONObject("wired"));
 
-        bindings = object.getJSONArray("bindings").toList().stream()
-                .map(o -> new PresetWiredFurniBinding(new JSONObject((Map)o))).collect(Collectors.toList());
+        bindings =
+                object.getJSONArray("bindings").toList().stream()
+                        .map(o -> new PresetWiredFurniBinding(new JSONObject((Map) o)))
+                        .collect(Collectors.toList());
 
-        adsBackgrounds = !object.has("adsBackgrounds") ? new ArrayList<>() :
-                object.getJSONArray("adsBackgrounds").toList().stream()
-                .map(o -> new PresetAdsBackground(new JSONObject((Map)o))).collect(Collectors.toList());
+        adsBackgrounds =
+                !object.has("adsBackgrounds")
+                        ? new ArrayList<>()
+                        : object.getJSONArray("adsBackgrounds").toList().stream()
+                                .map(o -> new PresetAdsBackground(new JSONObject((Map) o)))
+                                .collect(Collectors.toList());
     }
 
     @Override
     public JSONObject toJsonObject() {
         JSONObject object = new JSONObject();
 
-        JSONArray jsonFurni = new JSONArray(furniture.stream().map(PresetFurni::toJsonObject).collect(Collectors.toList()));
-        JSONArray jsonBindings = new JSONArray(bindings.stream().map(PresetWiredFurniBinding::toJsonObject).collect(Collectors.toList()));
+        JSONArray jsonFurni =
+                new JSONArray(
+                        furniture.stream()
+                                .map(PresetFurni::toJsonObject)
+                                .collect(Collectors.toList()));
+        JSONArray jsonBindings =
+                new JSONArray(
+                        bindings.stream()
+                                .map(PresetWiredFurniBinding::toJsonObject)
+                                .collect(Collectors.toList()));
 
         object.put("furni", jsonFurni);
         object.put("wired", presetWireds.toJsonObject());
@@ -59,23 +77,22 @@ public class PresetConfig implements PresetJsonConfigurable {
         return object;
     }
 
-
     public Map<Integer, Integer> applyPostConfig(PostConfig postConfig) {
         Map<Integer, Integer> furniIdMap = new HashMap<>();
         // maps placeholder furni id in the config to the real furni in the room
-        // this must be created here because postconfig may already replace preset furni with real furni
+        // this must be created here because postconfig may already replace preset furni with real
+        // furni
 
         // apply global classname mapper
         // apply useExistingFurni
-        for (int i = furniture.size() - 1; i >= 0 ; i--) {
+        for (int i = furniture.size() - 1; i >= 0; i--) {
             PresetFurni p = furniture.get(i);
             FurniPostConfig c = postConfig.getFurniPostConfig(p.getFurniName());
-//            furniIdMap.put(p.getFurniId(), -1);
+            //            furniIdMap.put(p.getFurniId(), -1);
             if (c != null && c.isUseExistingFurni()) {
                 furniIdMap.put(p.getFurniId(), c.getExistingFurniId());
                 furniture.remove(i);
-            }
-            else if (postConfig.getClassMapping(p.getClassName()) != null) {
+            } else if (postConfig.getClassMapping(p.getClassName()) != null) {
                 p.setClassName(postConfig.getClassMapping(p.getClassName()));
             }
         }

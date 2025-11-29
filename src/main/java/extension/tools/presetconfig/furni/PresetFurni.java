@@ -10,9 +10,12 @@ public class PresetFurni implements PresetJsonConfigurable {
     private String className;
     private HPoint location; // relative to selection, both x & y & z matter
     private int rotation;
-    private String state;    // only if category = legacystuffdata (0), only apply if UseFurniture packet works
+    private String
+            state; // only if category = legacystuffdata (0), only apply if UseFurniture packet
+    // works
 
-    private String furniName = null; // uniquely given name by GPresets, based on furniId and className
+    private String furniName =
+            null; // uniquely given name by GPresets, based on furniId and className
 
     public PresetFurni(int furniId, String className, HPoint location, int rotation, String state) {
         this.furniId = furniId;
@@ -26,11 +29,8 @@ public class PresetFurni implements PresetJsonConfigurable {
     public PresetFurni(PresetFurni furni) {
         this.furniId = furni.furniId;
         this.className = furni.className;
-        this.location = new HPoint(
-                furni.location.getX(),
-                furni.location.getY(),
-                furni.location.getZ()
-        );
+        this.location =
+                new HPoint(furni.location.getX(), furni.location.getY(), furni.location.getZ());
         this.rotation = furni.rotation;
         this.state = furni.state;
         this.furniName = furni.furniName;
@@ -40,11 +40,11 @@ public class PresetFurni implements PresetJsonConfigurable {
         this.furniId = jsonObject.getInt("id");
         this.className = jsonObject.getString("className");
         JSONObject jsonLocation = jsonObject.getJSONObject("location");
-        this.location = new HPoint(
-                jsonLocation.getInt("x"),
-                jsonLocation.getInt("y"),
-                jsonLocation.getDouble("z")
-        );
+        this.location =
+                new HPoint(
+                        jsonLocation.getInt("x"),
+                        jsonLocation.getInt("y"),
+                        jsonLocation.getDouble("z"));
         this.rotation = jsonObject.getInt("rotation");
         this.state = jsonObject.has("state") ? jsonObject.getString("state") : null;
         this.furniName = jsonObject.getString("name"); // required when parsing from jsonobject
@@ -68,9 +68,9 @@ public class PresetFurni implements PresetJsonConfigurable {
             object.put("state", state);
         }
 
-//        if (furniName != null) {
-            object.put("name", furniName); // required when exporting to json object
-//        }
+        //        if (furniName != null) {
+        object.put("name", furniName); // required when exporting to json object
+        //        }
 
         return object;
     }
@@ -98,7 +98,6 @@ public class PresetFurni implements PresetJsonConfigurable {
     public void setRotation(int rotation) {
         this.rotation = rotation;
     }
-
 
     public String getState() {
         return state;
