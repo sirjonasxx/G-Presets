@@ -635,12 +635,6 @@ public class GPresetImporter {
                     true,
                     moveFurni.getLocation().getZ()// + rootLocation.getZ()
             );
-            if (extension.getPermissions().canModifyWired()) {
-                // set rotation
-                int wiredRotation = moveFurni.getRotation() == 0 ? 0 : moveFurni.getRotation() / 2;
-                extension.sendToServer(new HPacket("WiredSetObjectVariableValue", HMessage.Direction.TOSERVER, 0, realFurniId, "-122", wiredRotation));
-                Utils.sleep(Math.max(extension.getSafeFeedbackTimeout(), 60));
-            }
         }
 
 
