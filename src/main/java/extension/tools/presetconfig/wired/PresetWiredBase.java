@@ -225,6 +225,10 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
         this.items = items;
     }
 
+    public void setSecondItems(List<Integer> items) {
+        this.items2 = items;
+    }
+
     public void setPickedFurniSources(List<Integer> pickedFurniSources) {
         this.pickedFurniSources = pickedFurniSources;
     }
