@@ -393,8 +393,10 @@ public class GPresetExporter {
             // second pass: filter wired furni selections & bindings to only contain items in allFurni
             Set<Integer> allFurniIds = allFurni.stream().map(PresetFurni::getFurniId).collect(Collectors.toSet());
 
-            wiredLists.forEach(l -> l.forEach((Consumer<PresetWiredBase>) w ->
-                    w.setItems(w.getItems().stream().filter(allFurniIds::contains).collect(Collectors.toList()))));
+            wiredLists.forEach(l -> l.forEach((Consumer<PresetWiredBase>) w -> {
+                w.setItems(w.getItems().stream().filter(allFurniIds::contains).collect(Collectors.toList()));
+                w.setSecondItems(w.getSecondItems().stream().filter(allFurniIds::contains).collect(Collectors.toList()));
+            }));
             allBindings = allBindings.stream().filter(b -> allFurniIds.contains(b.getFurniId())).collect(Collectors.toList());
 
 
