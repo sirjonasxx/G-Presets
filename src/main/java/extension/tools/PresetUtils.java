@@ -12,7 +12,7 @@ public class PresetUtils {
     public static HPoint presetDimensions(PresetConfig presetConfig) {
         List<PresetFurni> furni = presetConfig.getFurniture();
 
-        if (furni.size() == 0) return new HPoint(0, 0);
+        if (furni.isEmpty()) return new HPoint(0, 0);
 
         int lowestX = furni.get(0).getLocation().getX();
         int lowestY = furni.get(0).getLocation().getY();
