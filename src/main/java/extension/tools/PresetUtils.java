@@ -1,7 +1,7 @@
 package extension.tools;
 
 import extension.tools.presetconfig.PresetConfig;
-import extension.tools.presetconfig.furni.PresetFurni;
+import extension.tools.presetconfig.furni.PresetFloorFurni;
 import game.RoomState;
 import gearth.extensions.parsers.HPoint;
 
@@ -10,7 +10,7 @@ import java.util.List;
 public class PresetUtils {
 
     public static HPoint presetDimensions(PresetConfig presetConfig) {
-        List<PresetFurni> furni = presetConfig.getFurniture();
+        List<PresetFloorFurni> furni = presetConfig.getFloorFurniture();
 
         if (furni.isEmpty()) return new HPoint(0, 0);
 
@@ -19,7 +19,7 @@ public class PresetUtils {
         int highestX = lowestX;
         int highestY = lowestY;
 
-        for (PresetFurni f : furni) {
+        for (PresetFloorFurni f : furni) {
             HPoint loc = f.getLocation();
             if (loc.getX() < lowestX) lowestX = loc.getX();
             if (loc.getY() < lowestY) lowestY = loc.getY();

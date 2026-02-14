@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class WallPosition {
-    private static final Pattern pattern = Pattern.compile("w=(?<x>\\d+),(?<y>\\d+) l=(?<offsetX>\\d+),(?<offsetY>\\d+) (?<direction>[rl]) a=(?<altitude>\\d+)");
+    private static final Pattern pattern = Pattern.compile("w=(?<x>\\d+),(?<y>\\d+) l=(?<offsetX>\\d+),(?<offsetY>\\d+) (?<direction>[rl])( a=(?<altitude>\\d+))?");
 
     private final int x;
     private final int y;
@@ -30,7 +30,8 @@ public class WallPosition {
             this.offsetX = Integer.parseInt(matcher.group("offsetX"));
             this.offsetY = Integer.parseInt(matcher.group("offsetY"));
             this.direction = matcher.group("direction");
-            this.altitude = Integer.parseInt(matcher.group("altitude"));
+            String altitudeGroup = matcher.group("altitude");
+            this.altitude = altitudeGroup == null ? -1 : Integer.parseInt(altitudeGroup);
         } else {
             throw new IllegalArgumentException("Invalid position string: " + positionString);
         }

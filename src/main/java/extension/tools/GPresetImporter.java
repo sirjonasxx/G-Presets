@@ -8,7 +8,7 @@ import extension.tools.postconfig.PostConfig;
 import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
 import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
-import extension.tools.presetconfig.furni.PresetFurni;
+import extension.tools.presetconfig.furni.PresetFloorFurni;
 import extension.tools.presetconfig.wired.*;
 import furnidata.FurniDataTools;
 import game.RoomState;
@@ -209,7 +209,7 @@ public class GPresetImporter {
     }
 
     public boolean isReady() {
-        return extension.getFloorState().inRoom() && extension.furniDataReady() &&
+        return extension.getRoomState().inRoom() && extension.furniDataReady() &&
                 extension.getInventory().getState() == Inventory.InventoryState.LOADED && extension.stackTile() != null &&
                 presetConfig != null &&
                 extension.getPermissions().canMoveFurni() && (!extension.shouldExportWired() || extension.getPermissions().canModifyWired());
@@ -271,7 +271,7 @@ public class GPresetImporter {
             // check if user has enough furniture / BC items available (depending on settings)
             FurniDataTools furniData = extension.getFurniDataTools();
             List<FurniDropInfo> fakeDropInfo = new ArrayList<>();
-            for (PresetFurni f : workingPresetConfig.getFurniture()) {
+            for (PresetFloorFurni f : workingPresetConfig.getFloorFurniture()) {
                 fakeDropInfo.add(new FurniDropInfo(-1, -1, furniData.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1));
             }
             Map<String, Integer> missing = AvailabilityChecker.missingItems(fakeDropInfo, extension.getInventory(), furniData);
@@ -293,7 +293,7 @@ public class GPresetImporter {
                 allAvailableStackTiles = new ArrayList<>();
                 Set<String> allStacktileClasses = Arrays.stream(StackTileSetting.values()).map(StackTileSetting::getClassName).collect(Collectors.toSet());
                 allStacktileClasses.forEach(c -> {
-                    List<HFloorItem> stackTiles = extension.getFloorState().getFloorItemsFromType(furniData, c);
+                    List<HFloorItem> stackTiles = extension.getRoomState().getFloorItemsFromType(furniData, c);
                     if (!stackTiles.isEmpty()) {
                         HFloorItem stackTile = stackTiles.get(0);
                         allAvailableStackTiles.add(new StackTileInfo(
@@ -355,7 +355,7 @@ public class GPresetImporter {
             }
 
             if (startAddingFurni) {
-                heightOffset = PresetUtils.lowestFloorPoint(extension.getFloorState(), workingPresetConfig, rootLocation);
+                heightOffset = PresetUtils.lowestFloorPoint(extension.getRoomState(), workingPresetConfig, rootLocation);
 
                 state = BuildingImportState.ADD_UNSTACKABLES;
                 new Thread(this::addUnstackables).start();
@@ -439,7 +439,7 @@ public class GPresetImporter {
 
     private void moveFurni(int furniId, int x, int y, int rot, boolean moveStackTile, double height) {
         if (moveStackTile) {
-            StackTileInfo stackInfo = StackTileUtils.findBestDropLocation(x, y, allAvailableStackTiles, extension.getFloorState());
+            StackTileInfo stackInfo = StackTileUtils.findBestDropLocation(x, y, allAvailableStackTiles, extension.getRoomState());
             if (stackInfo != null) {
                 moveFurni(stackInfo.getFurniId(), stackInfo.getLocation().getX(), stackInfo.getLocation().getY(),
                         stackInfo.getRotation(), false, -1);
@@ -467,11 +467,11 @@ public class GPresetImporter {
     }
 
     private void attemptSetState(int furniId, String targetState) {
-        RoomState floor = extension.getFloorState();
+        RoomState room = extension.getRoomState();
         FurniDataTools furniData = extension.getFurniDataTools();
-        if (floor == null || furniData == null || floor.floorFurniFromId(furniId) == null) return;
+        if (room == null || furniData == null || room.floorFurniFromId(furniId) == null) return;
 
-        HFloorItem item = floor.floorFurniFromId(furniId);
+        HFloorItem item = room.floorFurniFromId(furniId);
         boolean isStackable = furniData.isStackable(furniData.getFloorItemName(item.getTypeId()));
         HPoint originalLocation = item.getTile();
         int originalRotation = item.getFacing().ordinal();
@@ -501,7 +501,7 @@ public class GPresetImporter {
                 extension.sendToServer(new HPacket("UseFurniture", HMessage.Direction.TOSERVER, furniId, 0));
                 Utils.sleep(Math.max(extension.getSafeFeedbackTimeout(), 60));
 
-                HFloorItem itemNew = floor.floorFurniFromId(furniId);
+                HFloorItem itemNew = room.floorFurniFromId(furniId);
                 newState = StateExtractor.stateFromItem(itemNew);
 
                 i++;
@@ -599,26 +599,26 @@ public class GPresetImporter {
     private void moveFurniture() {
         FurniDataTools furniData = extension.getFurniDataTools();
 
-        List<PresetFurni> moveList = new ArrayList<>();
+        List<PresetFloorFurni> moveList = new ArrayList<>();
 
         synchronized (lock) {
-            workingPresetConfig.getFurniture().forEach(p -> {
+            workingPresetConfig.getFloorFurniture().forEach(p -> {
                 if (furniData.isStackable(p.getClassName()) && !p.getClassName().startsWith("wf_trg_") && realFurniIdMap.containsKey(p.getFurniId())) {
                     moveList.add(p);
                 }
             });
-            workingPresetConfig.getFurniture().forEach(p -> {
+            workingPresetConfig.getFloorFurniture().forEach(p -> {
                 if (furniData.isStackable(p.getClassName()) && p.getClassName().startsWith("wf_trg_") && realFurniIdMap.containsKey(p.getFurniId())) {
                     moveList.add(p);
                 }
             });
         }
 
-        Map<Integer, PresetFurni> movesByRealId = new HashMap<>();
+        Map<Integer, PresetFloorFurni> movesByRealId = new HashMap<>();
 
         int i = 0;
         while (state == BuildingImportState.MOVE_FURNITURE && i < moveList.size()) {
-            PresetFurni moveFurni = moveList.get(i);
+            PresetFloorFurni moveFurni = moveList.get(i);
             i++;
             int realFurniId = realFurniIdMap.get(moveFurni.getFurniId());
 
@@ -641,11 +641,11 @@ public class GPresetImporter {
         // second pass
         Utils.sleep(300 + extension.getSafeFeedbackTimeout());
         if (state == BuildingImportState.MOVE_FURNITURE) {
-            List<HFloorItem> maybeNotMovedItems = extension.getFloorState().getFloorFurniOnTile(stackTileLocation.getX(), stackTileLocation.getY());
-            maybeNotMovedItems.addAll(extension.getFloorState().getFloorFurniOnTile(stackTileLocation.getX(), stackTileLocation.getY()));
-            maybeNotMovedItems.addAll(extension.getFloorState().getFloorFurniOnTile(reservedSpace.getX(), reservedSpace.getY()));
+            List<HFloorItem> maybeNotMovedItems = extension.getRoomState().getFloorFurniOnTile(stackTileLocation.getX(), stackTileLocation.getY());
+            maybeNotMovedItems.addAll(extension.getRoomState().getFloorFurniOnTile(stackTileLocation.getX(), stackTileLocation.getY()));
+            maybeNotMovedItems.addAll(extension.getRoomState().getFloorFurniOnTile(reservedSpace.getX(), reservedSpace.getY()));
             maybeNotMovedItems = maybeNotMovedItems.stream().filter(h -> {
-                PresetFurni p = movesByRealId.get(h.getId());
+                PresetFloorFurni p = movesByRealId.get(h.getId());
                 if (p == null) return false;
                 return p.getLocation().getX() + rootLocation.getX() != h.getTile().getX() ||
                         p.getLocation().getY() + rootLocation.getY() != h.getTile().getY() ||
@@ -655,7 +655,7 @@ public class GPresetImporter {
             for (HFloorItem o : maybeNotMovedItems) {
                 if (state != BuildingImportState.MOVE_FURNITURE) break;
 
-                PresetFurni p = movesByRealId.get(o.getId());
+                PresetFloorFurni p = movesByRealId.get(o.getId());
 
                 moveFurni(
                         o.getId(),
@@ -688,7 +688,7 @@ public class GPresetImporter {
     private void setupWired() {
         List<PresetWiredBase> allWireds = new ArrayList<>();
         Map<Integer, List<PresetWiredFurniBinding>> wiredBindings = new HashMap<>();
-        Map<Integer, PresetFurni> furni = new HashMap<>();
+        Map<Integer, PresetFloorFurni> furni = new HashMap<>();
 
         synchronized (lock) {
             PresetWireds presetWireds = workingPresetConfig.getPresetWireds();
@@ -720,7 +720,7 @@ public class GPresetImporter {
                 if (!wiredBindings.containsKey(b.getWiredId())) wiredBindings.put(b.getWiredId(), new ArrayList<>());
                 wiredBindings.get(b.getWiredId()).add(b);
             });
-            workingPresetConfig.getFurniture().forEach(p -> furni.put(p.getFurniId(), p));
+            workingPresetConfig.getFloorFurniture().forEach(p -> furni.put(p.getFurniId(), p));
             
             variablesProcessed = 0;
             variablesToProcess = variables.size();
@@ -736,7 +736,7 @@ public class GPresetImporter {
 
             i++;
 
-            RoomState floor = extension.getFloorState();
+            RoomState room = extension.getRoomState();
             FurniDataTools furniData = extension.getFurniDataTools();
 
             List<PresetWiredFurniBinding> bindings = wiredBindings.get(wiredBase.getWiredId());
@@ -763,10 +763,10 @@ public class GPresetImporter {
 
                         boolean needMovement = binding.getLocation() != null || binding.getRotation() != null || binding.getAltitude() != null;
                         if (needMovement) {
-                            HFloorItem floorItem = floor.floorFurniFromId(furniId);
+                            HFloorItem floorItem = room.floorFurniFromId(furniId);
                             if (floorItem != null) {
                                 boolean needStacktile =
-                                        furniData.isStackable(furniData.getFloorItemName(extension.getFloorState().floorFurniFromId(furniId).getTypeId()))
+                                        furniData.isStackable(furniData.getFloorItemName(extension.getRoomState().floorFurniFromId(furniId).getTypeId()))
                                         || binding.getAltitude() != null;
 
                                 FurniMoveInfo undoMovement = new FurniMoveInfo(
@@ -840,7 +840,7 @@ public class GPresetImporter {
         moveFurni(mainStackTile, stackTileLocation.getX(), stackTileLocation.getY(), 0, false, -1);
 
         synchronized (lock) {
-            workingPresetConfig.getFurniture().forEach(f -> {
+            workingPresetConfig.getFloorFurniture().forEach(f -> {
                 if (furniData.isStackable(f.getClassName())) {
                     FurniDropInfo dropInfo = new FurniDropInfo(
                             f.getClassName().startsWith("wf_trg_") ?
@@ -941,10 +941,10 @@ public class GPresetImporter {
     }
 
     private boolean locationContainsWired(int x, int y) {
-        RoomState floor = extension.getFloorState();
+        RoomState room = extension.getRoomState();
         FurniDataTools furniData = extension.getFurniDataTools();
 
-        return floor.getFloorFurniOnTile(x, y).stream().anyMatch(i -> {
+        return room.getFloorFurniOnTile(x, y).stream().anyMatch(i -> {
             String className = furniData.getFloorItemName(i.getTypeId());
             return className.startsWith("wf_cnd_") ||
                     className.startsWith("wf_trg_") ||
@@ -956,7 +956,7 @@ public class GPresetImporter {
         // can not be the unoccupied space
         // can also not be a place with wired in the first or second tile (top row)
         // this will be the place where all furniture is placed on
-        RoomState floor = extension.getFloorState();
+        RoomState room = extension.getRoomState();
 
 
         for (int x = 0; x < 64 - mainStackDimensions; x++) {
@@ -964,12 +964,12 @@ public class GPresetImporter {
             nextIteration:
             for (int y = 0; y < 64 - mainStackDimensions; y++) {
 
-                char reference = floor.floorHeight(x, y);
+                char reference = room.floorHeight(x, y);
                 if (reference == 'x') continue;
 
                 for (int xOffset = 0; xOffset < mainStackDimensions; xOffset++) {
                     for (int yOffset = 0; yOffset < mainStackDimensions; yOffset++) {
-                        if (floor.floorHeight(x + xOffset, y + yOffset) != reference) {
+                        if (room.floorHeight(x + xOffset, y + yOffset) != reference) {
                             continue nextIteration;
                         }
                     }
@@ -988,7 +988,7 @@ public class GPresetImporter {
         List<FurniDropInfo> furniDropInfos = new ArrayList<>();
 
         synchronized (lock) {
-            workingPresetConfig.getFurniture().forEach(f -> {
+            workingPresetConfig.getFloorFurniture().forEach(f -> {
                 if (!furniData.isStackable(f.getClassName())) {
                     FurniDropInfo dropInfo = new FurniDropInfo(
                             f.getLocation().getX() + rootLocation.getX(),

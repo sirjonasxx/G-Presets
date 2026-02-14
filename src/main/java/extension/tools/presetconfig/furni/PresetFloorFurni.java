@@ -4,7 +4,7 @@ import extension.tools.presetconfig.PresetJsonConfigurable;
 import gearth.extensions.parsers.HPoint;
 import org.json.JSONObject;
 
-public class PresetFurni implements PresetJsonConfigurable {
+public class PresetFloorFurni implements PresetJsonConfigurable {
 
     private int furniId;
     private String className;
@@ -14,7 +14,7 @@ public class PresetFurni implements PresetJsonConfigurable {
 
     private String furniName = null; // uniquely given name by GPresets, based on furniId and className
 
-    public PresetFurni(int furniId, String className, HPoint location, int rotation, String state) {
+    public PresetFloorFurni(int furniId, String className, HPoint location, int rotation, String state) {
         this.furniId = furniId;
         this.className = className;
         this.location = location;
@@ -23,7 +23,7 @@ public class PresetFurni implements PresetJsonConfigurable {
     }
 
     // deep copy constructor
-    public PresetFurni(PresetFurni furni) {
+    public PresetFloorFurni(PresetFloorFurni furni) {
         this.furniId = furni.furniId;
         this.className = furni.className;
         this.location = new HPoint(
@@ -36,7 +36,7 @@ public class PresetFurni implements PresetJsonConfigurable {
         this.furniName = furni.furniName;
     }
 
-    public PresetFurni(JSONObject jsonObject) {
+    public PresetFloorFurni(JSONObject jsonObject) {
         this.furniId = jsonObject.getInt("id");
         this.className = jsonObject.getString("className");
         JSONObject jsonLocation = jsonObject.getJSONObject("location");

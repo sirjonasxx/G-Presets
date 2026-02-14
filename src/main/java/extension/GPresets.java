@@ -12,7 +12,7 @@ import extension.tools.postconfig.ItemSource;
 import extension.tools.postconfig.PostConfig;
 import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.PresetConfigUtils;
-import extension.tools.presetconfig.furni.PresetFurni;
+import extension.tools.presetconfig.furni.PresetFloorFurni;
 import furnidata.FurniDataTools;
 import game.RoomState;
 import game.Inventory;
@@ -391,7 +391,7 @@ public class GPresets extends ExtensionForm {
         return inventory;
     }
 
-    public RoomState getFloorState() {
+    public RoomState getRoomState() {
         return roomState;
     }
 
@@ -433,7 +433,7 @@ public class GPresets extends ExtensionForm {
             combined.applyPostConfig(postConfig);
 
             List<FurniDropInfo> fakeDropInfo = new ArrayList<>();
-            for (PresetFurni f : combined.getFurniture()) {
+            for (PresetFloorFurni f : combined.getFloorFurniture()) {
                 fakeDropInfo.add(new FurniDropInfo(-1, -1, furniDataTools.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1));
             }
 
