@@ -14,7 +14,7 @@ import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.PresetConfigUtils;
 import extension.tools.presetconfig.furni.PresetFurni;
 import furnidata.FurniDataTools;
-import game.FloorState;
+import game.RoomState;
 import game.Inventory;
 import game.RoomPermissions;
 import gearth.extensions.ExtensionForm;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 @ExtensionInfo(
         Title =  "G-Presets",
         Description =  "Never do anything twice",
-        Version =  "1.2.9",
+        Version =  "1.3.0",
         Author =  "sirjonasxx"
 )
 public class GPresets extends ExtensionForm {
@@ -95,7 +95,7 @@ public class GPresets extends ExtensionForm {
 
     private FurniDataTools furniDataTools = null;
     private Inventory inventory = null;
-    private FloorState floorState = null;
+    private RoomState roomState = null;
     private RoomPermissions permissions = null;
     private volatile boolean isConnected = false;
 
@@ -195,7 +195,7 @@ public class GPresets extends ExtensionForm {
 
     @Override
     protected void initExtension() {
-        this.floorState = new FloorState(this, logger, this::updateUI, () -> {
+        this.roomState = new RoomState(this, logger, this::updateUI, () -> {
             this.updateUI();
             this.exporter.reset();
             logger.log("Leaving room..", "blue");
@@ -225,7 +225,7 @@ public class GPresets extends ExtensionForm {
             }
         });
 
-        this.floorState.requestRoom(this);
+        this.roomState.requestRoom(this);
         updateUI();
         updateInstalledPresets();
 
@@ -305,7 +305,7 @@ public class GPresets extends ExtensionForm {
     protected void onEndConnection() {
         isConnected = false;
         furniDataTools = null;
-        floorState.reset();
+        roomState.reset();
         inventory.clear();
         exporter.reset();
         importer.reset();
@@ -313,9 +313,9 @@ public class GPresets extends ExtensionForm {
     }
 
     public HFloorItem stackTile() {
-        if (!floorState.inRoom() || !furniDataTools.isReady()) return null;
-        List<HFloorItem> items = floorState.getItemsFromType(furniDataTools, stackTileSetting.getClassName());
-        if (items.size() == 0) return null;
+        if (!roomState.inRoom() || !furniDataTools.isReady()) return null;
+        List<HFloorItem> items = roomState.getFloorItemsFromType(furniDataTools, stackTileSetting.getClassName());
+        if (items.isEmpty()) return null;
         return items.get(0);
     }
 
@@ -351,7 +351,7 @@ public class GPresets extends ExtensionForm {
     private void updateUI() {
         Platform.runLater(() -> {
             updateLabel(cndConnectedLbl, isConnected);
-            updateLabel(cndRoomLbl, floorState.inRoom());
+            updateLabel(cndRoomLbl, roomState.inRoom());
             updateLabel(cndFurnidataLbl, furniDataReady());
             updateLabel(cndInventoryLbl, inventory.getState() == Inventory.InventoryState.LOADED,
                     inventory.getState() == Inventory.InventoryState.LOADING);
@@ -391,8 +391,8 @@ public class GPresets extends ExtensionForm {
         return inventory;
     }
 
-    public FloorState getFloorState() {
-        return floorState;
+    public RoomState getFloorState() {
+        return roomState;
     }
 
     public RoomPermissions getPermissions() {

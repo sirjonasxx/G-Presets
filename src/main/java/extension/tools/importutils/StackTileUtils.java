@@ -1,21 +1,21 @@
 package extension.tools.importutils;
 
-import game.FloorState;
+import game.RoomState;
 import gearth.extensions.parsers.HPoint;
 
 import java.util.*;
 
 public class StackTileUtils {
 
-    public static StackTileInfo findBestDropLocation(int x, int y, List<StackTileInfo> potentialStacktiles, FloorState floorState) {
-        if (!floorState.inRoom()) return null;
+    public static StackTileInfo findBestDropLocation(int x, int y, List<StackTileInfo> potentialStacktiles, RoomState roomState) {
+        if (!roomState.inRoom()) return null;
 
         potentialStacktiles.sort((o1, o2) -> -Integer.compare(o1.getDimension(), o2.getDimension()));
 
         for (StackTileInfo info : potentialStacktiles) {
             int dimension = info.getDimension();
             if (dimension != -1) {
-                HPoint dropLocation = findBestDropLocation(x, y, dimension, floorState);
+                HPoint dropLocation = findBestDropLocation(x, y, dimension, roomState);
 
                 if (dropLocation != null) {
                     return new StackTileInfo(info.getFurniId(), dropLocation, 0, dimension);
@@ -23,25 +23,25 @@ public class StackTileUtils {
             }
             else {
                 // is 1x2 tile
-                char rootChar = floorState.floorHeight(x, y);
+                char rootChar = roomState.floorHeight(x, y);
                 if (rootChar == 'x') continue;
 
                 HPoint location = null;
                 int rotation = -1;
 
-                if (floorState.floorHeight(x+1, y) == rootChar) {
+                if (roomState.floorHeight(x+1, y) == rootChar) {
                     location = new HPoint(x, y);
                     rotation = 0;
                 }
-                else if (floorState.floorHeight(x, y+1) == rootChar) {
+                else if (roomState.floorHeight(x, y+1) == rootChar) {
                     location = new HPoint(x, y);
                     rotation = 2;
                 }
-                else if (floorState.floorHeight(x-1, y) == rootChar) {
+                else if (roomState.floorHeight(x-1, y) == rootChar) {
                     location = new HPoint(x-1, y);
                     rotation = 0;
                 }
-                else if (floorState.floorHeight(x, y-1) == rootChar) {
+                else if (roomState.floorHeight(x, y-1) == rootChar) {
                     location = new HPoint(x, y-1);
                     rotation = 2;
                 }
@@ -55,7 +55,7 @@ public class StackTileUtils {
         return null;
     }
 
-    public static HPoint findBestDropLocation(int x, int y, int stackDimensions, FloorState floorState) {
+    public static HPoint findBestDropLocation(int x, int y, int stackDimensions, RoomState roomState) {
         List<HPoint> possibleLocations = new ArrayList<>();
 
         for (int x2 = x; x2 > Math.max(x - stackDimensions, 0); x2--) {
@@ -75,12 +75,12 @@ public class StackTileUtils {
         for (HPoint p : possibleLocations) {
             int x2 = p.getX();
             int y2 = p.getY();
-            char referenceChar = floorState.floorHeight(x2, y2);
+            char referenceChar = roomState.floorHeight(x2, y2);
             if (referenceChar == 'x') continue;
 
             for (int x3 = 0; x3 < stackDimensions; x3++) {
                 for (int y3 = 0; y3 < stackDimensions; y3++) {
-                    if (floorState.floorHeight(x2 + x3, y2 + y3) != referenceChar) continue outerloop;
+                    if (roomState.floorHeight(x2 + x3, y2 + y3) != referenceChar) continue outerloop;
                 }
             }
 

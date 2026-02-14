@@ -11,7 +11,7 @@ import extension.tools.presetconfig.furni.PresetFurni;
 import extension.tools.presetconfig.wired.*;
 import extension.tools.presetconfig.wired.incoming.*;
 import furnidata.FurniDataTools;
-import game.FloorState;
+import game.RoomState;
 import gearth.extensions.parsers.HFloorItem;
 import gearth.extensions.parsers.HPoint;
 import gearth.extensions.parsers.stuffdata.MapStuffData;
@@ -195,10 +195,10 @@ public class GPresetExporter {
 
     private void maybeSaveBindings(PresetWiredBase wiredBase) {
         wiredFurniBindings.remove(wiredCacheKey(wiredBase.getWiredId()));
-        FloorState floorState = extension.getFloorState();
+        RoomState roomState = extension.getFloorState();
         FurniDataTools furniDataTools = extension.getFurniDataTools();
 
-        HFloorItem wiredItem = floorState.furniFromId(wiredBase.getWiredId());
+        HFloorItem wiredItem = roomState.floorFurniFromId(wiredBase.getWiredId());
         String className = furniDataTools.getFloorItemName(wiredItem.getTypeId());
 
         if(requireBindings.contains(className) && wiredBase.getOptions().size() >= 4) {
@@ -209,7 +209,7 @@ public class GPresetExporter {
 
             List<PresetWiredFurniBinding> bindings = new ArrayList<>();
             wiredBase.getItems().forEach(bindItemId -> {
-                HFloorItem bindItem = floorState.furniFromId(bindItemId);
+                HFloorItem bindItem = roomState.floorFurniFromId(bindItemId);
 
                 if (bindItem != null) {
                     PresetWiredFurniBinding binding = new PresetWiredFurniBinding(
@@ -287,13 +287,13 @@ public class GPresetExporter {
 
     public synchronized List<Integer> unRegisteredWiredsInArea(int x, int y, int dimX, int dimY) {
         if (isReady()) {
-            FloorState floor = extension.getFloorState();
+            RoomState floor = extension.getFloorState();
             FurniDataTools furniDataTools = extension.getFurniDataTools();
 
             List<Integer> unregisteredWired = new ArrayList<>();
             for (int xi = x; xi < x + dimX; xi++) {
                 for (int yi = y; yi < y + dimY; yi++) {
-                    floor.getFurniOnTile(xi, yi).forEach(f -> {
+                    floor.getFloorFurniOnTile(xi, yi).forEach(f -> {
                         String classname = furniDataTools.getFloorItemName(f.getTypeId());
                         if (    (classname.startsWith("wf_trg_") && !wiredTriggerConfigs.containsKey(wiredCacheKey(f.getId())))
                                 || (classname.startsWith("wf_cnd_") && !wiredConditionConfigs.containsKey(wiredCacheKey(f.getId())))
@@ -314,7 +314,7 @@ public class GPresetExporter {
 
     private void export(String name, int x, int y, int dimX, int dimY) {
         if (isReady() && (unRegisteredWiredsInArea(x, y, dimX, dimY).size() == 0 || !extension.shouldExportWired())) {
-            FloorState floor = extension.getFloorState();
+            RoomState floor = extension.getFloorState();
             FurniDataTools furniDataTools = extension.getFurniDataTools();
 
             List<PresetFurni> allFurni = new ArrayList<>();
@@ -333,7 +333,7 @@ public class GPresetExporter {
             // first pass: fill all items with copies
             for (int xi = x; xi < x + dimX; xi++) {
                 for (int yi = y; yi < y + dimY; yi++) {
-                    List<HFloorItem> items = floor.getFurniOnTile(xi, yi);
+                    List<HFloorItem> items = floor.getFloorFurniOnTile(xi, yi);
                     for (HFloorItem f : items) {
                         String classname = furniDataTools.getFloorItemName(f.getTypeId());
 
@@ -740,9 +740,9 @@ public class GPresetExporter {
     public void cacheWiredConfig(PresetWiredBase presetWiredBase) {
 
         FurniDataTools furniData = extension.getFurniDataTools();
-        FloorState floorState = extension.getFloorState();
-        if (furniData == null || floorState == null) return;
-        HFloorItem floorItem = floorState.furniFromId(presetWiredBase.getWiredId());
+        RoomState roomState = extension.getFloorState();
+        if (furniData == null || roomState == null) return;
+        HFloorItem floorItem = roomState.floorFurniFromId(presetWiredBase.getWiredId());
         if (floorItem == null) return;
         int typeId = floorItem.getTypeId();
 

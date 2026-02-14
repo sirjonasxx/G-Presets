@@ -2,7 +2,7 @@ package extension.tools;
 
 import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.furni.PresetFurni;
-import game.FloorState;
+import game.RoomState;
 import gearth.extensions.parsers.HPoint;
 
 import java.util.List;
@@ -43,7 +43,7 @@ public class PresetUtils {
         return 256;
     }
 
-    public static int lowestFloorPoint(FloorState floor, PresetConfig presetConfig, HPoint presetRoot) {
+    public static int lowestFloorPoint(RoomState floor, PresetConfig presetConfig, HPoint presetRoot) {
         HPoint dim = presetDimensions(presetConfig);
         
         return lowestFloorPoint(
@@ -56,7 +56,7 @@ public class PresetUtils {
         );
     }
 
-    public static int lowestFloorPoint(FloorState floor, HPoint start, HPoint end) {
+    public static int lowestFloorPoint(RoomState floor, HPoint start, HPoint end) {
         int lowestPoint = 256;
 
         for (int x = start.getX(); x <= end.getX(); x++) {
