@@ -15,7 +15,7 @@ import java.util.*;
 public class FurniDataTools {
 
     private static final Set<String> UNSTACKABLE_FURNI = new HashSet<>(Arrays.asList("fball_gate", "es_tile", "bb_patch1",
-            "es_skating_ice", "val11_floor", "easter11_grasspatch", "queue_tile1*0", "queue_tile1*1", "queue_tile1*2",
+            "es_skating_ice", "snowb_slope", "val11_floor", "easter11_grasspatch", "queue_tile1*0", "queue_tile1*1", "queue_tile1*2",
             "queue_tile1*3", "queue_tile1*4", "queue_tile1*5", "queue_tile1*6", "queue_tile1*7", "queue_tile1*8",
             "queue_tile1*9", "hc_rllr", "sf_roller", "room_info15_roller", "hblooza14_track", "hblooza14_track_crr",
             "hblooza14_track_crl", "easter_c20_rapids", "hween12_track_crl", "hween12_track_crl", "hween12_track",
