@@ -125,29 +125,9 @@ public class GPresetExporter {
         return extension.getFloorState().inRoom() && extension.furniDataReady();
     }
 
-    public static String fixEncoding(String text) {
-        if (text == null) return null;
-        try {
-            byte[] isoBytes = text.getBytes(StandardCharsets.ISO_8859_1);
-            if (!text.equals(new String(isoBytes, StandardCharsets.ISO_8859_1))) {
-            	// make sure there is no lost of byte-informations. Otherwise, fallback to the text we had
-                return text;
-            }
-            String utf8Decoded = new String(isoBytes, StandardCharsets.UTF_8);
-            if (utf8Decoded.contains("\uFFFD")) {
-                // if contains the "invalid character", then assumption of UTF-8 is false
-                return text;
-            }
-            if (Arrays.equals(utf8Decoded.getBytes(StandardCharsets.UTF_8), isoBytes)) {
-                return utf8Decoded;
-            }
-        } catch (Exception e) {}
-        return text;
-    }
-
     private void onChat(HMessage hMessage) {
         synchronized (lock) {
-            String text = fixEncoding(hMessage.getPacket().readString());
+            String text = hMessage.getPacket().readString(StandardCharsets.UTF_8);
             if (text.equals(":abort") || text.equals(":a")) {
                 hMessage.setBlocked(true);
                 if (state != PresetExportState.NONE) {
