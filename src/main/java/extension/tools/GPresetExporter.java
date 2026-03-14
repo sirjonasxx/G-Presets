@@ -152,19 +152,10 @@ public class GPresetExporter {
                 }
             } else if (state == PresetExportState.AWAITING_NAME) {
                 hMessage.setBlocked(true);
-
-                StringBuilder invalidChars = new StringBuilder();
-                for (char c : Utils.getInvalidOsFileCharacters()) {
-                    if (text.indexOf(c) != -1) {
-                        invalidChars.append(c);
-                    }
-                }
-
-                if (invalidChars.length() > 0) {
-                    extension.sendVisualChatInfo(String.format("invalid characters '%s' for the preset name. Waiting for a valid name...", invalidChars.toString()));
+                if (!text.matches("[^<>:\"\\/\\\\|?*]*")) {
+                    extension.sendVisualChatInfo("Invalid characters in name, don't use the following characters: < > : / \\ | ? *");
                     return;
                 }
-
                 int x1 = rectCorner1.getX();
                 int y1 = rectCorner1.getY();
                 int x2 = rectCorner2.getX();
