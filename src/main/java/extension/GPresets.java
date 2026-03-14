@@ -1,10 +1,7 @@
 package extension;
 
 import extension.logger.Logger;
-import extension.tools.PresetUtils;
-import extension.tools.StackTileSetting;
-import extension.tools.GPresetExporter;
-import extension.tools.GPresetImporter;
+import extension.tools.*;
 import extension.tools.importutils.AvailabilityChecker;
 import extension.tools.importutils.FurniDropInfo;
 import extension.tools.postconfig.FurniPostConfig;
@@ -53,7 +50,7 @@ import java.util.stream.Collectors;
 @ExtensionInfo(
         Title =  "G-Presets",
         Description =  "Never do anything twice",
-        Version =  "1.2.9",
+        Version =  "1.2.10",
         Author =  "sirjonasxx"
 )
 public class GPresets extends ExtensionForm {
@@ -76,7 +73,13 @@ public class GPresets extends ExtensionForm {
     public ToggleGroup item_src_tgl;
     public ListView<String> presetListView;
 
+    public Label donateLabel;
+    public RadioButton donateMissing;
+    public RadioButton donateAll;
+    public ToggleGroup donate_tgl;
+
     public Button availabilityBtn;
+    public Button selfDonateBtn;
     public Button currentPresetBtn;
     public CheckBox allowIncompleteBuildsCbx;
 
@@ -102,6 +105,8 @@ public class GPresets extends ExtensionForm {
     private GPresetExporter exporter = null;
     private GPresetImporter importer = null;
 
+    private AutoDonator autoDonator = null;
+
     private volatile long latestPingTimestamp = -1;
     private volatile int ping = 45;
     private volatile double pingVariation = 10;
@@ -126,6 +131,11 @@ public class GPresets extends ExtensionForm {
             Cacher.put("stacktile", option);
             stackTileSetting = StackTileSetting.fromString(option);
             updateUI();
+        });
+
+        donate_tgl.selectedToggleProperty().addListener(observable -> {
+            Object option = ((RadioButton)(donate_tgl.getSelectedToggle())).getUserData();
+            Cacher.put("donationMode", option);
         });
 
         noExportWiredCbx.selectedProperty().addListener(observable -> {
@@ -206,10 +216,12 @@ public class GPresets extends ExtensionForm {
         this.exporter = new GPresetExporter(this);
         this.importer = new GPresetImporter(this);
 
-        onConnect((host, i, s1, s2, hClient) -> furniDataTools = new FurniDataTools(host, this::updateUI));
+        this.autoDonator = new AutoDonator(this);
 
-
-
+        onConnect((host, i, s1, s2, hClient) -> {
+            showSelfDonateBtn("game-s2.habbo.com".equals(host));
+            furniDataTools = new FurniDataTools(host, this::updateUI);
+        });
 
         intercept(HMessage.Direction.TOSERVER, "LatencyPingRequest", hMessage -> {
             latestPingTimestamp = System.currentTimeMillis();
@@ -275,6 +287,14 @@ public class GPresets extends ExtensionForm {
                 .filter(s -> itemSourceKey.equals(s.getUserData()))
                 .findFirst()
                 .orElseGet(() -> item_src_tgl.getToggles().get(0))
+                .setSelected(true);
+
+        String donationModeKey = cache.optString("donationMode", "MISSING_ITEMS");
+        donate_tgl.getToggles()
+                .stream()
+                .filter(s -> donationModeKey.equals(s.getUserData()))
+                .findFirst()
+                .orElseGet(() -> donate_tgl.getToggles().get(0))
                 .setSelected(true);
 
         ratelimiter.setValue(cache.optInt("ratelimit", 22));
@@ -359,6 +379,7 @@ public class GPresets extends ExtensionForm {
             updateLabel(cndPermissionsLbl, permissions.canMoveFurni() && (noExportWiredCbx.isSelected() || permissions.canModifyWired()));
 
             availabilityBtn.setDisable(importer.getPresetConfig() == null);
+            selfDonateBtn.setDisable(importer.getPresetConfig() == null);
             currentPresetBtn.setDisable(presetListView.getSelectionModel().getSelectedItem() == null);
         });
     }
@@ -445,6 +466,27 @@ public class GPresets extends ExtensionForm {
 
     }
 
+    public void selfDonateBtnClick(ActionEvent actionEvent) {
+        if (exporter.getState() != GPresetExporter.PresetExportState.NONE) {
+            logger.log("Can't autodonate while export is in progress", "red");
+            return;
+        }
+        if (importer.getState() != GPresetImporter.BuildingImportState.NONE) {
+            logger.log("Can't autodonate while import is in progress", "red");
+            return;
+        }
+
+        autoDonator.donateAll(donateMissing.isSelected());
+    }
+
+    public void showSelfDonateBtn(boolean show) {
+        selfDonateBtn.setVisible(show);
+        donateLabel.setVisible(show);
+        donateAll.setVisible(show);
+        donateMissing.setVisible(show);
+        presetListView.setPrefHeight(show ? 170.0 : 204.0);
+    }
+
     public void openPresetsFolderClick(ActionEvent actionEvent) {
         try {
             Desktop.getDesktop().open(new File(PresetConfigUtils.presetPath()));
@@ -508,6 +550,10 @@ public class GPresets extends ExtensionForm {
 
     public GPresetExporter getExporter() {
         return exporter;
+    }
+
+    public GPresetImporter getImporter() {
+        return importer;
     }
 
     public void alwaysOnTopClick(ActionEvent actionEvent) {
