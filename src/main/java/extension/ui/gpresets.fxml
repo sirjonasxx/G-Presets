@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<TabPane prefHeight="303.0" prefWidth="686.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="extension.GPresets">
+<TabPane prefHeight="303.0" prefWidth="686.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.411" xmlns:fx="http://javafx.com/fxml/1" fx:controller="extension.GPresets">
   <tabs>
     <Tab text="Presets">
       <content>
@@ -42,6 +42,7 @@
                      </children>
                   </AnchorPane>
                   <ListView fx:id="presetListView" layoutX="527.0" layoutY="12.0" prefHeight="204.0" prefWidth="146.0" />
+                  <Button fx:id="selfDonateBtn" layoutX="527.0" layoutY="190.0" mnemonicParsing="false" onAction="#selfDonateBtnClick" prefHeight="25.0" prefWidth="147.0" text="Self-donate furni" visible="false" />
                   <Button fx:id="availabilityBtn" layoutX="527.0" layoutY="225.0" mnemonicParsing="false" onAction="#availabilityBtnClick" prefHeight="25.0" prefWidth="147.0" text="Check Availability" />
                </children>
             </AnchorPane>
@@ -78,6 +79,13 @@
                   <Label layoutX="13.0" layoutY="78.0" text="Ratelimit:" />
                   <CheckBox fx:id="onTopCbx" layoutX="576.0" layoutY="232.0" mnemonicParsing="false" onAction="#alwaysOnTopClick" text="Always on top" />
                   <Button layoutX="522.0" layoutY="195.0" mnemonicParsing="false" onAction="#clearWiredClick" prefHeight="25.0" prefWidth="150.0" text="Clear Wired Cache" />
+                  <Label fx:id="donateLabel" layoutX="13.0" layoutY="111.0" text="Self-donate:" visible="false" />
+                  <RadioButton fx:id="donateMissing" layoutX="93.0" layoutY="111.0" mnemonicParsing="false" selected="true" text="Only missing items" userData="MISSING_ITEMS" visible="false">
+                      <toggleGroup>
+                          <ToggleGroup fx:id="donate_tgl" />
+                      </toggleGroup>
+                  </RadioButton>
+                  <RadioButton fx:id="donateAll" layoutX="245.0" layoutY="111.0" mnemonicParsing="false" selected="false" text="All items in export" toggleGroup="$donate_tgl" userData="ALL_ITEMS" visible="false" />
                </children></AnchorPane>
       </content>
     </Tab>
