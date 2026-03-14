@@ -23,6 +23,10 @@ public class Utils {
         Utils.extraSleepTime = extraSleepTime;
     }
 
+    public static char[] getInvalidOsFileCharacters() {
+        return new char[]{'<', '>', ':', '"', '/', '\\', '|', '?', '*'};
+    }
+
     public static List<Integer> readIntList(HPacket packet) {
         int size = packet.readInteger();
         List<Integer> intList = new ArrayList<>();
