@@ -20,6 +20,7 @@ import gearth.protocol.HPacket;
 import utils.StateExtractor;
 import utils.Utils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -126,7 +127,7 @@ public class GPresetExporter {
 
     private void onChat(HMessage hMessage) {
         synchronized (lock) {
-            String text = hMessage.getPacket().readString();
+            String text = hMessage.getPacket().readString(StandardCharsets.UTF_8);
             if (text.equals(":abort") || text.equals(":a")) {
                 hMessage.setBlocked(true);
                 if (state != PresetExportState.NONE) {
