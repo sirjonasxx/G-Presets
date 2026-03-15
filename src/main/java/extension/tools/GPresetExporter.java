@@ -153,6 +153,10 @@ public class GPresetExporter {
                 }
             } else if (state == PresetExportState.AWAITING_NAME) {
                 hMessage.setBlocked(true);
+                if (!text.matches("[^<>:\"\\/\\\\|?*]*")) {
+                    extension.sendVisualChatInfo("Invalid characters in name, don't use the following characters: &lt; &gt; : / \\ | ? *");
+                    return;
+                }
                 int x1 = rectCorner1.getX();
                 int y1 = rectCorner1.getY();
                 int x2 = rectCorner2.getX();
