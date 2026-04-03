@@ -296,55 +296,32 @@ public class FloorState {
             synchronized (lock) {
                 int count = packet.readInteger();
                 for (int i = 0; i < count; i++) {
-                    int type = packet.readInteger();
-                    // ok but wtf is this mess???
-                    if (type == 0) { // user
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readString();
-                        packet.readString();
-
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                    }
-                    else if (type == 1) { // furni
-                        int oldX = packet.readInteger();
-                        int oldY = packet.readInteger();
-                        int newX = packet.readInteger();
-                        int newY = packet.readInteger();
-
-                        String oldZ = packet.readString();
-                        String newZ = packet.readString();
-
-                        int furniId = packet.readInteger();
-                        int animationTime = packet.readInteger();
-                        int direction = packet.readInteger();
-
-                        updateFurniPosition(furniId, newX, newY, newZ);
-                    }
-                    else if (type == 2) { // wall item
-                        packet.readInteger();
-                        packet.readBoolean();
-
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
-                    }
-                    else if (type == 3) { // user direction
-                        packet.readInteger();
-                        packet.readInteger();
-                        packet.readInteger();
+                    switch (packet.readInteger()) {
+                        case 0: // user
+                            packet.skip("iiiissiiiii");
+                            if (packet.readBoolean())
+                                packet.skip("i");
+                            break;
+                        case 1: // floor item
+                            packet.skip("ii");
+                            int newX = packet.readInteger();
+                            int newY = packet.readInteger();
+                            packet.skip("s");
+                            String newZ = packet.readString();
+                            int furniId = packet.readInteger();
+                            packet.skip("ii");
+                            if (packet.readBoolean())
+                                packet.skip("i");
+                            if (packet.readBoolean())
+                                packet.skip("i");
+                            updateFurniPosition(furniId, newX, newY, newZ);
+                            break;
+                        case 2: // wall item
+                            packet.skip("iBiiiiiiiii");
+                            break;
+                        case 3: // user direction
+                            packet.skip("iii");
+                            break;
                     }
                 }
             }
