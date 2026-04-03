@@ -20,6 +20,7 @@ import gearth.protocol.HPacket;
 import utils.StateExtractor;
 import utils.Utils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -126,7 +127,7 @@ public class GPresetExporter {
 
     private void onChat(HMessage hMessage) {
         synchronized (lock) {
-            String text = hMessage.getPacket().readString();
+            String text = hMessage.getPacket().readString(StandardCharsets.UTF_8);
             if (text.equals(":abort") || text.equals(":a")) {
                 hMessage.setBlocked(true);
                 if (state != PresetExportState.NONE) {
@@ -152,6 +153,10 @@ public class GPresetExporter {
                 }
             } else if (state == PresetExportState.AWAITING_NAME) {
                 hMessage.setBlocked(true);
+                if (!text.matches("[^<>:\"\\/\\\\|?*]*")) {
+                    extension.sendVisualChatInfo("Invalid characters in name, don't use the following characters: &lt; &gt; : / \\ | ? *");
+                    return;
+                }
                 int x1 = rectCorner1.getX();
                 int y1 = rectCorner1.getY();
                 int x2 = rectCorner2.getX();
