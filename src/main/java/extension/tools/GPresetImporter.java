@@ -404,7 +404,8 @@ public class GPresetImporter {
                     "",
                     dropInfo.getX(),
                     dropInfo.getY(),
-                    dropInfo.getRotation()
+                    dropInfo.getRotation(),
+                    true
             ));
 
             Utils.sleep(230);
