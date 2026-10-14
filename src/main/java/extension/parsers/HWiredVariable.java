@@ -16,8 +16,10 @@ public class HWiredVariable {
     public final boolean canWriteValue;
     public final boolean canInterceptChanges;
     public final boolean isInvisible;
+    public final boolean requiresExecutionContext;
     public final boolean canReadCreationTime;
     public final boolean canReadLastUpdateTime;
+    public final String textConnectorFallback;
     public HashMap<Integer, String> textConnector;
 
     public HWiredVariable(HPacket packet) {
@@ -32,8 +34,11 @@ public class HWiredVariable {
         this.canWriteValue = packet.readBoolean();
         this.canInterceptChanges = packet.readBoolean();
         this.isInvisible = packet.readBoolean();
+        this.requiresExecutionContext = packet.readBoolean();
         this.canReadCreationTime = packet.readBoolean();
         this.canReadLastUpdateTime = packet.readBoolean();
+
+        String tcFallback = "";
 
         if(packet.readBoolean()) {
             this.textConnector = new HashMap<>();
@@ -41,6 +46,11 @@ public class HWiredVariable {
             for(int i = 0; i < textConnectorCount; i++) {
                 this.textConnector.put(packet.readInteger(), packet.readString());
             }
+            if (packet.readBoolean()) {
+                tcFallback = packet.readString();
+            }
         }
+
+        this.textConnectorFallback = tcFallback;
     }
 }
