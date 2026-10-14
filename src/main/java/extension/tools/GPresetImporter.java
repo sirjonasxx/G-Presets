@@ -9,6 +9,7 @@ import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
 import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
 import extension.tools.presetconfig.furni.PresetFurni;
+import extension.tools.presetconfig.recolorable.PresetRecolorable;
 import extension.tools.presetconfig.wired.*;
 import furnidata.FurniDataTools;
 import game.FloorState;
@@ -272,7 +273,7 @@ public class GPresetImporter {
             FurniDataTools furniData = extension.getFurniDataTools();
             List<FurniDropInfo> fakeDropInfo = new ArrayList<>();
             for (PresetFurni f : workingPresetConfig.getFurniture()) {
-                fakeDropInfo.add(new FurniDropInfo(-1, -1, furniData.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1));
+                fakeDropInfo.add(new FurniDropInfo(-1, -1, furniData.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1, ""));
             }
             Map<String, Integer> missing = AvailabilityChecker.missingItems(fakeDropInfo, extension.getInventory(), furniData);
             if (missing == null) {
@@ -401,7 +402,7 @@ public class GPresetImporter {
                     HMessage.Direction.TOSERVER,
                     -1,
                     offerId,
-                    "",
+                    dropInfo.getExtraParam(),
                     dropInfo.getX(),
                     dropInfo.getY(),
                     dropInfo.getRotation(),
@@ -850,7 +851,15 @@ public class GPresetImporter {
                             stackTileLocation.getY(),
                             furniData.getFloorTypeId(f.getClassName()),
                             postConfig.getItemSource(),
-                            0);
+                            0,
+                            f.getClassName().contains("recolorable") ?
+                                    workingPresetConfig.getRecolorables().stream()
+                                            .filter(r -> r.getFurniId() == f.getFurniId())
+                                            .map(PresetRecolorable::toColorString)
+                                            .findFirst()
+                                            .orElse("") :
+                                    ""
+                            );
                     furniDropInfos.add(dropInfo);
 
                     String key = String.format("%d|%d|%d", dropInfo.getX(), dropInfo.getY(), dropInfo.getTypeId());
@@ -996,7 +1005,15 @@ public class GPresetImporter {
                             f.getLocation().getY() + rootLocation.getY(),
                             furniData.getFloorTypeId(f.getClassName()),
                             postConfig.getItemSource(),
-                            f.getRotation());
+                            f.getRotation(),
+                            f.getClassName().contains("recolorable") ?
+                                    workingPresetConfig.getRecolorables().stream()
+                                            .filter(r -> r.getFurniId() == f.getFurniId())
+                                            .map(PresetRecolorable::toColorString)
+                                            .findFirst()
+                                            .orElse("") :
+                                    ""
+                            );
 
                     furniDropInfos.add(dropInfo);
 

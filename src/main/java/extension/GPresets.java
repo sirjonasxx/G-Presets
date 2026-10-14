@@ -455,7 +455,7 @@ public class GPresets extends ExtensionForm {
 
             List<FurniDropInfo> fakeDropInfo = new ArrayList<>();
             for (PresetFurni f : combined.getFurniture()) {
-                fakeDropInfo.add(new FurniDropInfo(-1, -1, furniDataTools.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1));
+                fakeDropInfo.add(new FurniDropInfo(-1, -1, furniDataTools.getFloorTypeId(f.getClassName()), postConfig.getItemSource(), -1, ""));
             }
 
             AvailabilityChecker.printAvailability(logger, fakeDropInfo, inventory, furniDataTools);

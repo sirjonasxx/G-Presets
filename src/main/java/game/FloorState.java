@@ -7,9 +7,11 @@ import gearth.extensions.IExtension;
 import gearth.extensions.parsers.HFloorItem;
 import gearth.extensions.parsers.HPoint;
 import gearth.extensions.parsers.stuffdata.IStuffData;
+import gearth.extensions.parsers.stuffdata.MapStuffData;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import utils.Callback;
+import utils.Utils;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -47,6 +49,8 @@ public class FloorState {
         extension.intercept(HMessage.Direction.TOCLIENT, "SlideObjectBundle", this::onSlide);
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredFurniMove", this::onFurniMove);
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredMovements", this::onWiredMovements);
+
+        extension.intercept(HMessage.Direction.TOCLIENT, "FurniRecolorUpdate", this::onFurniRecolorUpdate);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectDataUpdate", this::onDataUpdate);
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectsDataUpdate", this::onDataUpdates);
@@ -366,6 +370,31 @@ public class FloorState {
     private void onDataUpdate(HMessage hMessage) {
         HPacket packet = hMessage.getPacket();
         onDataUpdate(hMessage.getPacket(), Integer.parseInt(packet.readString()));
+    }
+
+    private void onFurniRecolorUpdate(HMessage hMessage) {
+        HPacket packet = hMessage.getPacket();
+        int updatesCount = packet.readInteger();
+        for (int i = 0; i < updatesCount; i++) {
+            List<Integer> ids = Utils.readIntList(packet);
+            int red = packet.readShort();
+            int green = packet.readShort();
+            int blue = packet.readShort();
+
+            synchronized (lock) {
+                for (int id : ids) {
+                    if (furniIdToItem.containsKey(id)) {
+                        HFloorItem item = furniIdToItem.get(id);
+                        HashMap<String, String> data = new HashMap();
+                        data.put("r", String.valueOf(red));
+                        data.put("g", String.valueOf(green));
+                        data.put("b", String.valueOf(blue));
+                        data.put("state", String.valueOf(item.getStuff().getState()));
+                        item.setStuff(new MapStuffData(data));
+                    }
+                }
+            }
+        }
     }
 
     public void requestRoom(ExtensionBase ext) {

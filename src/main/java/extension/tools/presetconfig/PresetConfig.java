@@ -5,6 +5,7 @@ import extension.tools.postconfig.PostConfig;
 import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
 import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
 import extension.tools.presetconfig.furni.PresetFurni;
+import extension.tools.presetconfig.recolorable.PresetRecolorable;
 import extension.tools.presetconfig.wired.PresetWireds;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,12 +22,14 @@ public class PresetConfig implements PresetJsonConfigurable {
     private PresetWireds presetWireds;
     private List<PresetWiredFurniBinding> bindings;
     private List<PresetAdsBackground> adsBackgrounds;
+    private List<PresetRecolorable> recolorables;
 
-    public PresetConfig(List<PresetFurni> furniture, PresetWireds presetWireds, List<PresetWiredFurniBinding> bindings, List<PresetAdsBackground> adsBackgrounds) {
+    public PresetConfig(List<PresetFurni> furniture, PresetWireds presetWireds, List<PresetWiredFurniBinding> bindings, List<PresetAdsBackground> adsBackgrounds, List<PresetRecolorable> recolorables) {
         this.furniture = furniture;
         this.presetWireds = presetWireds;
         this.bindings = bindings;
         this.adsBackgrounds = adsBackgrounds;
+        this.recolorables = recolorables;
     }
 
     public PresetConfig(JSONObject object) {
@@ -41,6 +44,10 @@ public class PresetConfig implements PresetJsonConfigurable {
         adsBackgrounds = !object.has("adsBackgrounds") ? new ArrayList<>() :
                 object.getJSONArray("adsBackgrounds").toList().stream()
                 .map(o -> new PresetAdsBackground(new JSONObject((Map)o))).collect(Collectors.toList());
+
+        recolorables = !object.has("recolorables") ? new ArrayList<>() :
+                object.getJSONArray("recolorables").toList().stream()
+                .map(o -> new PresetRecolorable(new JSONObject((Map)o))).collect(Collectors.toList());
     }
 
     @Override
@@ -55,6 +62,9 @@ public class PresetConfig implements PresetJsonConfigurable {
         object.put("bindings", jsonBindings);
         if (!adsBackgrounds.isEmpty()) {
             object.put("adsBackgrounds", adsBackgrounds);
+        }
+        if (!recolorables.isEmpty()) {
+            object.put("recolorables", recolorables);
         }
         return object;
     }
@@ -114,5 +124,13 @@ public class PresetConfig implements PresetJsonConfigurable {
 
     public void setAdsBackgrounds(List<PresetAdsBackground> adsBackgrounds) {
         this.adsBackgrounds = adsBackgrounds;
+    }
+
+    public List<PresetRecolorable> getRecolorables() {
+        return recolorables;
+    }
+
+    public void setRecolorables(List<PresetRecolorable> recolorables) {
+        this.recolorables = recolorables;
     }
 }

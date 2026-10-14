@@ -8,6 +8,7 @@ import extension.tools.presetconfig.PresetConfigUtils;
 import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
 import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
 import extension.tools.presetconfig.furni.PresetFurni;
+import extension.tools.presetconfig.recolorable.PresetRecolorable;
 import extension.tools.presetconfig.wired.*;
 import extension.tools.presetconfig.wired.incoming.*;
 import furnidata.FurniDataTools;
@@ -332,6 +333,7 @@ public class GPresetExporter {
             List<List<? extends PresetWiredBase>> wiredLists = Arrays.asList(allConditions, allEffects, allTriggers, allAddons, allSelectors, allVariables);
             List<PresetWiredFurniBinding> allBindings = new ArrayList<>();
             List<PresetAdsBackground> allAdsBackgrounds = new ArrayList<>();
+            List<PresetRecolorable> allRecolorables = new ArrayList<>();
 
 
 
@@ -354,6 +356,16 @@ public class GPresetExporter {
                                     stuffDataMap.get("offsetX"),
                                     stuffDataMap.get("offsetY"),
                                     stuffDataMap.get("offsetZ")
+                            ));
+                        }
+
+                        if (classname.contains("recolorable") && f.getStuff() instanceof MapStuffData) {
+                            Map<String, String> stuffDataMap = (MapStuffData) f.getStuff();
+                            allRecolorables.add(new PresetRecolorable(
+                                    f.getId(),
+                                    stuffDataMap.get("r"),
+                                    stuffDataMap.get("g"),
+                                    stuffDataMap.get("b")
                             ));
                         }
 
@@ -451,6 +463,9 @@ public class GPresetExporter {
             allAdsBackgrounds.forEach(a -> {
                 a.setFurniId(mappedFurniIds.get(a.getFurniId()));
             });
+            allRecolorables.forEach(a -> {
+                a.setFurniId(mappedFurniIds.get(a.getFurniId()));
+            });
 
 
             // fourth pass: assign names to furniture based on class & remove state information from wired class
@@ -477,7 +492,7 @@ public class GPresetExporter {
 
 
             PresetWireds presetWireds = new PresetWireds(allConditions, allEffects, allTriggers, allAddons, allSelectors, allVariables, variablesMap);
-            PresetConfig presetConfig = new PresetConfig(allFurni, presetWireds, allBindings, allAdsBackgrounds);
+            PresetConfig presetConfig = new PresetConfig(allFurni, presetWireds, allBindings, allAdsBackgrounds, allRecolorables);
 
             PresetConfigUtils.savePreset(name, presetConfig);
             extension.updateInstalledPresets();
