@@ -811,7 +811,27 @@ public class GPresetImporter {
                 );
             }
 
+            PresetFurni wiredFurni = furni.get(wiredBase.getWiredId());
+            boolean holdsPlaceholderOrCapturer = Arrays.asList(
+                    "wf_xtra_text_output_variable",
+                    "wf_xtra_text_output_username",
+                    "wf_xtra_text_output_furni_name",
+                    "wf_xtra_text_input_variable",
+                    "wf_trg_receive_dataframe"
+                ).contains(wiredFurni.getClassName());
+
+            int realId = realFurniIdMap.get(wiredBase.getWiredId());
+            HPoint location = floor.furniFromId(realId).getTile();
+
+            if (holdsPlaceholderOrCapturer) {
+                moveFurni(realId, reservedSpace.getX(), reservedSpace.getY(), 0, true, -1);
+            }
+
             saveWired(wiredBase, 0);
+
+            if (holdsPlaceholderOrCapturer) {
+                moveFurni(realId, location.getX(), location.getY(), wiredFurni.getRotation(), true, -1);
+            }
 
             for (FurniMoveInfo furniMoveInfo : undoBindMoves) {
                 double altitude = furniMoveInfo.getAltitude() == null ? -1 : ((double) furniMoveInfo.getAltitude()) / 100;
