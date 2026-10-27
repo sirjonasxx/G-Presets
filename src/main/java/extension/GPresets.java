@@ -18,7 +18,6 @@ import gearth.extensions.ExtensionForm;
 import gearth.extensions.ExtensionInfo;
 import gearth.extensions.parsers.HFloorItem;
 import gearth.extensions.parsers.HPoint;
-import gearth.misc.Cacher;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import javafx.application.Platform;
@@ -35,12 +34,12 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import org.json.JSONObject;
+import utils.Cacher;
 import utils.Utils;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -115,7 +114,7 @@ public class GPresets extends ExtensionForm {
 
 
     public void initialize() {
-        setupCache();
+        loadCache();
 
         logsBorderPane.setPadding(new Insets(5, 5, 5, 5));
         logger.initialize(logsBorderPane);
@@ -204,7 +203,7 @@ public class GPresets extends ExtensionForm {
     }
 
     @Override
-    protected void initExtension() {
+    public void initExtension() {
         this.floorState = new FloorState(this, logger, this::updateUI, () -> {
             this.updateUI();
             this.exporter.reset();
@@ -256,19 +255,6 @@ public class GPresets extends ExtensionForm {
         updatePostConfig();
     }
 
-    private void setupCache() {
-        File extDir = null;
-        try {
-            extDir = (new File(GPresets.class.getProtectionDomain().getCodeSource().getLocation().toURI())).getParentFile();
-            if (extDir.getName().equals("Extensions")) {
-                extDir = extDir.getParentFile();
-            }
-        } catch (URISyntaxException ignored) {}
-
-        Cacher.setCacheDir(extDir + File.separator + "Cache");
-        loadCache();
-    }
-
     private void loadCache() {
         JSONObject cache = Cacher.getCacheContents();
 
@@ -313,7 +299,7 @@ public class GPresets extends ExtensionForm {
     }
 
     @Override
-    protected void onStartConnection() {
+    public void onStartConnection() {
         latestPingTimestamp = System.currentTimeMillis();
 //        sendToServer(new HPacket("LatencyPingRequest", HMessage.Direction.TOSERVER, -1));
 
@@ -322,7 +308,7 @@ public class GPresets extends ExtensionForm {
     }
 
     @Override
-    protected void onEndConnection() {
+    public void onEndConnection() {
         isConnected = false;
         furniDataTools = null;
         floorState.reset();
