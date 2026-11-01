@@ -9,6 +9,7 @@ import extension.tools.presetconfig.PresetConfig;
 import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
 import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
 import extension.tools.presetconfig.furni.PresetFurni;
+import extension.tools.presetconfig.label.PresetFurniLabel;
 import extension.tools.presetconfig.recolorable.PresetRecolorable;
 import extension.tools.presetconfig.wired.*;
 import furnidata.FurniDataTools;
@@ -23,6 +24,7 @@ import utils.StateExtractor;
 import utils.Utils;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -110,6 +112,29 @@ public class GPresetImporter {
         extension.intercept(HMessage.Direction.TOSERVER, "UpdateSelector", this::blockFurniAdjustments);
 
         extension.intercept(HMessage.Direction.TOCLIENT, "WiredSaveSuccess", this::wiredSaved);
+        extension.intercept(HMessage.Direction.TOCLIENT, "FurnitureLabelsAndRegionsUpdate", this::labelUpdated);
+    }
+
+    private void labelUpdated(HMessage hMessage) {
+        synchronized (lock) {
+            LabelConfirmation awaited = awaitedLabelConfirmation;
+            if (awaited == null || state != BuildingImportState.SETUP_WIRED) return;
+
+            for (PresetFurniLabel updated : PresetFurniLabel.readFromPacket(hMessage.getPacket())) {
+                if (updated.getFurniId() != awaited.realFurniId) continue;
+
+                // the update confirms the packet that is currently awaited, and only that one: an
+                // update carrying the settings of a label does not confirm a pending text change
+                boolean confirmed = awaited.part == LabelPart.SETTINGS
+                        ? updated.hasSameSettingsAs(awaited.label)
+                        : updated.hasSameTextAs(awaited.label);
+
+                if (confirmed) {
+                    awaited.latch.countDown();
+                    return;
+                }
+            }
+        }
     }
 
     private void onWiredAllVariables(HMessage hMessage) {
@@ -524,6 +549,35 @@ public class GPresetImporter {
     private Semaphore wiredSaveConfirmation = new Semaphore(0);
     private Semaphore wiredVariableConfirmation = new Semaphore(0);
 
+    private static final int SAVE_DELAY_MS = 300;
+    private static final int MAX_LABEL_SAVE_ATTEMPTS = 3;
+
+    private enum LabelPart {
+        SETTINGS,
+        TEXT
+    }
+
+    /**
+     * SetFurnitureLabel (text) and SetFurnitureLabelSettings (settings) are independent packets
+     * that are confirmed by separate FurnitureLabelsAndRegionsUpdate packets, so every sent packet
+     * gets its own confirmation object.
+     */
+    private static class LabelConfirmation {
+        private final PresetFurniLabel label;
+        private final int realFurniId; // the id used in the packet, not the preset id
+        private final LabelPart part;
+        private final CountDownLatch latch = new CountDownLatch(1);
+
+        private LabelConfirmation(PresetFurniLabel label, int realFurniId, LabelPart part) {
+            this.label = label;
+            this.realFurniId = realFurniId;
+            this.part = part;
+        }
+    }
+
+    private volatile LabelConfirmation awaitedLabelConfirmation = null;
+    private long latestLabelSave = -1;
+
     private void wiredSaved(HMessage hMessage) {
         if (state == BuildingImportState.SETUP_WIRED) {
             wiredSaveConfirmation.release();
@@ -542,8 +596,7 @@ public class GPresetImporter {
         else if (presetWired instanceof PresetWiredSelector) latestSave = latestSelectorSave;
         else if (presetWired instanceof PresetWiredVariable) latestSave = latestVariableSave;
 
-        int delay = 300 - ((int)(Math.min(300, System.currentTimeMillis() - latestSave)));
-        if (delay > 0) Utils.sleep(delay);
+        waitForSaveSlot(latestSave);
 
         wiredSaveConfirmation.drainPermits();
         wiredVariableConfirmation.drainPermits();
@@ -595,6 +648,89 @@ public class GPresetImporter {
         }
         else {
             saveWired(presetWired, attempt + 1);
+        }
+    }
+
+    private void saveLabel(PresetFurniLabel label) {
+        if (!realFurniIdMap.containsKey(label.getFurniId())) return;
+
+        int realId = realFurniIdMap.get(label.getFurniId());
+        HFloorItem item = extension.getFloorState().furniFromId(realId);
+        if (item != null && !"wf_label".equals(extension.getFurniDataTools().getFloorItemName(item.getTypeId()))) {
+            return;
+        }
+
+        // The server only answers with a FurnitureLabelsAndRegionsUpdate when something really
+        // changed. A redundant SetFurnitureLabel or SetFurnitureLabelSettings stays unanswered.
+        // The exporter tracks the state of every label in the room, including the state a label
+        // gets when it is dropped, so compare each part against that state and only send the
+        // packets that actually change something.
+        for (int attempt = 0; attempt < MAX_LABEL_SAVE_ATTEMPTS; attempt++) {
+            PresetFurniLabel current = extension.getExporter().getLabelConfig(realId);
+            boolean settingsDiffer = current == null || !current.hasSameSettingsAs(label);
+            boolean textDiffer = current == null || !current.hasSameTextAs(label);
+
+            if (!settingsDiffer && !textDiffer) {
+                return;
+            }
+
+            // each packet is confirmed on its own, and only if that packet really changed its part
+            boolean settingsSaved = !settingsDiffer || sendLabelSettings(label, realId);
+            boolean textSaved = !textDiffer || sendLabelText(label, realId);
+
+            if (settingsSaved && textSaved) {
+                return;
+            }
+            // a late confirmation may have updated the exporter's cache in the meantime,
+            // in which case the retry recomputes what still differs and resends only that
+        }
+    }
+
+    private boolean sendLabelSettings(PresetFurniLabel label, int realId) {
+        return sendUpdateWiredLabelPacket(new HPacket(
+                "SetFurnitureLabelSettings",
+                HMessage.Direction.TOSERVER,
+                realId,
+                label.getColor(),
+                label.getAccess(),
+                label.isAlwaysOpen()
+        ), label, realId, LabelPart.SETTINGS);
+    }
+
+    private boolean sendLabelText(PresetFurniLabel label, int realId) {
+        return sendUpdateWiredLabelPacket(new HPacket(
+                "SetFurnitureLabel",
+                HMessage.Direction.TOSERVER,
+                realId,
+                label.getText()
+        ), label, realId, LabelPart.TEXT);
+    }
+
+    private boolean sendUpdateWiredLabelPacket(HPacket packet, PresetFurniLabel label, int realId, LabelPart part) {
+        // every packet needs its own delay, a packet sent too fast is ignored by the server
+        waitForSaveSlot(latestLabelSave);
+
+        LabelConfirmation confirmation = new LabelConfirmation(label, realId, part);
+        awaitedLabelConfirmation = confirmation;
+
+        extension.sendToServer(packet);
+        latestLabelSave = System.currentTimeMillis();
+
+        try {
+            return confirmation.latch.await(5, TimeUnit.SECONDS);
+        }
+        catch (InterruptedException e) {
+            return false;
+        }
+        finally {
+            awaitedLabelConfirmation = null;
+        }
+    }
+
+    private void waitForSaveSlot(long lastSave) {
+        long elapsed = System.currentTimeMillis() - lastSave;
+        if (elapsed < SAVE_DELAY_MS) {
+            Utils.sleep((int) (SAVE_DELAY_MS - elapsed));
         }
     }
 
@@ -728,8 +864,18 @@ public class GPresetImporter {
             variablesToProcess = variables.size();
         }
         
+        List<PresetFurniLabel> labels = workingPresetConfig.getLabels();
+
         int i = 0;
-        while (state == BuildingImportState.SETUP_WIRED && i < allWireds.size()) {
+        int labelIndex = 0;
+        // wired labels are wired data, so their settings are set up in this same step
+        while (state == BuildingImportState.SETUP_WIRED && (i < allWireds.size() || labelIndex < labels.size())) {
+            if (labelIndex < labels.size()) {
+                saveLabel(labels.get(labelIndex++));
+            }
+
+            if (i >= allWireds.size()) continue;
+
             PresetWiredBase wiredBase = allWireds.get(i);
 
             if ((i + 1) % 50 == 0) {
