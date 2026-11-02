@@ -539,12 +539,8 @@ public class GPresetImporter {
     }
 
 
-    private long latestConditionSave = -1;
-    private long latestTriggerSave = -1;
-    private long latestEffectSave = -1;
-    private long latestAddonSave = -1;
-    private long latestSelectorSave = -1;
-    private long latestVariableSave = -1;
+    // every wired packet, wired label updates included, shares the same server rate limit
+    private long latestWiredSave = -1;
 
     private Semaphore wiredSaveConfirmation = new Semaphore(0);
     private Semaphore wiredVariableConfirmation = new Semaphore(0);
@@ -576,7 +572,6 @@ public class GPresetImporter {
     }
 
     private volatile LabelConfirmation awaitedLabelConfirmation = null;
-    private long latestLabelSave = -1;
 
     private void wiredSaved(HMessage hMessage) {
         if (state == BuildingImportState.SETUP_WIRED) {
@@ -587,16 +582,7 @@ public class GPresetImporter {
     private void saveWired(PresetWiredBase presetWired, int attempt) {
         if (attempt > 2) return;
 
-        long latestSave = 0;
-
-        if (presetWired instanceof PresetWiredCondition) latestSave = latestConditionSave;
-        else if (presetWired instanceof PresetWiredEffect) latestSave = latestEffectSave;
-        else if (presetWired instanceof PresetWiredTrigger) latestSave = latestTriggerSave;
-        else if (presetWired instanceof PresetWiredAddon) latestSave = latestAddonSave;
-        else if (presetWired instanceof PresetWiredSelector) latestSave = latestSelectorSave;
-        else if (presetWired instanceof PresetWiredVariable) latestSave = latestVariableSave;
-
-        waitForSaveSlot(latestSave);
+        waitForSaveSlot(latestWiredSave);
 
         wiredSaveConfirmation.drainPermits();
         wiredVariableConfirmation.drainPermits();
@@ -619,12 +605,7 @@ public class GPresetImporter {
             presetWiredBase = presetWired.applyWiredConfig(extension, realFurniIdMap, realVariableIdMap);
         }
 
-        if (presetWired instanceof PresetWiredCondition) latestConditionSave = System.currentTimeMillis();
-        else if (presetWired instanceof PresetWiredEffect) latestEffectSave = System.currentTimeMillis();
-        else if (presetWired instanceof PresetWiredTrigger) latestTriggerSave = System.currentTimeMillis();
-        else if (presetWired instanceof PresetWiredAddon) latestAddonSave = System.currentTimeMillis();
-        else if (presetWired instanceof PresetWiredSelector) latestSelectorSave = System.currentTimeMillis();
-        else if (presetWired instanceof PresetWiredVariable) latestVariableSave = System.currentTimeMillis();
+        latestWiredSave = System.currentTimeMillis();
 
         boolean gotConfirmation = false;
         try { gotConfirmation = wiredSaveConfirmation.tryAcquire(5, TimeUnit.SECONDS);
@@ -708,13 +689,13 @@ public class GPresetImporter {
 
     private boolean sendUpdateWiredLabelPacket(HPacket packet, PresetFurniLabel label, int realId, LabelPart part) {
         // every packet needs its own delay, a packet sent too fast is ignored by the server
-        waitForSaveSlot(latestLabelSave);
+        waitForSaveSlot(latestWiredSave);
 
         LabelConfirmation confirmation = new LabelConfirmation(label, realId, part);
         awaitedLabelConfirmation = confirmation;
 
         extension.sendToServer(packet);
-        latestLabelSave = System.currentTimeMillis();
+        latestWiredSave = System.currentTimeMillis();
 
         try {
             return confirmation.latch.await(5, TimeUnit.SECONDS);
