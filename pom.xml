@@ -7,7 +7,7 @@
     <groupId>gearthextensions</groupId>
     <artifactId>GPresets</artifactId>
     <packaging>jar</packaging>
-    <version>1.2.12</version>
+    <version>1.2.13</version>
 
     <build>
         <resources>
@@ -100,6 +100,11 @@
             <groupId>org.fxmisc.richtext</groupId>
             <artifactId>richtextfx</artifactId>
             <version>0.11.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>2.0.20</version>
         </dependency>
     </dependencies>
 
