@@ -159,11 +159,11 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
                     .collect(Collectors.toList());
 
             String _defaultId = "0";
-            // Variables from another room
-            if(this instanceof PresetWiredVariable && this.variableIds.size() == 1) {
-                _defaultId = this.variableIds.get(0);
-                realVariableIdMap.put(_defaultId, _defaultId);
-            }
+//            // Variables from another room
+//            if(this instanceof PresetWiredVariable && this.variableIds.size() == 1) {
+//                _defaultId = this.variableIds.get(0);
+//                realVariableIdMap.put(_defaultId, _defaultId);
+//            }
 
             String defaultId = _defaultId;
 
