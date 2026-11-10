@@ -158,23 +158,28 @@ public abstract class PresetWiredBase implements PresetJsonConfigurable, Cloneab
                     .map(realFurniIdMap::get)
                     .collect(Collectors.toList());
 
-            String _defaultId = "0";
-//            // Variables from another room
-//            if(this instanceof PresetWiredVariable && this.variableIds.size() == 1) {
-//                _defaultId = this.variableIds.get(0);
-//                realVariableIdMap.put(_defaultId, _defaultId);
-//            }
-
-            String defaultId = _defaultId;
-
             presetWiredBase.variableIds = variableIds.stream()
-                    .map(id -> id.equals("0") || id.startsWith("-") || id.startsWith("~") ? id : realVariableIdMap.getOrDefault(id, defaultId))
+                    .map(id -> correctVariableId(id, realFurniIdMap, realVariableIdMap))
                     .collect(Collectors.toList());
 
             presetWiredBase.applyWiredConfig(extension);
             return (T) presetWiredBase;
         }
         return null;
+    }
+
+    private String correctVariableId(String id, Map<Integer, Integer> realFurniIdMap, Map<String, String> realVariableIdMap) {
+        if (id.equals("0") || id.startsWith("-") || id.startsWith("~")) return id;
+
+        if (id.startsWith("s")) {
+            String[] idParts = id.substring(1).split("-");
+            idParts[0] = realVariableIdMap.getOrDefault(idParts[0], "0");
+            idParts[1] = realFurniIdMap.getOrDefault(Integer.valueOf(idParts[1]), 0).toString();
+            if (idParts[0].equals("0") || idParts[1].equals("0")) return "0";
+            return "s" + String.join("-", idParts);
+        }
+
+        return realVariableIdMap.getOrDefault(id, "0");
     }
 
     public int getWiredId() {

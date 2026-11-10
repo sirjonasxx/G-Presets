@@ -442,8 +442,14 @@ public class GPresetExporter {
             });
             wiredLists.forEach(l -> l.forEach((Consumer<PresetWiredBase>) w -> {
                 w.setWiredId(mappedFurniIds.get(w.getWiredId()));
-                w.setItems(w.getItems().stream().map(mappedFurniIds::get).collect(Collectors.toList()));
-                w.setSecondItems(w.getSecondItems().stream().map(mappedFurniIds::get).collect(Collectors.toList()));
+                w.setItems(w.getItems().stream().map(mappedFurniIds::get).toList());
+                w.setSecondItems(w.getSecondItems().stream().map(mappedFurniIds::get).toList());
+                w.setVariableIds(w.getVariableIds().stream().map(id -> {
+                    if (!id.startsWith("s")) return id;
+                    String[] idParts = id.substring(1).split("-");
+                    idParts[1] = mappedFurniIds.get(Integer.valueOf(idParts[1])).toString();
+                    return "s" + String.join("-", idParts);
+                }).toList());
             }));
             allBindings.forEach(b -> {
                 b.setFurniId(mappedFurniIds.get(b.getFurniId()));

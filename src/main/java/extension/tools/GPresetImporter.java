@@ -137,11 +137,6 @@ public class GPresetImporter {
 
                 for(HWiredVariable newVar : variables) {
                     Optional<Map.Entry<String, String>> op = map.entrySet().stream().filter(k -> k.getKey().equals(newVar.name)).findFirst();
-                    if (newVar.name.equals("inv_item_varboxid")) {
-                        System.out.println(op);
-                        System.out.println(newVar.name);
-                        System.out.println(newVar.id);
-                    }
                     op.ifPresent(stringStringEntry -> realVariableIdMap.put(stringStringEntry.getValue(), newVar.id));
                 }
 
@@ -561,8 +556,10 @@ public class GPresetImporter {
         if (presetWired.getVariableIds() != null && !presetWired.getVariableIds().isEmpty()) {
             needVariableIds.clear();
             needVariableIds.addAll(presetWired.getVariableIds());
-            needVariableIds = needVariableIds.stream().filter(id -> id.equals("0") && realVariableIdMap.keySet().stream().noneMatch(x -> x.equals(id))).collect(Collectors.toList());
-
+            needVariableIds = needVariableIds.stream()
+                    .map(id -> id.startsWith("s") ? id.substring(1).split("-")[0] : id)
+                    .filter(id -> realVariableIdMap.keySet().stream().noneMatch(x -> x.equals(id)))
+                    .toList();
             if(!needVariableIds.isEmpty()) {
                 extension.sendToServer(new HPacket("WiredGetAllVariablesDiffs", HMessage.Direction.TOSERVER, 0));
                 boolean gotVariableConfirmation = false;
@@ -733,18 +730,27 @@ public class GPresetImporter {
             variablesProcessed = 0;
             variablesToProcess = allWireds.size();
             allWireds.addAll(
+                    presetWireds.getAddons().stream()
+                            .filter(filter)
+                            .filter(isDependantOnVars.negate())
+                            .toList()
+            );
+            allWireds.addAll(
                     presetWireds.getVariables().stream()
                             .filter(filter)
                             .filter(isDependantOnVars)
                             .toList()
             );
             allWireds.addAll(
-                    presetWireds.getConditions().stream().filter(filter).toList());
+                    presetWireds.getAddons().stream()
+                            .filter(filter)
+                            .filter(isDependantOnVars)
+                            .toList()
+            );
+            allWireds.addAll(presetWireds.getConditions().stream().filter(filter).toList());
             allWireds.addAll(presetWireds.getEffects().stream().filter(filter).toList());
             allWireds.addAll(presetWireds.getTriggers().stream().filter(filter).toList());
-            // allWireds.addAll(presetWireds.getAddons().stream().filter(filter).collect(Collectors.toList()));
             allWireds.addAll(presetWireds.getSelectors().stream().filter(filter).toList());
-            allWireds.addAll(presetWireds.getAddons().stream().filter(filter).toList());
 
             workingPresetConfig.getBindings().forEach(b -> {
                 if (!wiredBindings.containsKey(b.getWiredId())) wiredBindings.put(b.getWiredId(), new ArrayList<>());
