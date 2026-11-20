@@ -559,7 +559,7 @@ public class GPresetImporter {
             needVariableIds = needVariableIds.stream()
                     .map(id -> id.startsWith("s") ? id.substring(1).split("-")[0] : id)
                     .filter(id -> realVariableIdMap.keySet().stream().noneMatch(x -> x.equals(id)))
-                    .toList();
+                    .collect(Collectors.toCollection(ArrayList::new));
             if(!needVariableIds.isEmpty()) {
                 extension.sendToServer(new HPacket("WiredGetAllVariablesDiffs", HMessage.Direction.TOSERVER, 0));
                 boolean gotVariableConfirmation = false;
