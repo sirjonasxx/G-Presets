@@ -8,6 +8,7 @@ import extension.tools.presetconfig.PresetConfigUtils;
 import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
 import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
 import extension.tools.presetconfig.furni.PresetFurni;
+import extension.tools.presetconfig.label.PresetFurniLabel;
 import extension.tools.presetconfig.recolorable.PresetRecolorable;
 import extension.tools.presetconfig.wired.*;
 import extension.tools.presetconfig.wired.incoming.*;
@@ -57,6 +58,9 @@ public class GPresetExporter {
             "wf_act_match_to_sshot", "wf_cnd_match_snapshot", "wf_cnd_not_match_snap", "wf_trg_stuff_state"));
     private final Map<String, List<PresetWiredFurniBinding>> wiredFurniBindings = Collections.synchronizedMap(new HashMap<>());
 
+    // keyed by furniId only: the full snapshot (FurnitureLabelsAndRegions) clears it on every room load
+    private final Map<Integer, PresetFurniLabel> labelConfigs = Collections.synchronizedMap(new HashMap<>());
+
 
     private final GPresets extension;
 
@@ -84,6 +88,27 @@ public class GPresetExporter {
 
         extension.intercept(HMessage.Direction.TOCLIENT, "ObjectRemove", this::onFurniRemoved);
         extension.intercept(HMessage.Direction.TOCLIENT, "RoomReady", this::onRoomReady);
+
+        extension.intercept(HMessage.Direction.TOCLIENT, "FurnitureLabelsAndRegions", this::onLabelsAndRegions);
+        extension.intercept(HMessage.Direction.TOCLIENT, "FurnitureLabelsAndRegionsUpdate", this::onLabelsAndRegionsUpdate);
+    }
+
+    private void onLabelsAndRegions(HMessage hMessage) {
+        // full snapshot of all labels in the room, sent automatically on room load
+        List<PresetFurniLabel> labels = PresetFurniLabel.readFromPacket(hMessage.getPacket());
+        synchronized (labelConfigs) {
+            labelConfigs.clear();
+            labels.forEach(label -> labelConfigs.put(label.getFurniId(), label));
+        }
+    }
+
+    private void onLabelsAndRegionsUpdate(HMessage hMessage) {
+        PresetFurniLabel.readFromPacket(hMessage.getPacket())
+                .forEach(label -> labelConfigs.put(label.getFurniId(), label));
+    }
+
+    public PresetFurniLabel getLabelConfig(int furniId) {
+        return labelConfigs.get(furniId);
     }
 
     private void onRoomReady(HMessage hMessage) {
@@ -334,6 +359,7 @@ public class GPresetExporter {
             List<PresetWiredFurniBinding> allBindings = new ArrayList<>();
             List<PresetAdsBackground> allAdsBackgrounds = new ArrayList<>();
             List<PresetRecolorable> allRecolorables = new ArrayList<>();
+            List<PresetFurniLabel> allLabels = new ArrayList<>();
 
 
 
@@ -367,6 +393,18 @@ public class GPresetExporter {
                                     stuffDataMap.get("g"),
                                     stuffDataMap.get("b")
                             ));
+                        }
+
+                        // label settings count as wired data: skipped when wired export is disabled
+                        if (extension.shouldExportWired() && classname.equals("wf_label")) {
+                            PresetFurniLabel label = labelConfigs.get(f.getId());
+                            if (label != null) {
+                                allLabels.add(new PresetFurniLabel(label));
+                            }
+                            else {
+                                extension.getLogger().log(String.format(
+                                        "No captured state for wf_label with id %d, exporting without its label settings", f.getId()), "orange");
+                            }
                         }
 
                         if (extension.shouldExportWired()) {
@@ -472,6 +510,11 @@ public class GPresetExporter {
             allRecolorables.forEach(a -> {
                 a.setFurniId(mappedFurniIds.get(a.getFurniId()));
             });
+            allLabels.forEach(l -> {
+                if (mappedFurniIds.containsKey(l.getFurniId())) {
+                    l.setFurniId(mappedFurniIds.get(l.getFurniId()));
+                }
+            });
 
 
             // fourth pass: assign names to furniture based on class & remove state information from wired class
@@ -498,7 +541,7 @@ public class GPresetExporter {
 
 
             PresetWireds presetWireds = new PresetWireds(allConditions, allEffects, allTriggers, allAddons, allSelectors, allVariables, variablesMap);
-            PresetConfig presetConfig = new PresetConfig(allFurni, presetWireds, allBindings, allAdsBackgrounds, allRecolorables);
+            PresetConfig presetConfig = new PresetConfig(allFurni, presetWireds, allBindings, allAdsBackgrounds, allRecolorables, allLabels);
 
             PresetConfigUtils.savePreset(name, presetConfig);
             extension.updateInstalledPresets();
@@ -813,6 +856,7 @@ public class GPresetExporter {
         wiredSelectorConfigs.remove(key);
         wiredAddonConfigs.remove(key);
         wiredVariableConfigs.remove(key);
+        labelConfigs.remove(furniId);
     }
 
     private String wiredCacheKey(int id) {
@@ -828,6 +872,7 @@ public class GPresetExporter {
                 wiredSelectorConfigs.clear();
                 wiredAddonConfigs.clear();
                 wiredVariableConfigs.clear();
+                labelConfigs.clear();
                 hasVariableMap = false;
                 variablesMap = new HashMap<>();
             }

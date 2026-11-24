@@ -5,6 +5,7 @@ import extension.tools.postconfig.PostConfig;
 import extension.tools.presetconfig.ads_bg.PresetAdsBackground;
 import extension.tools.presetconfig.binding.PresetWiredFurniBinding;
 import extension.tools.presetconfig.furni.PresetFurni;
+import extension.tools.presetconfig.label.PresetFurniLabel;
 import extension.tools.presetconfig.recolorable.PresetRecolorable;
 import extension.tools.presetconfig.wired.PresetWireds;
 import org.json.JSONArray;
@@ -23,13 +24,15 @@ public class PresetConfig implements PresetJsonConfigurable {
     private List<PresetWiredFurniBinding> bindings;
     private List<PresetAdsBackground> adsBackgrounds;
     private List<PresetRecolorable> recolorables;
+    private List<PresetFurniLabel> labels;
 
-    public PresetConfig(List<PresetFurni> furniture, PresetWireds presetWireds, List<PresetWiredFurniBinding> bindings, List<PresetAdsBackground> adsBackgrounds, List<PresetRecolorable> recolorables) {
+    public PresetConfig(List<PresetFurni> furniture, PresetWireds presetWireds, List<PresetWiredFurniBinding> bindings, List<PresetAdsBackground> adsBackgrounds, List<PresetRecolorable> recolorables, List<PresetFurniLabel> labels) {
         this.furniture = furniture;
         this.presetWireds = presetWireds;
         this.bindings = bindings;
         this.adsBackgrounds = adsBackgrounds;
         this.recolorables = recolorables;
+        this.labels = labels;
     }
 
     public PresetConfig(JSONObject object) {
@@ -48,6 +51,10 @@ public class PresetConfig implements PresetJsonConfigurable {
         recolorables = !object.has("recolorables") ? new ArrayList<>() :
                 object.getJSONArray("recolorables").toList().stream()
                 .map(o -> new PresetRecolorable(new JSONObject((Map)o))).collect(Collectors.toList());
+
+        labels = !object.has("labels") ? new ArrayList<>() :
+                object.getJSONArray("labels").toList().stream()
+                .map(o -> new PresetFurniLabel(new JSONObject((Map)o))).collect(Collectors.toList());
     }
 
     @Override
@@ -65,6 +72,9 @@ public class PresetConfig implements PresetJsonConfigurable {
         }
         if (!recolorables.isEmpty()) {
             object.put("recolorables", recolorables);
+        }
+        if (!labels.isEmpty()) {
+            object.put("labels", new JSONArray(labels.stream().map(PresetFurniLabel::toJsonObject).collect(Collectors.toList())));
         }
         return object;
     }
@@ -132,5 +142,13 @@ public class PresetConfig implements PresetJsonConfigurable {
 
     public void setRecolorables(List<PresetRecolorable> recolorables) {
         this.recolorables = recolorables;
+    }
+
+    public List<PresetFurniLabel> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(List<PresetFurniLabel> labels) {
+        this.labels = labels;
     }
 }
