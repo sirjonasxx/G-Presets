@@ -2,13 +2,13 @@ package furnidata;
 
 import furnidata.details.FloorItemDetails;
 import furnidata.details.WallItemDetails;
-import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import utils.Callback;
 
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -62,8 +62,10 @@ public class FurniDataTools {
     }
 
     private void fetch(Callback onLoad) throws IOException {
-        JSONObject object = new JSONObject(IOUtils.toString(
-                new URL(furnidataUrl()).openStream(), StandardCharsets.UTF_8));
+        JSONObject object;
+        try (InputStream stream = URI.create(furnidataUrl()).toURL().openStream()) {
+            object = new JSONObject(new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+        }
 
         JSONArray floorJson = object.getJSONObject("roomitemtypes").getJSONArray("furnitype");
         floorJson.forEach(o -> {
